@@ -37,7 +37,7 @@ Async I/O for provider and external-API calls. Aggressive caching for weather (p
 
 ## Local dev
 
-`docker-compose.yml` brings up Postgres + pgvector locally so development never touches the single free Supabase project. `AGRIAI_LOCAL_DATABASE_URL` selects it in dev.
+The **Supabase CLI local stack** (`supabase start`) provides Postgres + pgvector + Auth (`auth.uid()`, `auth.users`) locally, so development never touches the single free `agriai-db` project and RLS can be tested for real. `apps/api/.env`'s `AGRIAI_DATABASE_URL` points at it in dev (see ADR-0011).
 
 ## Ingestion (separate)
 

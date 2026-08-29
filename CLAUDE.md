@@ -93,7 +93,7 @@ apps/web/    Next.js PWA — UI only, no AI logic
 ingest/      Runs on the developer laptop, NOT in production (Docling needs ~6GB RAM)
 evals/       Gold questions (JSONL) + Ragas + promptfoo
 data/        Version-stamped agrochemical label table + banned-molecule denylists
-db/          SQL migrations (checked in)
+supabase/    Supabase CLI project — config.toml + migrations/ (checked in; applied via `supabase db reset` locally, `supabase db push` to agriai-db)
 docs/        Architecture, ADRs, roadmap, learning log — the source of truth alongside Git
 ```
 Full structure and the "what does / does not belong here" rules: `docs/architecture/system-architecture.md`.

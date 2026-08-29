@@ -1,7 +1,5 @@
 # db/
 
-SQL migrations for the AgriAI Supabase Postgres (project `agriai-db`). Checked in; applied forward. Never edit a migration's history — add a new migration.
+**Moved 2026-08-29:** migrations now live in `supabase/migrations/`, managed by the Supabase CLI (see ADR-0011 and CLAUDE.md §7). This folder is kept only so old links don't 404; it holds no active files.
 
-- `migrations/` — ordered `.sql` files (schema, RLS policies, indexes, pgvector setup).
-
-The proposed data model is in `docs/database/schema.md`. Enable the `vector` extension; put RLS on every user-owned table; HNSW on embeddings, GIN on `tsv`, btree on filter columns.
+Why: RLS testing needs Supabase's own `auth.uid()`/`auth.users`/role machinery, which a plain Postgres container doesn't have — the Supabase CLI's local stack (`supabase start`) provisions all of it, matching the real `agriai-db` project.
