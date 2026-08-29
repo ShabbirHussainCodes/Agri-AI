@@ -4,9 +4,16 @@ from app.core.auth import AuthContext, get_current_user
 from app.core.config import settings
 from app.core.db import get_authed_conn, get_pool, lifespan
 from app.routers import farms as farms_router
+from app.routers import farm_crops as farm_crops_router
+from app.routers import crops as crops_router
+from app.core.errors import postgres_error_handler
+import asyncpg
 
 app = FastAPI(title="AgriAI API", version="0.1.0", lifespan=lifespan)
 app.include_router(farms_router.router)
+app.include_router(farm_crops_router.router)
+app.include_router(crops_router.router)
+app.add_exception_handler(asyncpg.PostgresError, postgres_error_handler)
 
 
 @app.get("/health")

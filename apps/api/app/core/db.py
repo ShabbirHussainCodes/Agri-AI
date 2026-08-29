@@ -16,10 +16,22 @@ from app.core.config import settings
 pool: asyncpg.Pool | None = None
 
 
+async def _init_connection(conn: asyncpg.Connection) -> None:
+    """asyncpg does not convert Python dict <-> Postgres jsonb on its own —
+    without this, jsonb columns come back as raw text and dicts sent in
+    must be pre-serialized. Registering this codec once, per connection,
+    makes it transparent everywhere else in the app."""
+    await conn.set_type_codec(
+        "jsonb", encoder=json.dumps, decoder=json.loads, schema="pg_catalog"
+    )
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     global pool
-    pool = await asyncpg.create_pool(settings.database_url, min_size=1, max_size=5)
+    pool = await asyncpg.create_pool(
+        settings.database_url, min_size=1, max_size=5, init=_init_connection
+    )
     try:
         yield
     finally:
