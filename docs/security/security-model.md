@@ -13,7 +13,7 @@ AgriAI uses its own Supabase project `agriai-db` with its own database, pgvector
 
 ## 3. Authentication & authorization
 
-- Supabase Auth issues JWTs; the backend **verifies** them (JWKS, RS256, `aud`/`exp`, `sub` → profile). We write the verification middleware ourselves; we do not roll our own issuance/session/refresh logic.
+- Supabase Auth issues JWTs; the backend **verifies** them (JWKS, ES256, `aud`/`exp`, `sub` → profile). We write the verification middleware ourselves; we do not roll our own issuance/session/refresh logic.
 - **Row-Level Security** on every user-owned table: a row is visible/writable only to its owning `auth.uid()`. Storage bucket `crop-photos` uses the same policy.
 
 ## 4. Farmer-data privacy

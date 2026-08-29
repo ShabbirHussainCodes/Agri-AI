@@ -10,7 +10,7 @@
 
 ## Auth
 
-Handled by Supabase Auth on the client; the backend only **verifies** the JWT (JWKS, RS256, check `aud`/`exp`, extract `sub` → profile). We write the verification middleware ourselves (learning value); we do not roll our own token issuance.
+Handled by Supabase Auth on the client; the backend only **verifies** the JWT (JWKS, ES256, check `aud`/`exp`, extract `sub` → profile). We write the verification middleware ourselves (learning value); we do not roll our own token issuance.
 
 ## Farm & onboarding
 

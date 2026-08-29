@@ -18,5 +18,12 @@ class Settings(BaseSettings):
     # they're in without re-deriving it from the database_url.
     env: str = "local"
 
+    # Supabase-issued user JWTs are asymmetrically signed (ES256, verified
+    # against a public JWKS endpoint) — both locally and on the real
+    # agriai-db project, just different URLs/keys. We only ever verify
+    # tokens here; Supabase Auth is what issues them.
+    jwks_url: str
+    jwt_audience: str = "authenticated"
+
 
 settings = Settings()
