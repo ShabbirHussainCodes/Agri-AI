@@ -1,0 +1,59 @@
+# ---- Secrets & environment ----
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+service-account*.json
+AGRIAI_*  # accidental key dumps
+
+# ---- Python ----
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+dist/
+build/
+
+# ---- Node / Next.js ----
+node_modules/
+.next/
+out/
+.turbo/
+npm-debug.log*
+pnpm-debug.log*
+yarn-error.log*
+
+# ---- Data & models (large / local only) ----
+# Corpus source PDFs and generated embeddings are NOT committed.
+ingest/_downloads/
+ingest/_cache/
+*.onnx
+*.gguf
+models/
+data/agrochemical/_raw/       # raw source PDFs; only the parsed, version-stamped table is committed
+
+# ---- Local dev ----
+.DS_Store
+Thumbs.db
+*.local
+docker-compose.override.yml
+.agriai_write_test            # stray probe file, safe to delete
+
+# ---- IDE ----
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.recommended.json
+.idea/
+
+# ---- Test / eval artifacts ----
+evals/_runs/
+tests/cassettes/*.tmp
+.langfuse/
+agriai-phase0.tgz

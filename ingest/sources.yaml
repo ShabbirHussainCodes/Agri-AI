@@ -1,0 +1,36 @@
+# AgriAI corpus licence register.
+# Every source must have a licence + permission status BEFORE bulk ingestion.
+# tier: A = ingest freely | B = ingest after emailed permission | C = link & cite only | D = do not touch
+# Verify anything marked "verify" in a browser before ingesting.
+
+sources: []
+  # - id: fao-knowledge-repo
+  #   name: FAO Knowledge Repository
+  #   url: https://openknowledge.fao.org/
+  #   tier: A
+  #   licence: open-access (confirm specific CC on the item)
+  #   languages: [en, multi]
+  #   permission_status: open
+  #   notes: best-licensed serious source
+  #
+  # - id: datagovin-mandi
+  #   name: data.gov.in mandi prices
+  #   url: https://www.data.gov.in/
+  #   tier: A
+  #   licence: GODL-India (commercial use allowed, attribution required)
+  #   permission_status: open
+  #
+  # - id: vikaspedia-agri
+  #   name: Vikaspedia agriculture
+  #   url: https://en.vikaspedia.in/viewcontent/agriculture
+  #   tier: B
+  #   licence: all-rights-reserved; reuse by written permission (vikaspedia@cdac.in)
+  #   permission_status: not-requested   # operational follow-up; must not block the architecture
+  #
+  # - id: tnau-agritech
+  #   name: TNAU Agritech Portal
+  #   url: https://agritech.tnau.ac.in/
+  #   tier: C
+  #   licence: all-rights-reserved (link & cite only)
+  #   permission_status: n/a
+  #   notes: verify TLS in a browser before any fetch (cert was broken on automated fetch)
