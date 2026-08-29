@@ -4,6 +4,8 @@
 - **Date:** 2026-08-27
 - **Deciders:** Shabbir (+ Claude)
 
+> **Note (2026-08-29):** the Python-version clause of this ADR ("Python 3.12") is superseded by [ADR-0011](ADR-0011-python-3-14-dev-runtime.md) — the project now targets **Python 3.14** (3.12+). The rest of this ADR's decision (FastAPI backend, Next.js frontend) is unchanged.
+
 ## Context
 AgriAI needs document ingestion, RAG evaluation, computer vision, and structured-output validation, on free tiers, built by a solo developer on a Data-Scientist learning path. The earlier AgriAI v1 was Next.js + Prisma (TypeScript).
 

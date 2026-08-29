@@ -16,3 +16,4 @@ Format: `docs/decisions/ADR-000-template.md`.
 | [0008](ADR-0008-storage-supabase-behind-interface.md) | Supabase Storage behind a StorageProvider interface | Accepted |
 | [0009](ADR-0009-supabase-project-isolation.md) | Separate Supabase project; BillingMars isolation | Accepted |
 | [0010](ADR-0010-language-scope-hindi-english.md) | MVP language scope: Hindi + English only | Accepted |
+| [0011](ADR-0011-python-3-14-dev-runtime.md) | Python 3.14 (not 3.12) for the AI backend | Accepted |

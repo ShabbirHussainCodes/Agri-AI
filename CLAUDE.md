@@ -30,7 +30,7 @@ Useful farming information is fragmented, technical, not personalised to the far
 
 | Layer | Choice | ADR |
 |---|---|---|
-| AI backend | Python 3.12 + FastAPI | ADR-0001 |
+| AI backend | Python 3.14 (3.12+) + FastAPI | ADR-0001, ADR-0011 |
 | Frontend | Next.js (App Router) PWA — UI only | ADR-0001 |
 | Agent | Hand-rolled tool-calling loop (Pydantic AI only later if a real need appears) | ADR-0002 |
 | DB + auth + vector | Supabase Postgres + pgvector, **project `agriai-db`, region `ap-south-1` (Mumbai)** | ADR-0003, ADR-0009 |
