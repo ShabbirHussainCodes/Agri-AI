@@ -10,7 +10,7 @@
 
 ## Current position
 
-**Phase 0 — IN PROGRESS.** Architecture and documentation being created. No application code yet. Implementation begins only when Shabbir explicitly moves the project into the implementation phase.
+**Phase 1 — COMPLETED.** Data foundation (schema, migrations, auth, RLS, onboarding, activity logging) is built, tested, and verified against both the local Supabase stack and the real `agriai-db` project. Phase 2 (provider layer + first agent) is next.
 
 ---
 
@@ -26,8 +26,8 @@
 
 | # | Objective | Ships (demoable increment) | Verified by | Tag | Status |
 |---|---|---|---|---|---|
-| 0 | Architecture & docs | This repo: CLAUDE.md, ADRs, docs skeleton, roadmap | A stranger can read the repo and understand the plan | `v0.0-architecture` | IN PROGRESS |
-| 1 | Data foundation | DB schema + migrations + auth + RLS + onboarding + activity logging | pytest on models; create a farm end-to-end | `v0.1-foundation` | PLANNED |
+| 0 | Architecture & docs | This repo: CLAUDE.md, ADRs, docs skeleton, roadmap | A stranger can read the repo and understand the plan | `v0.0-architecture` | COMPLETED |
+| 1 | Data foundation | DB schema + migrations + auth + RLS + onboarding + activity logging | pytest on models; create a farm end-to-end | `v0.1-foundation` | COMPLETED |
 | 2 | Provider layer + first agent | Provider interfaces, hand-rolled tool loop, 2 read tools, evidence-typed response | Cassette-backed tests; one real question answered | `v0.2-agent` | PLANNED |
 | 3 | Corpus + eval set | Licence register, Docling ingest, ~30 eval questions written first | Chunks in DB with full metadata; eval JSONL committed | `v0.3-corpus-evalset` | PLANNED |
 | 4 | RAG v1 | Hybrid retrieval, RRF, citation validation, abstention floor | **Ragas baseline numbers recorded** | `v0.4-rag-baseline` | PLANNED |
@@ -68,3 +68,4 @@
 ## Change log
 
 - `2026-08-27` — Phase 0 started. Direction approved; ADR-0001…0010 created. Vision provider corrected to Groq `qwen/qwen3.6-27b`; default chat model to `gpt-oss-120b/20b`; storage to Supabase Storage behind an interface; language scope narrowed to Hindi + English. Groq data-use check cleared farmer-image routing.
+- `2026-08-30` — Phase 1 completed. Supabase CLI local stack; 5 core migrations (profiles/farms/crops/farm_crops/activities) with RLS Option B (real JWT claims, `auth.uid()`-enforced policies); FastAPI skeleton with JWKS/ES256 verification; automated RLS proof (pytest); real `agriai-db` project created in its own Supabase org (`ap-south-1`), migrations applied, RLS + write-isolation proven end-to-end against the live project. ADR-0011 (Python 3.14 dev runtime) added, superseding ADR-0001's version clause.

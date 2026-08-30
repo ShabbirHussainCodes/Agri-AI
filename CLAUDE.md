@@ -117,10 +117,11 @@ Never write absolute competitive claims such as "all existing systems are statel
 
 ## 10. Current status
 
-**Phase 0 — architecture & documentation.** No implementation code yet. See `docs/roadmap/roadmap.md` for the phase tracker and current position. Coding begins only when Shabbir explicitly moves the project into the implementation phase.
+**Phase 1 — COMPLETED (data foundation).** Supabase project `agriai-db` (own org, `ap-south-1`) is live with the 5 core migrations (profiles/farms/crops/farm_crops/activities), RLS Option B enforced by real JWT claims, and explicit `GRANT`s for the `authenticated` role (the local dev stack grants these by default; the real project does not, since "Automatically expose new tables" was deliberately left off). FastAPI backend verifies Supabase JWTs via JWKS/ES256. RLS isolation is proven both by an automated pytest suite (local) and by manual end-to-end verification against the real project. See `docs/roadmap/roadmap.md` for the phase tracker. Phase 2 (provider layer + first agent) is next.
 
 ## 11. Known open items / things to verify before they harden
 
+- **Supabase Auth "Confirm email" is OFF on `agriai-db`** (turned off during Phase 1 verification to avoid the free-tier email rate limit). Deliberately left off for now since no real farmers are onboarding yet -- decide the real approach (email confirm ON + templates, phone/OTP, or custom SMTP) explicitly in Phase 2+'s onboarding work, not by default.
 - Supabase "2 active projects" limit — per-organization or per-account? (BillingMars already uses one slot.) Check the dashboard before creating `agriai-db`.
 - Groq zero-data-retention setting is offered to "Eligible Customers" — may be paid/enterprise-gated; unconfirmed. Base no-training term is not tier-gated, so not a blocker.
 - Provider free-tier numeric rate limits are console-only now (Groq/Google/Mistral). Cite a dated console screenshot in ADRs, never a public docs number.
