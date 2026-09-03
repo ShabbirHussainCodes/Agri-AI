@@ -1,0 +1,462 @@
+interactions:
+- request:
+    body: '{"messages":[{"role":"system","content":"You are AgriAI, a farming advisory
+      assistant for Indian smallholder farmers.\n\nYou have already been given this
+      farm''s own record in the user message below -- use it, don''t ask for it again.\n\nRules:\n-
+      Use ONLY the tools provided to get real data. Never invent crop, weather, or
+      activity data.\n- Call get_weather only if the question depends on weather (irrigation,
+      spraying, timing).\n- When you have enough evidence (or you''ve decided no more
+      tools will help), stop calling tools. Do not write a final answer here -- a
+      separate step will ask you for the structured answer."},{"role":"user","content":"Farm
+      record:\n{\"farm_name\":\"Cassette Test Farm\",\"crop_name\":null,\"variety\":null,\"sowing_date\":null,\"days_since_sowing\":null,\"area_ha\":1.5,\"recent_activities\":[]}\n\nFarmer''s
+      question: Kya aaj mujhe apne gehun ko paani dena chahiye?"}],"model":"openai/gpt-oss-120b","tools":[{"type":"function","function":{"name":"get_weather","description":"Get
+      current temperature and rain, plus a 3-day rain forecast, at this farm''s own
+      location. Use this for irrigation-timing or spray-timing questions.","parameters":{"type":"object","properties":{},"required":[],"additionalProperties":false}}}]}'
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate
+      authorization:
+      - REDACTED
+      connection:
+      - keep-alive
+      content-length:
+      - '1248'
+      content-type:
+      - application/json
+      host:
+      - api.groq.com
+      user-agent:
+      - AsyncGroq/Python 1.7.0
+      x-stainless-arch:
+      - arm64
+      x-stainless-async:
+      - async:asyncio
+      x-stainless-lang:
+      - python
+      x-stainless-os:
+      - MacOS
+      x-stainless-package-version:
+      - 1.7.0
+      x-stainless-read-timeout:
+      - '60'
+      x-stainless-retry-count:
+      - '0'
+      x-stainless-runtime:
+      - CPython
+      x-stainless-runtime-version:
+      - 3.14.6
+    method: POST
+    uri: https://api.groq.com/openai/v1/chat/completions
+  response:
+    body:
+      string: !!binary |
+        H4sIAAAAAAAA/21Uy47jNhC85ysaPFuOnpbkHALktEGAXDZBDtmFQJFNiTMSKZPU2Iahf0/T6/HO
+        AjlJqu6qfuvGtGRHJkYexLxMSStTFKrNk0POm6SsMEuavpZJ2dSqSPtKqVyyHbP9C4rwIO6FJSoG
+        bQ2ZhEMekESzumnKqi3KasdmK3Eid7ug4frnYQmJ9T7J8rSPlNFqgZ4d/70xbSRe2DElDnrPB2TH
+        G3N2oifj3msfuAnEoSjeGm0Gwv9BGPkbAgfF3QwOhXXyCMLZpTN8RtAezDpNO3jjTmO4Pr68PZNA
+        JynfO7KHzxaMvRNBG2X38NeId1F0wP2rP8IX9seVA+cvMK8vZOSLQRhwXA28Wlg4NxokFQnUmVFf
+        8dcvDM6jFmNM4hNVp6PG59Guk4Tf4UyxHcxX8qG2QbCSXyPltzV8LAb8aM/+Q0Ux3V9gQTfyxcOs
+        qTNmAKqE7+GTPeMbqZ4RBDfgg54m4MafCeu5RwnWkJGHEd0e/kQCAhXNyWvA0D0sEfNIvVPguDbf
+        UgPrQFnKifuwh789EmynPc0jPruo8Rhj3ColOqkyJVSOiRBVmZRlkydtrg5Jjakqe6EybMvIvi5x
+        wGo14rFGz1caf6yYrB+SIwfuhnVGEygeu21s275uOzbZYXG2J+w+Yaa00X7svi0LOX7Icvu6Y+v7
+        gp1WXLELOsZJ90XaNlWbZcWOkdq8hC7YVzSkWpSH79jDO80ORVNXVUaL/DyEJyPL6h/xBysv67Si
+        OIfYusCnJ6E8FE/o3fdQlEVTFfX/ROgkBq5j12/fb+Ip1jbb9iiz68n8Ku3ZvDfHX33AuaMeDegW
+        p008aLV0aZ02XJQtr6jNl25w9hTV7yN1eOrSbM7m+uTbDE+XFkMjVXW5DHkvyJ9WhvwOZdtkOeW9
+        RcS90XlTNTQ3+gUYSnnmRrLtp/8A7VdUpH4EAAA=
+    headers:
+      alt-svc:
+      - h3=":443"; ma=86400
+      cache-control:
+      - private, max-age=0, no-store, no-cache, must-revalidate
+      cf-cache-status:
+      - DYNAMIC
+      cf-ray:
+      - a356bddb298c54c0-DEL
+      connection:
+      - keep-alive
+      content-encoding:
+      - gzip
+      content-type:
+      - application/json
+      date:
+      - Thu, 03 Sep 2026 18:15:45 GMT
+      server:
+      - cloudflare
+      set-cookie:
+      - __cf_bm=538MiINwhVPd.dLGVtIP.2O3c8UNb0mg47sdVJ2dzt0-1788459345.1492076-1.0.1.1-sWQ.BWIL1AzRBvltMA_T6EIRwuVaMsPmsdazyOZZWKKkRcVkGlkFJNxrZPj4y0aqqILvln_vHOEWFwyH2zwCM7mAmOj2NAE.hhJF3a_a7AwQKadRi.E520pXjnNxSZpb;
+        HttpOnly; SameSite=None; Secure; Path=/; Domain=groq.com; Expires=Thu, 03
+        Sep 2026 18:45:45 GMT
+      strict-transport-security:
+      - max-age=15552000
+      transfer-encoding:
+      - chunked
+      vary:
+      - Origin
+      via:
+      - 1.1 google
+      x-groq-region:
+      - bom
+      x-ratelimit-limit-requests:
+      - '1000'
+      x-ratelimit-limit-tokens:
+      - '8000'
+      x-ratelimit-remaining-requests:
+      - '998'
+      x-ratelimit-remaining-tokens:
+      - '7221'
+      x-ratelimit-reset-requests:
+      - 2m52.8s
+      x-ratelimit-reset-tokens:
+      - 5.842s
+      x-request-id:
+      - req_01m1m7qs91eqx9et8df5xxg2bc
+    status:
+      code: 200
+      message: OK
+- request:
+    body: ''
+    headers:
+      accept:
+      - '*/*'
+      accept-encoding:
+      - gzip, deflate
+      connection:
+      - keep-alive
+      host:
+      - api.open-meteo.com
+      user-agent:
+      - python-httpx/0.28.1
+    method: GET
+    uri: https://api.open-meteo.com/v1/forecast?latitude=26.85&longitude=80.95&current=temperature_2m%2Crain&daily=rain_sum&timezone=auto&forecast_days=3
+  response:
+    body:
+      string: !!binary |
+        eJx8j0FOwzAQRe/iLakZ221iZ4dYsEDsuqsqy23dyiK2keNEgqp34gycjEkobWDR5fz5/82fI2lM
+        drnbWVLzkkomlSxIE8PhLEqgSgAXBTnYYBOaY8jOW+1bUgNlGKhAVqAqVlaqVAXp8lbH/b61Wbd2
+        G8MOjUxJgIIMwY8YEEseWmfun2PzarIh1402m02yvRvvoO3pZXm3qAWgxTa2P8uMVRRx2y4lG7Lu
+        gst45DhSMOTaKEtgmHEh29SbBsXfLnjL+rfhky5ZzT2uvj4fUU7GDRe9J6cLegLlwMsZqBmIJRf1
+        fPGHrsbv/nH5WPIHCxQAsTvjmvcbfQezbjt/6TEGrtbVpAbaL8N8OizIekpaCcqgEJRDMacK1qfT
+        NwAAAP//AwBEwpgb
+    headers:
+      connection:
+      - keep-alive
+      content-encoding:
+      - deflate
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 03 Sep 2026 18:15:46 GMT
+      transfer-encoding:
+      - chunked
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"messages":[{"role":"system","content":"You are AgriAI, a farming advisory
+      assistant for Indian smallholder farmers.\n\nYou have already been given this
+      farm''s own record in the user message below -- use it, don''t ask for it again.\n\nRules:\n-
+      Use ONLY the tools provided to get real data. Never invent crop, weather, or
+      activity data.\n- Call get_weather only if the question depends on weather (irrigation,
+      spraying, timing).\n- When you have enough evidence (or you''ve decided no more
+      tools will help), stop calling tools. Do not write a final answer here -- a
+      separate step will ask you for the structured answer."},{"role":"user","content":"Farm
+      record:\n{\"farm_name\":\"Cassette Test Farm\",\"crop_name\":null,\"variety\":null,\"sowing_date\":null,\"days_since_sowing\":null,\"area_ha\":1.5,\"recent_activities\":[]}\n\nFarmer''s
+      question: Kya aaj mujhe apne gehun ko paani dena chahiye?"},{"role":"assistant","tool_calls":[{"id":"fc_df1fcf2e-cc54-4482-92f6-7e0f4bcf1e94","type":"function","function":{"name":"get_weather","arguments":"{}"}}]},{"role":"tool","tool_call_id":"fc_df1fcf2e-cc54-4482-92f6-7e0f4bcf1e94","content":"{\"current_temp_c\":
+      27.0, \"current_rain_mm\": 0.0, \"forecast_dates\": [\"2026-09-03\", \"2026-09-04\",
+      \"2026-09-05\"], \"forecast_rain_mm\": [3.1, 3.2, 4.9]}"}],"model":"openai/gpt-oss-120b","tools":[{"type":"function","function":{"name":"get_weather","description":"Get
+      current temperature and rain, plus a 3-day rain forecast, at this farm''s own
+      location. Use this for irrigation-timing or spray-timing questions.","parameters":{"type":"object","properties":{},"required":[],"additionalProperties":false}}}]}'
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate
+      authorization:
+      - REDACTED
+      connection:
+      - keep-alive
+      content-length:
+      - '1649'
+      content-type:
+      - application/json
+      cookie:
+      - __cf_bm=538MiINwhVPd.dLGVtIP.2O3c8UNb0mg47sdVJ2dzt0-1788459345.1492076-1.0.1.1-sWQ.BWIL1AzRBvltMA_T6EIRwuVaMsPmsdazyOZZWKKkRcVkGlkFJNxrZPj4y0aqqILvln_vHOEWFwyH2zwCM7mAmOj2NAE.hhJF3a_a7AwQKadRi.E520pXjnNxSZpb
+      host:
+      - api.groq.com
+      user-agent:
+      - AsyncGroq/Python 1.7.0
+      x-stainless-arch:
+      - arm64
+      x-stainless-async:
+      - async:asyncio
+      x-stainless-lang:
+      - python
+      x-stainless-os:
+      - MacOS
+      x-stainless-package-version:
+      - 1.7.0
+      x-stainless-read-timeout:
+      - '60'
+      x-stainless-retry-count:
+      - '0'
+      x-stainless-runtime:
+      - CPython
+      x-stainless-runtime-version:
+      - 3.14.6
+    method: POST
+    uri: https://api.groq.com/openai/v1/chat/completions
+  response:
+    body:
+      string: !!binary |
+        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
+    headers:
+      alt-svc:
+      - h3=":443"; ma=86400
+      cache-control:
+      - private, max-age=0, no-store, no-cache, must-revalidate
+      cf-cache-status:
+      - DYNAMIC
+      cf-ray:
+      - a356bde6095054c0-DEL
+      connection:
+      - keep-alive
+      content-encoding:
+      - gzip
+      content-type:
+      - application/json
+      date:
+      - Thu, 03 Sep 2026 18:15:49 GMT
+      server:
+      - cloudflare
+      strict-transport-security:
+      - max-age=15552000
+      transfer-encoding:
+      - chunked
+      vary:
+      - Origin
+      via:
+      - 1.1 google
+      x-groq-region:
+      - bom
+      x-ratelimit-limit-requests:
+      - '1000'
+      x-ratelimit-limit-tokens:
+      - '8000'
+      x-ratelimit-remaining-requests:
+      - '997'
+      x-ratelimit-remaining-tokens:
+      - '6564'
+      x-ratelimit-reset-requests:
+      - 4m19.2s
+      x-ratelimit-reset-tokens:
+      - 10.77s
+      x-request-id:
+      - req_01m1m7qtyzern9zmvtstmavab2
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"messages":[{"role":"system","content":"You are AgriAI. Using only the
+      evidence below (this farm''s own record, any weather data fetched, and your
+      own reasoning), produce the final structured advisory.\n\nRules:\n- structured_data
+      and live_data must reflect exactly what was provided below -- do not alter or
+      invent values in them.\n- model_inference and recommendation must be grounded
+      only in the evidence below. Never state a specific number (temperature, rainfall,
+      dose, date) that isn''t present in the evidence.\n- If the evidence doesn''t
+      give you enough to answer confidently, set abstained=true and explain why in
+      abstained_because -- do not guess.\n- Never state a pesticide dose or waiting
+      period -- that capability does not exist yet in this system.\n- Keep the recommendation
+      short, concrete, and actionable for a farmer reading on a phone."},{"role":"user","content":"Farm
+      record:\n{\"farm_name\":\"Cassette Test Farm\",\"crop_name\":null,\"variety\":null,\"sowing_date\":null,\"days_since_sowing\":null,\"area_ha\":1.5,\"recent_activities\":[]}\n\nFarmer''s
+      question: Kya aaj mujhe apne gehun ko paani dena chahiye?"},{"role":"assistant","tool_calls":[{"id":"fc_df1fcf2e-cc54-4482-92f6-7e0f4bcf1e94","type":"function","function":{"name":"get_weather","arguments":"{}"}}]},{"role":"tool","tool_call_id":"fc_df1fcf2e-cc54-4482-92f6-7e0f4bcf1e94","content":"{\"current_temp_c\":
+      27.0, \"current_rain_mm\": 0.0, \"forecast_dates\": [\"2026-09-03\", \"2026-09-04\",
+      \"2026-09-05\"], \"forecast_rain_mm\": [3.1, 3.2, 4.9]}"}],"model":"openai/gpt-oss-120b","response_format":{"type":"json_schema","json_schema":{"name":"AdvisoryResponse","strict":true,"schema":{"$defs":{"ActivitySummary":{"additionalProperties":false,"description":"`details`
+      is a JSON string, not a nested object: Groq''s strict\nschema mode requires
+      every object field to list fixed `properties`\n(verified against console.groq.com/docs/structured-outputs,\n2026-09-03)
+      -- it does not support an open, arbitrary-key dict like\nactivities.details
+      actually is (irrigation vs fertiliser vs spray\neach have different fields).
+      This field is read-only evidence shown\nto the model, never written back, so
+      a JSON string is sufficient and\nkeeps the schema valid without inventing a
+      fixed shape that doesn''t\nexist yet.","properties":{"type":{"title":"Type","type":"string"},"occurred_on":{"format":"date","title":"Occurred
+      On","type":"string"},"details":{"title":"Details","type":"string"}},"required":["type","occurred_on","details"],"title":"ActivitySummary","type":"object"},"EvidenceItem":{"additionalProperties":false,"properties":{"source_org":{"title":"Source
+      Org","type":"string"},"doc_title":{"title":"Doc Title","type":"string"},"published_year":{"title":"Published
+      Year","type":"integer"},"page":{"anyOf":[{"type":"integer"},{"type":"null"}],"default":null,"title":"Page"},"quote":{"title":"Quote","type":"string"}},"required":["source_org","doc_title","published_year","page","quote"],"title":"EvidenceItem","type":"object"},"FarmContextData":{"additionalProperties":false,"properties":{"farm_name":{"title":"Farm
+      Name","type":"string"},"crop_name":{"anyOf":[{"type":"string"},{"type":"null"}],"default":null,"title":"Crop
+      Name"},"variety":{"anyOf":[{"type":"string"},{"type":"null"}],"default":null,"title":"Variety"},"sowing_date":{"anyOf":[{"format":"date","type":"string"},{"type":"null"}],"default":null,"title":"Sowing
+      Date"},"days_since_sowing":{"anyOf":[{"type":"integer"},{"type":"null"}],"default":null,"title":"Days
+      Since Sowing"},"area_ha":{"anyOf":[{"type":"number"},{"type":"null"}],"default":null,"title":"Area
+      Ha"},"recent_activities":{"default":[],"items":{"$ref":"#/$defs/ActivitySummary"},"title":"Recent
+      Activities","type":"array"}},"required":["farm_name","crop_name","variety","sowing_date","days_since_sowing","area_ha","recent_activities"],"title":"FarmContextData","type":"object"},"WeatherData":{"additionalProperties":false,"properties":{"current_temp_c":{"anyOf":[{"type":"number"},{"type":"null"}],"default":null,"title":"Current
+      Temp C"},"current_rain_mm":{"anyOf":[{"type":"number"},{"type":"null"}],"default":null,"title":"Current
+      Rain Mm"},"forecast_dates":{"default":[],"items":{"type":"string"},"title":"Forecast
+      Dates","type":"array"},"forecast_rain_mm":{"default":[],"items":{"type":"number"},"title":"Forecast
+      Rain Mm","type":"array"}},"title":"WeatherData","type":"object","required":["current_temp_c","current_rain_mm","forecast_dates","forecast_rain_mm"]}},"additionalProperties":false,"properties":{"structured_data":{"$ref":"#/$defs/FarmContextData"},"live_data":{"anyOf":[{"$ref":"#/$defs/WeatherData"},{"type":"null"}],"default":null},"retrieved_evidence":{"default":[],"items":{"$ref":"#/$defs/EvidenceItem"},"title":"Retrieved
+      Evidence","type":"array"},"model_inference":{"title":"Model Inference","type":"string"},"recommendation":{"title":"Recommendation","type":"string"},"confidence":{"anyOf":[{"type":"number"},{"type":"null"}],"default":null,"title":"Confidence"},"abstained":{"title":"Abstained","type":"boolean"},"abstained_because":{"anyOf":[{"type":"string"},{"type":"null"}],"default":null,"title":"Abstained
+      Because"},"citations_valid":{"title":"Citations Valid","type":"boolean"}},"required":["structured_data","live_data","retrieved_evidence","model_inference","recommendation","confidence","abstained","abstained_because","citations_valid"],"title":"AdvisoryResponse","type":"object"}}}}'
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate
+      authorization:
+      - REDACTED
+      connection:
+      - keep-alive
+      content-length:
+      - '5429'
+      content-type:
+      - application/json
+      cookie:
+      - __cf_bm=538MiINwhVPd.dLGVtIP.2O3c8UNb0mg47sdVJ2dzt0-1788459345.1492076-1.0.1.1-sWQ.BWIL1AzRBvltMA_T6EIRwuVaMsPmsdazyOZZWKKkRcVkGlkFJNxrZPj4y0aqqILvln_vHOEWFwyH2zwCM7mAmOj2NAE.hhJF3a_a7AwQKadRi.E520pXjnNxSZpb
+      host:
+      - api.groq.com
+      user-agent:
+      - AsyncGroq/Python 1.7.0
+      x-stainless-arch:
+      - arm64
+      x-stainless-async:
+      - async:asyncio
+      x-stainless-lang:
+      - python
+      x-stainless-os:
+      - MacOS
+      x-stainless-package-version:
+      - 1.7.0
+      x-stainless-read-timeout:
+      - '60'
+      x-stainless-retry-count:
+      - '0'
+      x-stainless-runtime:
+      - CPython
+      x-stainless-runtime-version:
+      - 3.14.6
+    method: POST
+    uri: https://api.groq.com/openai/v1/chat/completions
+  response:
+    body:
+      string: !!binary |
+        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
+    headers:
+      alt-svc:
+      - h3=":443"; ma=86400
+      cache-control:
+      - private, max-age=0, no-store, no-cache, must-revalidate
+      cf-cache-status:
+      - DYNAMIC
+      cf-ray:
+      - a356bdf77e1154c0-DEL
+      connection:
+      - keep-alive
+      content-encoding:
+      - gzip
+      content-type:
+      - application/json
+      date:
+      - Thu, 03 Sep 2026 18:15:52 GMT
+      server:
+      - cloudflare
+      strict-transport-security:
+      - max-age=15552000
+      transfer-encoding:
+      - chunked
+      vary:
+      - Origin
+      via:
+      - 1.1 google
+      x-groq-region:
+      - bom
+      x-ratelimit-limit-requests:
+      - '1000'
+      x-ratelimit-limit-tokens:
+      - '8000'
+      x-ratelimit-remaining-requests:
+      - '996'
+      x-ratelimit-remaining-tokens:
+      - '4681'
+      x-ratelimit-reset-requests:
+      - 5m45.6s
+      x-ratelimit-reset-tokens:
+      - 24.892s
+      x-request-id:
+      - req_01m1m7qxpte6p9wjyethp9ba4j
+    status:
+      code: 200
+      message: OK
+version: 1

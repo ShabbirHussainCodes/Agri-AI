@@ -10,7 +10,7 @@
 
 ## Current position
 
-**Phase 1 — COMPLETED.** Data foundation (schema, migrations, auth, RLS, onboarding, activity logging) is built, tested, and verified against both the local Supabase stack and the real `agriai-db` project. Phase 2 (provider layer + first agent) is next.
+**Phase 2 — COMPLETED.** Provider abstraction (`LLMProvider`/`GroqProvider`) + hand-rolled agent loop + evidence-typed `POST /farms/{id}/ask` are built, cassette-tested, and verified end-to-end against the real Groq + Open-Meteo APIs. Phase 3 (corpus + eval set) is next.
 
 ---
 
@@ -28,7 +28,7 @@
 |---|---|---|---|---|---|
 | 0 | Architecture & docs | This repo: CLAUDE.md, ADRs, docs skeleton, roadmap | A stranger can read the repo and understand the plan | `v0.0-architecture` | COMPLETED |
 | 1 | Data foundation | DB schema + migrations + auth + RLS + onboarding + activity logging | pytest on models; create a farm end-to-end | `v0.1-foundation` | COMPLETED |
-| 2 | Provider layer + first agent | Provider interfaces, hand-rolled tool loop, 2 read tools, evidence-typed response | Cassette-backed tests; one real question answered | `v0.2-agent` | PLANNED |
+| 2 | Provider layer + first agent | Provider interfaces, hand-rolled tool loop, 2 read tools, evidence-typed response | Cassette-backed tests; one real question answered | `v0.2-agent` | COMPLETED |
 | 3 | Corpus + eval set | Licence register, Docling ingest, ~30 eval questions written first | Chunks in DB with full metadata; eval JSONL committed | `v0.3-corpus-evalset` | PLANNED |
 | 4 | RAG v1 | Hybrid retrieval, RRF, citation validation, abstention floor | **Ragas baseline numbers recorded** | `v0.4-rag-baseline` | PLANNED |
 | 5 | Weather + irrigation | Open-Meteo tool, ET₀ balance in code, LLM explains | Deterministic tests on the water-balance math | `v0.5-weather` | PLANNED |
@@ -69,3 +69,4 @@
 
 - `2026-08-27` — Phase 0 started. Direction approved; ADR-0001…0010 created. Vision provider corrected to Groq `qwen/qwen3.6-27b`; default chat model to `gpt-oss-120b/20b`; storage to Supabase Storage behind an interface; language scope narrowed to Hindi + English. Groq data-use check cleared farmer-image routing.
 - `2026-08-30` — Phase 1 completed. Supabase CLI local stack; 5 core migrations (profiles/farms/crops/farm_crops/activities) with RLS Option B (real JWT claims, `auth.uid()`-enforced policies); FastAPI skeleton with JWKS/ES256 verification; automated RLS proof (pytest); real `agriai-db` project created in its own Supabase org (`ap-south-1`), migrations applied, RLS + write-isolation proven end-to-end against the live project. ADR-0011 (Python 3.14 dev runtime) added, superseding ADR-0001's version clause.
+- `2026-09-03` — Phase 2 completed. Groq provider (tool calling + strict-schema structured output) behind `LLMProvider`; hand-rolled agent loop with `get_farm_context` called deterministically (not an LLM-optional tool -- a bug fix, see `app/agent/loop.py`'s module docstring for the Turn A/B prompt-leak it corrected) and `get_weather` as the one LLM-gated tool; `POST /farms/{id}/ask` returns an evidence-typed `AdvisoryResponse`. Cassette-backed test (`pytest-recording`) verifies the real Groq + Open-Meteo flow so CI never needs a live `GROQ_API_KEY`; `vcr_config` (`tests/conftest.py`) redacts auth headers and excludes local/internal hosts from the cassette entirely.

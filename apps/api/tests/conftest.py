@@ -33,6 +33,42 @@ async def client():
             yield c
 
 
+@pytest.fixture(scope="module")
+def vcr_config():
+    """docs/testing/testing-strategy.md Layer 2: cassettes are committed
+    to the repo, so anything sensitive in a recorded request/response
+    must be scrubbed BEFORE it's written, not after. Groq's Python SDK
+    sends the API key as a standard `Authorization: Bearer <key>` header
+    (OpenAI-compatible); `x-api-key` is filtered too in case a future
+    provider uses that style instead. Applies to every cassette in this
+    test package (pytest-recording looks up this fixture by name)."""
+    return {
+        "filter_headers": [
+            ("authorization", "REDACTED"),
+            ("x-api-key", "REDACTED"),
+        ],
+        # Local Supabase (127.0.0.1:54321) and our own app (called via
+        # ASGITransport(base_url="http://test") in the `client` fixture
+        # above) must run LIVE on every test run, never be recorded into
+        # or replayed from a cassette:
+        #  - Supabase: it's already required to be running for every
+        #    test in this suite (test_rls.py etc.) -- recording it buys
+        #    nothing and would commit a real (if short-lived, local-only)
+        #    JWT into the cassette.
+        #  - our own app: if this were cassette-replayed too, the test
+        #    would stop exercising the current code on every run after
+        #    the first recording -- exactly the opposite of what
+        #    testing-strategy.md Layer 2 is for ("test our code around
+        #    the model"). Only the genuinely external legs (Groq,
+        #    Open-Meteo) should ever be frozen into the cassette.
+        # (verified: vcrpy docs, "Advanced Features" -- ignore_hosts/
+        # ignore_localhost bypass VCR entirely, request hits the real
+        # server every time, nothing recorded or replayed.)
+        "ignore_localhost": True,
+        "ignore_hosts": ["test"],
+    }
+
+
 async def signup_test_user() -> str:
     """Creates a fresh farmer via the real local Supabase Auth API and
     returns their access token. A random email each time keeps tests

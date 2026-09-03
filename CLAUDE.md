@@ -117,7 +117,7 @@ Never write absolute competitive claims such as "all existing systems are statel
 
 ## 10. Current status
 
-**Phase 1 — COMPLETED (data foundation).** Supabase project `agriai-db` (own org, `ap-south-1`) is live with the 5 core migrations (profiles/farms/crops/farm_crops/activities), RLS Option B enforced by real JWT claims, and explicit `GRANT`s for the `authenticated` role (the local dev stack grants these by default; the real project does not, since "Automatically expose new tables" was deliberately left off). FastAPI backend verifies Supabase JWTs via JWKS/ES256. RLS isolation is proven both by an automated pytest suite (local) and by manual end-to-end verification against the real project. See `docs/roadmap/roadmap.md` for the phase tracker. Phase 2 (provider layer + first agent) is next.
+**Phase 2 — COMPLETED (provider layer + first agent).** Groq provider (`app/providers/groq_provider.py`) implements tool-calling (Turn A) and strict-schema structured output (Turn B) behind the `LLMProvider` interface. The hand-rolled agent loop (`app/agent/loop.py`) calls `get_farm_context` deterministically -- not an LLM-optional tool, since every farm-specific question needs it -- and `get_weather` as the one genuinely LLM-gated tool. `POST /farms/{id}/ask` returns an evidence-typed `AdvisoryResponse`. Verified end-to-end against the real Groq + Open-Meteo APIs (grounded weather-based irrigation advice, no hallucinated numbers) and covered by a cassette-backed test (`tests/test_ask.py`, pytest-recording) that CI can replay without a live `GROQ_API_KEY`. See `docs/roadmap/roadmap.md` for the phase tracker. Phase 3 (corpus + eval set) is next.
 
 ## 11. Known open items / things to verify before they harden
 
