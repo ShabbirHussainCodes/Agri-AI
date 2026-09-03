@@ -11,8 +11,8 @@ permissions"). It used to be an LLM-optional tool; that was a design
 gap (see loop.py's module docstring for the bug it caused), not a
 deliberate choice.
 """
+import json
 from datetime import date
-from typing import Any
 from uuid import UUID
 
 import asyncpg
@@ -20,11 +20,20 @@ from pydantic import BaseModel, ConfigDict
 
 
 class ActivitySummary(BaseModel):
+    """`details` is a JSON string, not a nested object: Groq's strict
+    schema mode requires every object field to list fixed `properties`
+    (verified against console.groq.com/docs/structured-outputs,
+    2026-09-03) -- it does not support an open, arbitrary-key dict like
+    activities.details actually is (irrigation vs fertiliser vs spray
+    each have different fields). This field is read-only evidence shown
+    to the model, never written back, so a JSON string is sufficient and
+    keeps the schema valid without inventing a fixed shape that doesn't
+    exist yet."""
     model_config = ConfigDict(extra="forbid")
 
     type: str
     occurred_on: date
-    details: dict[str, Any]
+    details: str
 
 
 class FarmContextData(BaseModel):
@@ -86,7 +95,7 @@ async def get_farm_context(conn: asyncpg.Connection, farm_id: UUID) -> FarmConte
         days_since_sowing=days_since_sowing,
         area_ha=float(farm_row["area_ha"]) if farm_row["area_ha"] is not None else None,
         recent_activities=[
-            ActivitySummary(type=r["type"], occurred_on=r["occurred_on"], details=r["details"])
+            ActivitySummary(type=r["type"], occurred_on=r["occurred_on"], details=json.dumps(r["details"], default=str))
             for r in activity_rows
         ],
     )
