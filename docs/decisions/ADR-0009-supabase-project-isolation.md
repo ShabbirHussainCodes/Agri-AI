@@ -15,7 +15,7 @@ Hard data-isolation requirement, and Mumbai region for Indian-user latency (Bill
 
 ## Consequences
 - **Positive:** complete isolation; correct region; no credential mixups.
-- **Trade-off / open item:** the free plan's "Limit of 2 active projects" — BillingMars uses one slot, and it's undocumented whether the limit is per-org or per-account. **Check the dashboard before creating `agriai-db`;** if per-org, use a new free org so BillingMars' slot is untouched.
+- **Trade-off (resolved 2026-08-29):** the free plan's "Limit of 2 active projects" is confirmed **per account, across all orgs** (verified against the live Supabase account) — a new org does not grant extra slots. `agriai-db` + `billingmars-db` now use both free slots; a third project will need pausing, upgrading, or deleting one of them.
 
 ## Links
 `docs/deployment/deployment.md`, `docs/security/security-model.md`.

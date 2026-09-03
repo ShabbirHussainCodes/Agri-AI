@@ -4,7 +4,7 @@ An AI-powered farming decision-support system for Indian smallholder farmers.
 
 AgriAI keeps a **per-farm record** — crop, growth stage, soil, weather, and the farmer's own history of irrigation, fertiliser, spraying, and past problems — and reasons over that record to give **evidence-grounded, source-cited recommendations** in Hindi and English, through a text and voice interface. It is designed to be honest: it distinguishes what a model inferred from what a document actually says, and it says "I'm not sure" and points to a human expert when the evidence is weak.
 
-> **Status:** Phase 0 — architecture and documentation. No application code yet. See [`docs/roadmap/roadmap.md`](docs/roadmap/roadmap.md).
+> **Status:** Phase 1 complete — data foundation (Supabase `agriai-db`, RLS, auth). Phase 2 (provider layer + first agent) in progress. See [`docs/roadmap/roadmap.md`](docs/roadmap/roadmap.md).
 
 ---
 

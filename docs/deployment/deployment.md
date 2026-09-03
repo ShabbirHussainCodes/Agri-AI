@@ -16,7 +16,7 @@
 
 - 500 MB DB, 1 GB storage, 5 GB egress (+5 GB cached, shared with API responses), 500 MB RAM shared CPU, 50,000 auth MAU.
 - **Paused after 1 week of inactivity** → a daily keep-alive cron is required, and must run in the week before any demo.
-- **"Limit of 2 active projects"** — BillingMars already uses one slot. ⚠️ Not documented whether this is per-org or per-account; **check the dashboard before creating `agriai-db`.** If per-org, a new free org frees BillingMars' slot.
+- **"Limit of 2 active projects"** — confirmed **per account, across all orgs** (2026-08-29, verified against the live Supabase account). `agriai-db` + `billingmars-db` now use both free slots; a third project needs pausing, upgrading, or deleting one of them.
 
 ## Containers
 

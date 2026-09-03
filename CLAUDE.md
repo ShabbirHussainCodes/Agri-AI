@@ -122,7 +122,7 @@ Never write absolute competitive claims such as "all existing systems are statel
 ## 11. Known open items / things to verify before they harden
 
 - **Supabase Auth "Confirm email" is OFF on `agriai-db`** (turned off during Phase 1 verification to avoid the free-tier email rate limit). Deliberately left off for now since no real farmers are onboarding yet -- decide the real approach (email confirm ON + templates, phone/OTP, or custom SMTP) explicitly in Phase 2+'s onboarding work, not by default.
-- Supabase "2 active projects" limit — per-organization or per-account? (BillingMars already uses one slot.) Check the dashboard before creating `agriai-db`.
+- ~~Supabase "2 active projects" limit: per-org or per-account?~~ **RESOLVED 2026-08-29** — confirmed against the live Supabase account: the Free plan's 2-active-project cap is **per account, across all orgs** (a new org does not grant extra free slots). `agriai-db` + `billingmars-db` now use both free slots; a future third project needs pausing/upgrading/deleting one of them.
 - Groq zero-data-retention setting is offered to "Eligible Customers" — may be paid/enterprise-gated; unconfirmed. Base no-training term is not tier-gated, so not a blocker.
 - Provider free-tier numeric rate limits are console-only now (Groq/Google/Mistral). Cite a dated console screenshot in ADRs, never a public docs number.
 - CIB&RC "Major Uses of Pesticides" — obtain a current edition from ppqs.gov.in (automated fetch 403s; a known mirror is dated 2012). Version-stamp whatever is used.

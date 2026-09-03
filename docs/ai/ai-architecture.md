@@ -9,7 +9,7 @@ Everything goes through a **provider abstraction** (`app/providers/`) so a rate 
 | Job | Model | Notes |
 |---|---|---|
 | Chat / reasoning | Groq `openai/gpt-oss-120b` | fast path `gpt-oss-20b`; prompt caching only on gpt-oss family; cached tokens don't count toward rate limits |
-| Strict JSON (Turn B) | Groq `openai/gpt-oss-120b` | strict schema supported on gpt-oss-20b/120b (and qwen3.8-27b) |
+| Strict JSON (Turn B) | Groq `openai/gpt-oss-120b` | strict schema supported on gpt-oss-20b/120b |
 | Vision | Groq `qwen/qwen3.6-27b` | 5 images/req, 20 MB, **2,048 tokens/image**; Preview status — keep a fallback; no strict schema, no prompt caching on this model |
 | Speech-to-text | Groq `whisper-large-v3-turbo` | free-tier file cap 25 MB; test Hindi ourselves (Groq docs say only "Multilingual") |
 | TTS | Browser SpeechSynthesis → IndicF5 (MIT) | Groq TTS has no Hindi |
