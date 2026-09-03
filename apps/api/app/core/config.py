@@ -25,5 +25,13 @@ class Settings(BaseSettings):
     jwks_url: str
     jwt_audience: str = "authenticated"
 
+    # Groq (ADR-0004). gpt-oss-120b is the "quality" model -- used for
+    # both agent turns in Phase 2 (tool-call decisions and the final
+    # strict-schema answer). gpt-oss-20b is kept here for later use
+    # (e.g. a faster Turn A) but nothing calls it yet.
+    groq_api_key: str
+    groq_chat_model: str = "openai/gpt-oss-120b"
+    groq_chat_model_fast: str = "openai/gpt-oss-20b"
+
 
 settings = Settings()
