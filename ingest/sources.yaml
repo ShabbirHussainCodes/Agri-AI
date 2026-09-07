@@ -2,35 +2,134 @@
 # Every source must have a licence + permission status BEFORE bulk ingestion.
 # tier: A = ingest freely | B = ingest after emailed permission | C = link & cite only | D = do not touch
 # Verify anything marked "verify" in a browser before ingesting.
+#
+# Commercialisation-safe policy (set 2026-09-07, Shabbir approved): AgriAI may be
+# commercialised in future, so NC (NonCommercial) / SA (ShareAlike)-restricted or
+# licence-unclear items are NOT ingested into the RAG corpus, even from a Tier A
+# source. A source being Tier A means the SOURCE is worth checking -- it does NOT
+# mean every item in it is clear to use. Every item needs its own licence
+# confirmed on its own page before ingestion.
 
-sources: []
-  # - id: fao-knowledge-repo
-  #   name: FAO Knowledge Repository
-  #   url: https://openknowledge.fao.org/
-  #   tier: A
-  #   licence: open-access (confirm specific CC on the item)
-  #   languages: [en, multi]
-  #   permission_status: open
-  #   notes: best-licensed serious source
-  #
-  # - id: datagovin-mandi
-  #   name: data.gov.in mandi prices
-  #   url: https://www.data.gov.in/
-  #   tier: A
-  #   licence: GODL-India (commercial use allowed, attribution required)
-  #   permission_status: open
-  #
-  # - id: vikaspedia-agri
-  #   name: Vikaspedia agriculture
-  #   url: https://en.vikaspedia.in/viewcontent/agriculture
-  #   tier: B
-  #   licence: all-rights-reserved; reuse by written permission (vikaspedia@cdac.in)
-  #   permission_status: not-requested   # operational follow-up; must not block the architecture
-  #
-  # - id: tnau-agritech
-  #   name: TNAU Agritech Portal
-  #   url: https://agritech.tnau.ac.in/
-  #   tier: C
-  #   licence: all-rights-reserved (link & cite only)
-  #   permission_status: n/a
-  #   notes: verify TLS in a browser before any fetch (cert was broken on automated fetch)
+sources:
+  - id: fao-knowledge-repo
+    name: FAO Knowledge Repository
+    url: https://openknowledge.fao.org/
+    tier: A
+    licence: >
+      Open access, but licence varies per item -- FAO adopted CC BY-NC-SA 3.0 IGO
+      for some content (e.g. statistical databases, 2020 policy), and its 2025
+      Open Access Policy names no single repository-wide licence.
+    licence_check: per-item, MANDATORY before ingest
+    ingest_policy: >
+      Ingest ONLY items whose own page states a clearly reusable, commercial-safe
+      licence (CC BY 4.0 / CC BY 3.0 IGO preferred). Do NOT ingest anything marked
+      NC (NonCommercial), SA (ShareAlike), or with no stated licence.
+    languages: [en, multi]
+    permission_status: open
+    rag_ingest: conditional   # per item, see ingest_policy
+    notes: >
+      Global scope, not India-specific. Real PDFs with page numbers, so citations
+      resolve properly once a CC BY item is confirmed.
+
+  - id: cgspace-cgiar
+    name: CGSpace (CGIAR research outputs)
+    url: https://cgspace.cgiar.org/
+    tier: A
+    licence: >
+      CGIAR Open Access policy mandates free unrestricted access; CC-BY encouraged
+      as the most permissive option; no repository-wide licence declared, so each
+      item's own record must be checked.
+    licence_check: per-item, MANDATORY before ingest
+    ingest_policy: >
+      Prioritise India/South Asia-relevant items (ICRISAT, IRRI, IWMI, CIMMYT
+      South Asia programmes) whose own item record states a clearly reusable,
+      commercial-friendly licence (CC BY preferred). Do NOT ingest NC/SA/unclear
+      items.
+    languages: [en]
+    permission_status: open
+    rag_ingest: conditional   # per item, see ingest_policy
+    notes: >
+      Best India-relevance among the clean-licensed candidates found so far.
+    approved_items:
+      # Verified item-by-item in a browser on 2026-09-07; Shabbir approved for
+      # Phase 3 ingestion. Both show "Access Rights: Open Access" and
+      # "Usage Rights: CC-BY-4.0" on their own CGSpace item pages.
+      - handle: 10568/180614
+        title: >
+          Organizing principles for agroecological kitchen gardens in Mandla,
+          Central India: A user manual for farmers and extension workers
+        item_url: https://hdl.handle.net/10568/180614
+        publisher: Alliance of Bioversity International & CIAT; ATREE
+        year: 2025
+        doc_type: manual
+        licence: CC-BY-4.0
+        languages: [en]
+        pages: 13
+        local_file: _downloads/cgspace-10568-180614_kitchen-gardens-mandla.pdf
+        # Document-level metadata copied onto every chunk (rag-design.md §4).
+        # crop_name is deliberately absent: this manual covers a mixed kitchen
+        # garden, so tagging it to one crop would be wrong.
+        state: Madhya Pradesh
+        notes: >
+          Written for farmers and extension workers; contains a crop calendar
+          (a real table -- useful to exercise Docling TableFormer). Scope is
+          kitchen/home gardens, not field crops.
+      - handle: 10568/180732
+        title: >
+          Evaluation of Integrated Pest and Disease Management Combinations
+          against Major Insect Pests and Diseases of Tomato in Tamil Nadu, India
+        item_url: https://hdl.handle.net/10568/180732
+        doi: 10.3390/horticulturae10070766
+        publisher: Tamil Nadu Agricultural University; World Vegetable Center
+        year: 2024
+        doc_type: journal_article
+        licence: CC-BY-4.0
+        languages: [en]
+        local_file: _downloads/cgspace-10568-180732_tomato-ipdm-tamil-nadu.pdf
+        # crop_name must match public.crops.name_en exactly -- ingestion fails
+        # loudly on a mismatch rather than silently storing NULL.
+        crop_name: Tomato
+        state: Tamil Nadu
+        notes: >
+          TNAU-authored content reachable under CC-BY via the journal, even
+          though the TNAU portal itself is Tier C -- a reusable route to Indian
+          university material. IMPORTANT: this is a research trial, not an
+          advisory. Its findings are `retrieved_evidence`, never a
+          `recommendation` (ADR-0006). Ingest with doc_type=journal_article so
+          the agent can tell the difference.
+
+  - id: datagovin
+    name: data.gov.in (Open Government Data Platform India)
+    url: https://www.data.gov.in/
+    tier: A
+    licence: >
+      GODL-India -- worldwide, royalty-free, non-exclusive; adaptation,
+      translation and commercial use permitted; attribution mandatory.
+    licence_check: licence-wide (confirmed -- cleanest of all sources here)
+    languages: [en, hi]
+    permission_status: open
+    rag_ingest: false   # structured tabular data, not corpus text
+    notes: >
+      Registered as a structured-data source for Phase 5 (weather) and Phase 9
+      (mandi prices) -- NOT part of the Phase 3 text RAG corpus.
+
+  - id: kisanvaani-agri-qa
+    name: KisanVaani/agriculture-qa-english-only (HuggingFace)
+    url: https://huggingface.co/datasets/KisanVaani/agriculture-qa-english-only
+    tier: A
+    licence: apache-2.0 (clean, commercial-safe)
+    languages: [en]
+    permission_status: open
+    rag_ingest: false   # rejected for the authoritative corpus
+    purpose: eval_reference_only
+    notes: >
+      22.6K question/answer pairs with no source, page, year, crop, or state
+      attached -- cannot support source-attributed evidence (CLAUDE.md rule 3),
+      so it is not corpus. Kept only as a reference for how farmers phrase
+      questions, when writing evals/questions.jsonl.
+
+  # Not yet evaluated (Tier B/C/D from docs/rag/rag-design.md §7 -- still the
+  # only India-state-specific, crop-stage-level package-of-practices sources):
+  #   B: Vikaspedia agriculture             -- needs emailed permission (vikaspedia@cdac.in)
+  #   C: ICAR / PAU PoP / ICAR-IIHR / TNAU  -- link & cite only, never bulk-ingest
+  #   D: CABI Compendium                    -- do not touch

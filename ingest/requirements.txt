@@ -1,0 +1,18 @@
+# Ingest pipeline dependencies -- DEVELOPER LAPTOP ONLY.
+# Deliberately separate from apps/api/requirements.txt: Docling needs ~6 GB RAM
+# and none of this is ever installed in production (ingest/README.md).
+#
+# Versions are intentionally loose right now. They get pinned to the exact
+# resolved versions after the first successful install -- guessing pins for
+# packages that cannot be resolved from here would be inventing facts.
+# After installing, run:  pip freeze > ingest/requirements.lock.txt
+
+docling>=2.0                # PDF parsing + structure-aware chunking (MIT)
+onnxruntime>=1.18           # local CPU inference for the embedder
+transformers>=4.44          # tokenizer only -- no torch inference
+huggingface-hub>=0.24       # pulls the ONNX export of multilingual-e5-small
+numpy>=1.26
+asyncpg>=0.29               # same driver the API uses
+pydantic-settings>=2.4      # same AGRIAI_* config convention as the API
+PyYAML>=6.0                 # reads sources.yaml
+pypdf>=4.0                  # page counts only
