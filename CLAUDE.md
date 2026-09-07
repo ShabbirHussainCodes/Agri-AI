@@ -117,7 +117,14 @@ Never write absolute competitive claims such as "all existing systems are statel
 
 ## 10. Current status
 
-**Phase 2 — COMPLETED (provider layer + first agent).** Groq provider (`app/providers/groq_provider.py`) implements tool-calling (Turn A) and strict-schema structured output (Turn B) behind the `LLMProvider` interface. The hand-rolled agent loop (`app/agent/loop.py`) calls `get_farm_context` deterministically -- not an LLM-optional tool, since every farm-specific question needs it -- and `get_weather` as the one genuinely LLM-gated tool. `POST /farms/{id}/ask` returns an evidence-typed `AdvisoryResponse`. Verified end-to-end against the real Groq + Open-Meteo APIs (grounded weather-based irrigation advice, no hallucinated numbers) and covered by a cassette-backed test (`tests/test_ask.py`, pytest-recording) that CI can replay without a live `GROQ_API_KEY`. See `docs/roadmap/roadmap.md` for the phase tracker. Phase 3 (corpus + eval set) is next.
+**Phase 3 — COMPLETED (corpus + eval set).** `ingest/` runs on the laptop: Docling parse → structure-aware chunking (every chunk keeps `page_no` and `section_path`) → local ONNX `multilingual-e5-small` embeddings → `public.documents` / `public.chunks` (HNSW cosine + generated `tsvector`, read-only for `authenticated`). Embeddings are built from heading-contextualised text while `content` stays raw, so a citation quotes the real passage. **113 chunks** from two item-level-verified CC-BY-4.0 CGSpace documents are in the local stack; 35 chunks were excluded or screened out, each with a printed reason. `evals/questions.jsonl` holds **55 gold questions** grounded only in what was actually ingested.
+
+Two things from this phase constrain everything after it:
+
+- **ADR-0012.** The Mandla crop calendar was extracted correctly and verified cell by cell against the PDF, then excluded anyway because the source's own values were unsafe for farmer-facing advice. Licence and provenance qualify a *source* for use, not its *content* for advice — safety-relevant agricultural claims need a domain sanity check too. Source content in the corpus is **not** AgriAI-verified knowledge, and the two must never be conflated in a response, in docs, or in demo material.
+- **The corpus carries real application rates** (`B. subtilis @ 4 g/L`, `Tilt® 25% EC @ 1 mL/L`, and others in 10 chunks) as a research trial's protocol, not label recommendations. Rule 1 permits dosages only from the deterministic agrochemical lookup, and that lookup is Phase 6. **Nothing from this corpus goes in front of a farmer until `app/safety/` exists.** Until then the only guard is the `dose_safety_abstention` eval bucket, which Phase 4 must measure.
+
+See `docs/roadmap/roadmap.md` for the phase tracker. Phase 4 (RAG v1) is next; its first job is a recorded Ragas baseline against this eval set.
 
 ## 11. Known open items / things to verify before they harden
 
@@ -128,3 +135,6 @@ Never write absolute competitive claims such as "all existing systems are statel
 - CIB&RC "Major Uses of Pesticides" — obtain a current edition from ppqs.gov.in (automated fetch 403s; a known mirror is dated 2012). Version-stamp whatever is used.
 - Reranker CPU latency is unverified — measure on the actual free-tier CPU before depending on it.
 - TNAU Agritech Portal TLS was broken on automated fetch — verify in a browser before ingesting.
+- Docling's reading order on two-column PDFs drops end-of-line characters and, near large tables, splices prose into table rows. Measured across both backends; pypdfium is better but not clean. Visibly damaged chunks are screened out, but pypdfium also reported out-of-page bbox geometry on pages 9–12 of `10568/180732`, so the damage zone may be wider than what the screen catches. 14 chunks from those pages are in the corpus with no visible damage — status unknown, to be measured by the eval set.
+- The corpus is English-only. Hindi retrieval is untested against a Hindi *source*; the Hindi eval questions test Hindi query → English passage (ADR-0007), which is a different claim.
+- Domain sanity validation (ADR-0012) is currently one person reading, not a test. Adding agronomic sanity assertions to the eval set is the follow-up.
