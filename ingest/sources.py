@@ -38,6 +38,11 @@ class ApprovedItem:
     crop_name: str | None
     state: str | None
 
+    # Pages of this PDF that must never reach the corpus. Set per item in
+    # sources.yaml WITH a written reason, so an exclusion is a reviewable
+    # decision in Git rather than an invisible filter in code.
+    exclude_pages: frozenset[int]
+
 
 def _clean(text: str | None) -> str | None:
     """YAML block scalars keep their newlines; titles and notes read better
@@ -83,6 +88,7 @@ def load_approved_items() -> list[ApprovedItem]:
                     local_path=local_path,
                     crop_name=raw.get("crop_name"),
                     state=raw.get("state"),
+                    exclude_pages=frozenset(raw.get("exclude_pages") or []),
                 )
             )
 

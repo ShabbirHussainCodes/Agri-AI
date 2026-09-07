@@ -17,3 +17,4 @@ Format: `docs/decisions/ADR-000-template.md`.
 | [0009](ADR-0009-supabase-project-isolation.md) | Separate Supabase project; BillingMars isolation | Accepted |
 | [0010](ADR-0010-language-scope-hindi-english.md) | MVP language scope: Hindi + English only | Accepted |
 | [0011](ADR-0011-python-3-14-dev-runtime.md) | Python 3.14 (not 3.12) for the AI backend | Accepted |
+| [0012](ADR-0012-corpus-domain-sanity-validation.md) | Licence is not enough: corpus content needs domain sanity validation | Accepted |

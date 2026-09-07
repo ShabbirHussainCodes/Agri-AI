@@ -68,11 +68,15 @@ def find_garble(text: str) -> list[str]:
 
 
 def screen_chunks(
-    chunks: list[ParsedChunk], embedder: E5Embedder
+    chunks: list[ParsedChunk], embedder: E5Embedder, item: ApprovedItem
 ) -> tuple[list[tuple[ParsedChunk, int]], list[tuple[ParsedChunk, int, str]]]:
     """Split chunks into (kept, dropped-with-reason).
 
-    Two reasons a chunk never reaches the corpus:
+    Three reasons a chunk never reaches the corpus:
+      excluded page -- the page is listed in this item's `exclude_pages` in
+                    sources.yaml, where the reason is written down. Checked
+                    FIRST, so an excluded page is never judged on any other
+                    grounds and can never slip through.
       too-short  -- page furniture ("Article", running heads) that can never
                     answer a question but can still win a retrieval slot.
       garbled    -- the text extractor mangled it (see find_garble). Better to
@@ -85,6 +89,11 @@ def screen_chunks(
 
     for chunk in chunks:
         n_tokens = embedder.count_tokens(chunk.text)
+        if chunk.page_no is not None and chunk.page_no in item.exclude_pages:
+            dropped.append(
+                (chunk, n_tokens, f"excluded page {chunk.page_no} (see sources.yaml)")
+            )
+            continue
         if n_tokens < MIN_CHUNK_TOKENS:
             dropped.append((chunk, n_tokens, f"too short (< {MIN_CHUNK_TOKENS} tokens)"))
             continue
@@ -190,7 +199,7 @@ async def ingest_item(
         print("  ! produced 0 chunks -- skipping")
         return
 
-    kept, dropped = screen_chunks(all_chunks, embedder)
+    kept, dropped = screen_chunks(all_chunks, embedder, item)
     if dropped:
         print(f"  dropped {len(dropped)} chunk(s):")
         for chunk, n_tokens, reason in dropped:
@@ -203,6 +212,15 @@ async def ingest_item(
 
     chunks = [c for c, _ in kept]
     token_counts = [n for _, n in kept]
+
+    # Belt and braces: an excluded page reaching this point would mean the
+    # screen was bypassed. Refuse to continue rather than write it.
+    leaked = sorted({c.page_no for c in chunks if c.page_no in item.exclude_pages})
+    if leaked:
+        raise RuntimeError(
+            f"{item.handle}: excluded pages {leaked} survived screening -- refusing "
+            "to ingest. This is a bug in screen_chunks, not a data problem."
+        )
 
     with_page = sum(1 for c in chunks if c.page_no is not None)
     with_section = sum(1 for c in chunks if c.section_path)

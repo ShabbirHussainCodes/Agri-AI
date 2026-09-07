@@ -70,6 +70,33 @@ sources:
         # crop_name is deliberately absent: this manual covers a mixed kitchen
         # garden, so tagging it to one crop would be wrong.
         state: Madhya Pradesh
+        # Appendix 1 (the crop calendar) is excluded from the corpus.
+        #
+        # This is NOT an extraction problem. The table was extracted
+        # structurally with ingest/extract_calendar.py -- 64 crop rows, 12
+        # month columns assigned by position -- and then verified cell by cell
+        # against page 12 of the source PDF by a human. Wheat, Rice, Onion,
+        # Radish, Turmeric and Kodo millet all matched the printed table
+        # exactly. The extractor is correct and the reading is faithful.
+        #
+        # It is excluded because the SOURCE VALUES could not be considered safe
+        # for farmer-facing recommendations. Per the table's own legend ("1"
+        # indicates months with suitable growing conditions), it states that
+        # wheat is suitable June-October and unsuitable November-March, which
+        # inverts the Indian rabi season; and it marks Kodo millet as
+        # unsuitable June-September while marking Kutki millet -- the same
+        # kharif season millet -- as suitable, within the same table.
+        #
+        # We are NOT correcting these values from general agronomic knowledge:
+        # replacing a source's data with our own assumptions would be a worse
+        # failure than omitting it, and would make the citation a lie. The
+        # calendar is simply not ingested, in any form, until an agronomist
+        # can adjudicate it. Cited evidence carries more weight with a farmer,
+        # not less, so a wrong sowing month delivered with a real CC-BY
+        # citation is more dangerous than no answer at all.
+        #
+        # See docs/decisions/ADR-0012-corpus-domain-sanity-validation.md.
+        exclude_pages: [11, 12, 13]
         notes: >
           Written for farmers and extension workers; contains a crop calendar
           (a real table -- useful to exercise Docling TableFormer). Scope is
