@@ -63,5 +63,36 @@ class IngestSettings(BaseSettings):
     # and is unfixed -- see the Phase 3 notes.
     docling_ocr: bool = True
 
+    # Which PDF text-extraction backend Docling uses.
+    #
+    #   "default"   -- ThreadedDoclingParseDocumentBackend (Docling's own)
+    #   "pypdfium"  -- PyPdfiumDocumentBackend (pypdfium2, a different engine)
+    #   "parse-v4"  -- DoclingParseV4DocumentBackend
+    #
+    # Default is pypdfium, chosen by measurement (2026-09-07 A/B, same OCR
+    # setting, both Phase 3 documents, dumps kept side by side):
+    #
+    #   pypdfium WINS: truncated words 5 -> 2; "biometric" 9 -> 20 and
+    #     "Plant height" 7 -> 20 occurrences; doc 10568/180732 grows 85 -> 98
+    #     chunks (119 KB -> 139 KB of extracted text); the Table-10 passage that
+    #     had body prose spliced into table rows is gone; and in the crop
+    #     calendar the July column is finally read as "Jul" instead of the
+    #     garbage "inr"/"nf"/"ot" the default backend produced.
+    #   pypdfium LOSES: it garbles characters on 4 chunks (51, 52, 55 on p9;
+    #     70 on p11) -- "ttkftd", "gpgpp", "ttIPDM". The default backend
+    #     garbles none.
+    #
+    # We take that trade deliberately. The default backend's failure is SILENT:
+    # ANOVA numbers spliced into prose still read like ordinary sentences, so a
+    # wrong figure can be cited with confidence. pypdfium's failure is VISIBLE
+    # and mechanically detectable, so those chunks are screened out before they
+    # ever reach the corpus (see screen_chunks in run.py). For a system that
+    # must not state wrong facts, a loud failure beats a plausible one.
+    #
+    # Both backends fail on the SAME pages (9, 11, 12) -- the table-heavy
+    # two-column ones. The real fix is treating those tables as structured data,
+    # not choosing a better text extractor.
+    docling_backend: str = "pypdfium"
+
 
 settings = IngestSettings()

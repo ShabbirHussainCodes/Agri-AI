@@ -34,9 +34,10 @@ def main() -> int:
 
     chunker = build_chunker(embedder.tokenizer, settings.chunk_max_tokens)
     print(f"chunker:         {type(chunker).__name__}")
-    print(f"docling OCR:     {'ON' if settings.docling_ocr else 'OFF'}\n")
+    print(f"docling OCR:     {'ON' if settings.docling_ocr else 'OFF'}")
+    print(f"docling backend: {settings.docling_backend}\n")
 
-    converter = build_converter(settings.docling_ocr)
+    converter = build_converter(settings.docling_ocr, settings.docling_backend)
     doc = parse_pdf(converter, item.local_path)
     raw_chunks = list(chunker.chunk(dl_doc=doc))
     print(f"chunks produced: {len(raw_chunks)}\n")

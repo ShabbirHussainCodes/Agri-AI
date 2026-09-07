@@ -13,6 +13,7 @@ approved cannot be ingested by accident.
 import argparse
 import asyncio
 import hashlib
+import re
 import sys
 from pathlib import Path
 
@@ -40,6 +41,63 @@ EMBED_BATCH = 16
 # Dropped chunks are always printed -- nothing disappears silently.
 MIN_CHUNK_TOKENS = 15
 
+# Signatures of PDF text-extraction damage, not of bad writing.
+#
+# GLUED_CASE: a lowercase run running straight into capitals, e.g. "ltithEG",
+#   "ttIPDM", "biAcross", "plantsThe" -- characters were dropped between two
+#   words and the remains fused.
+# CONSONANT_BLOB: an all-lowercase word of 4+ letters with no vowel at all,
+#   e.g. "ttkftd", "gpgpp", "bflld". Restricted to lowercase so acronyms
+#   (IPDM, TNAU, SDGs) are never caught, and anchored on word boundaries so
+#   ordinary English consonant clusters ("months", "strength") are not either.
+#
+# Measured on 183 chunks across both Phase 3 documents and both backends:
+# zero false positives once the URL words below are excluded, and it caught
+# exactly the 4 pypdfium chunks that are visibly broken. One hit is enough to
+# drop a chunk -- garbled evidence is worse than missing evidence.
+GLUED_CASE = re.compile(r"[a-z]{2,}[A-Z]{2,}|[a-z]{3,}[A-Z][a-z]{3,}")
+CONSONANT_BLOB = re.compile(r"\b[bcdfghjklmnpqrstvwxyz]{4,}\b")
+GARBLE_ALLOWLIST = {"https", "html", "www", "ftp", "xml", "json"}
+
+
+def find_garble(text: str) -> list[str]:
+    """Extraction-damage tokens in a chunk, or [] if it looks intact."""
+    hits = GLUED_CASE.findall(text)
+    hits += [w for w in CONSONANT_BLOB.findall(text) if w not in GARBLE_ALLOWLIST]
+    return hits
+
+
+def screen_chunks(
+    chunks: list[ParsedChunk], embedder: E5Embedder
+) -> tuple[list[tuple[ParsedChunk, int]], list[tuple[ParsedChunk, int, str]]]:
+    """Split chunks into (kept, dropped-with-reason).
+
+    Two reasons a chunk never reaches the corpus:
+      too-short  -- page furniture ("Article", running heads) that can never
+                    answer a question but can still win a retrieval slot.
+      garbled    -- the text extractor mangled it (see find_garble). Better to
+                    lose the passage than to let the agent quote nonsense as
+                    evidence.
+    Everything dropped is reported by the caller; nothing disappears silently.
+    """
+    kept: list[tuple[ParsedChunk, int]] = []
+    dropped: list[tuple[ParsedChunk, int, str]] = []
+
+    for chunk in chunks:
+        n_tokens = embedder.count_tokens(chunk.text)
+        if n_tokens < MIN_CHUNK_TOKENS:
+            dropped.append((chunk, n_tokens, f"too short (< {MIN_CHUNK_TOKENS} tokens)"))
+            continue
+        garble = find_garble(chunk.text)
+        if garble:
+            sample = ", ".join(dict.fromkeys(garble))[:80]
+            dropped.append((chunk, n_tokens, f"garbled extraction: {sample}"))
+            continue
+        kept.append((chunk, n_tokens))
+
+    return kept, dropped
+
+
 DUMP_DIR = INGEST_DIR / "_cache" / "dumps"
 
 
@@ -59,18 +117,6 @@ def pdf_page_count(path: Path) -> int | None:
         return None
 
 
-def split_junk(
-    chunks: list[ParsedChunk], embedder: E5Embedder
-) -> tuple[list[tuple[ParsedChunk, int]], list[tuple[ParsedChunk, int]]]:
-    """Partition chunks into (kept, dropped) with their token counts."""
-    kept: list[tuple[ParsedChunk, int]] = []
-    dropped: list[tuple[ParsedChunk, int]] = []
-    for chunk in chunks:
-        n_tokens = embedder.count_tokens(chunk.text)
-        (kept if n_tokens >= MIN_CHUNK_TOKENS else dropped).append((chunk, n_tokens))
-    return kept, dropped
-
-
 def embed_chunks(embedder: E5Embedder, texts: list[str]) -> np.ndarray:
     """Batched so a long document does not build one huge ONNX input tensor."""
     batches = []
@@ -84,7 +130,7 @@ def embed_chunks(embedder: E5Embedder, texts: list[str]) -> np.ndarray:
 def write_dump(
     item: ApprovedItem,
     kept: list[tuple[ParsedChunk, int]],
-    dropped: list[tuple[ParsedChunk, int]],
+    dropped: list[tuple[ParsedChunk, int, str]],
 ) -> Path:
     """Write every chunk to a text file so a human can actually read what
     Docling extracted -- especially tables, which is the one thing the summary
@@ -93,12 +139,15 @@ def write_dump(
     # The OCR mode is in the filename so an ocr-on and an ocr-off run can sit
     # side by side and be diffed, instead of one silently overwriting the other.
     mode = "ocr-on" if settings.docling_ocr else "ocr-off"
-    path = DUMP_DIR / f"{item.handle.replace('/', '-')}_chunks_{mode}.txt"
+    path = (
+        DUMP_DIR
+        / f"{item.handle.replace('/', '-')}_chunks_{mode}_{settings.docling_backend}.txt"
+    )
 
     with path.open("w", encoding="utf-8") as out:
         out.write(f"{item.handle} -- {item.title}\n")
         out.write(f"{item.item_url}\n")
-        out.write(f"kept {len(kept)} chunks, dropped {len(dropped)} as junk\n")
+        out.write(f"kept {len(kept)} chunks, dropped {len(dropped)}\n")
         out.write("=" * 78 + "\n\n")
 
         for i, (chunk, n_tokens) in enumerate(kept):
@@ -110,9 +159,10 @@ def write_dump(
             out.write(chunk.text + "\n\n")
 
         if dropped:
-            out.write("=" * 78 + "\nDROPPED AS JUNK\n" + "=" * 78 + "\n")
-            for chunk, n_tokens in dropped:
-                out.write(f"[page {chunk.page_no}, {n_tokens} tokens] {chunk.text!r}\n")
+            out.write("=" * 78 + "\nDROPPED\n" + "=" * 78 + "\n")
+            for chunk, n_tokens, reason in dropped:
+                out.write(f"[page {chunk.page_no}, {n_tokens} tokens] {reason}\n")
+                out.write(f"    {chunk.text!r}\n\n")
 
     return path
 
@@ -140,15 +190,15 @@ async def ingest_item(
         print("  ! produced 0 chunks -- skipping")
         return
 
-    kept, dropped = split_junk(all_chunks, embedder)
+    kept, dropped = screen_chunks(all_chunks, embedder)
     if dropped:
-        print(f"  dropped {len(dropped)} junk chunk(s) (< {MIN_CHUNK_TOKENS} tokens):")
-        for chunk, n_tokens in dropped:
-            preview = " ".join(chunk.text.split())[:60]
-            print(f"    - page {chunk.page_no}, {n_tokens} tok: {preview!r}")
+        print(f"  dropped {len(dropped)} chunk(s):")
+        for chunk, n_tokens, reason in dropped:
+            preview = " ".join(chunk.text.split())[:55]
+            print(f"    - page {chunk.page_no}, {n_tokens} tok [{reason}]: {preview!r}")
 
     if not kept:
-        print("  ! every chunk was junk -- skipping")
+        print("  ! every chunk was screened out -- skipping")
         return
 
     chunks = [c for c, _ in kept]
@@ -207,11 +257,14 @@ async def main_async(args: argparse.Namespace) -> int:
 
     print(f"{len(items)} approved item(s) to ingest")
 
-    print(f"Docling OCR: {'ON' if settings.docling_ocr else 'OFF'}")
+    print(
+        f"Docling OCR: {'ON' if settings.docling_ocr else 'OFF'} | "
+        f"backend: {settings.docling_backend}"
+    )
 
     embedder = E5Embedder(cache_dir=settings.embed_cache_dir)
     chunker = build_chunker(embedder.tokenizer, settings.chunk_max_tokens)
-    converter = build_converter(settings.docling_ocr)
+    converter = build_converter(settings.docling_ocr, settings.docling_backend)
 
     conn = None
     if not args.dry_run:

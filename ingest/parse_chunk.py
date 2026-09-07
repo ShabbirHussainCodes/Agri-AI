@@ -14,6 +14,8 @@ and needs Shabbir's sign-off before it is committed.
 from dataclasses import dataclass
 from pathlib import Path
 
+from docling.backend.docling_parse_v4_backend import DoclingParseV4DocumentBackend
+from docling.backend.pypdfium2_backend import PyPdfiumDocumentBackend
 from docling.chunking import HybridChunker
 from docling.datamodel.base_models import InputFormat
 from docling.datamodel.pipeline_options import PdfPipelineOptions
@@ -41,7 +43,17 @@ class ParsedChunk:
     section_path: str | None
 
 
-def build_converter(do_ocr: bool) -> DocumentConverter:
+# name -> backend class. "default" is absent on purpose: leaving `backend`
+# unset lets PdfFormatOption keep its own default (currently
+# ThreadedDoclingParseDocumentBackend), so we never pin a default that a
+# Docling upgrade has since moved on from.
+BACKENDS = {
+    "pypdfium": PyPdfiumDocumentBackend,
+    "parse-v4": DoclingParseV4DocumentBackend,
+}
+
+
+def build_converter(do_ocr: bool, backend: str = "default") -> DocumentConverter:
     """One converter, reused for every document -- it loads layout and table
     models on construction, so building it per PDF wastes that work.
 
@@ -49,15 +61,26 @@ def build_converter(do_ocr: bool) -> DocumentConverter:
     competes with the embedded text layer instead of helping it (see the note
     on `docling_ocr` in config.py). Table structure stays ON either way --
     that is what gives us the crop calendar and the treatment tables at all.
+
+    backend selects the text-extraction engine; see `docling_backend` in
+    config.py for why that is a knob at all.
     """
+    if backend != "default" and backend not in BACKENDS:
+        raise ValueError(
+            f"unknown docling backend {backend!r}; "
+            f"expected 'default' or one of {sorted(BACKENDS)}"
+        )
+
     pipeline_options = PdfPipelineOptions()
     pipeline_options.do_ocr = do_ocr
     pipeline_options.do_table_structure = True
 
+    kwargs = {"pipeline_options": pipeline_options}
+    if backend in BACKENDS:
+        kwargs["backend"] = BACKENDS[backend]
+
     return DocumentConverter(
-        format_options={
-            InputFormat.PDF: PdfFormatOption(pipeline_options=pipeline_options)
-        }
+        format_options={InputFormat.PDF: PdfFormatOption(**kwargs)}
     )
 
 
