@@ -4,7 +4,12 @@ One Settings object, built once at import time, used everywhere else in
 the app instead of calling os.environ directly — keeps config in one
 place and gives us validation for free (Pydantic).
 """
+from pathlib import Path
+
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+# apps/api/app/core/config.py -> repo root is four levels up.
+REPO_ROOT = Path(__file__).resolve().parents[4]
 
 
 class Settings(BaseSettings):
@@ -32,6 +37,13 @@ class Settings(BaseSettings):
     groq_api_key: str
     groq_chat_model: str = "openai/gpt-oss-120b"
     groq_chat_model_fast: str = "openai/gpt-oss-20b"
+
+    # Phase 4: local ONNX query embedder (app/retrieval/embedder.py).
+    # Defaults to the SAME cache the ingest job already downloaded the
+    # ~470 MB model into (ingest/config.py, gitignored), so local dev does
+    # not download it twice. A deployed API host sets AGRIAI_EMBED_CACHE_DIR
+    # to its own writable path.
+    embed_cache_dir: Path = REPO_ROOT / "ingest" / "_cache" / "models"
 
 
 settings = Settings()
