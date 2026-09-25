@@ -1,32 +1,53 @@
 """AdvisoryResponse: the agent's one and only output shape
 (docs/api/api-contracts.md). Separates what came from our own DB
 (structured_data), a live external API (live_data), retrieved documents
-(retrieved_evidence -- always [] until Phase 3-4's RAG exists), the
-model's own inference (model_inference), and the final recommendation --
-so it's always clear which part of an answer is a fact vs a model guess
-(CLAUDE.md rule #3).
+(retrieved_evidence), the model's own inference (model_inference), and the
+final recommendation -- so it's always clear which part of an answer is a
+fact vs a model guess (CLAUDE.md rule #3).
 
-structured_data/live_data are typed to the *real* tool output shapes
-(FarmContextData, WeatherData), not a generic dict. This is deliberate:
-Groq's strict JSON-schema mode (ADR-0004: "Strict JSON (Turn B) on
-gpt-oss-120b") needs the full shape known in advance for constrained
-decoding -- an open-ended dict can't be constrained that way. Tying
-these fields to the tool schemas also means the final answer schema and
-the tools that feed it can never silently drift apart.
+TWO SHAPES SINCE PHASE 4 (ADR-0013, which supersedes ADR-0006's "one
+Pydantic model = LLM schema + response" clause):
+
+  DraftAdvisory     -- what the MODEL writes in Turn B: its reasoning, its
+                       recommendation, and bare citations {passage, quote}.
+  AdvisoryResponse  -- what the FARMER receives, assembled by CODE
+                       (app/agent/finalize.py) from the draft plus data the
+                       model is never allowed to author: the farm record,
+                       the weather result, and every piece of source
+                       metadata (title, year, page, licence, URL).
+
+Why split: with one shared model, the LLM wrote retrieved_evidence
+(including source names and page numbers) and structured_data itself, and
+code could only check them afterwards. With the split, provenance cannot be
+fabricated because the model never produces it.
+
+structured_data/live_data stay typed to the real tool output shapes
+(FarmContextData, WeatherData), not a generic dict.
 """
-from pydantic import BaseModel, ConfigDict
+from typing import Literal
+from uuid import UUID
+
+from pydantic import BaseModel, ConfigDict, Field
 
 from app.agent.tools.farm_context import FarmContextData
 from app.agent.tools.weather import WeatherData
+from app.retrieval.citations import Citation
 
 
 class EvidenceItem(BaseModel):
+    """One retrieved passage that a VALIDATED citation points at. Every field
+    except `quote` is copied by code from the chunk/document row."""
+
     model_config = ConfigDict(extra="forbid")
 
-    source_org: str
+    chunk_id: UUID
+    source_org: str | None
     doc_title: str
-    published_year: int
+    doc_type: str
+    published_year: int | None = None
     page: int | None = None
+    licence: str
+    url: str
     quote: str
 
 
@@ -41,4 +62,33 @@ class AdvisoryResponse(BaseModel):
     confidence: float | None = None
     abstained: bool
     abstained_because: str | None = None
+    # Set by code, never by the model: True when every citation the model
+    # made was checked and verified against the passage it named.
     citations_valid: bool
+
+
+EvidenceBasis = Literal["retrieved_passages", "farm_and_weather_data", "none"]
+
+
+class DraftAdvisory(BaseModel):
+    """Turn B's strict output schema (Groq strict JSON mode). Kept small on
+    purpose: fewer fields the model controls, fewer tokens, less to go wrong."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    evidence_basis: EvidenceBasis = Field(
+        description=(
+            "What the answer rests on: 'retrieved_passages' if it uses anything from "
+            "the retrieved passages (then citations are required), "
+            "'farm_and_weather_data' if it uses only this farm's record and weather, "
+            "'none' if nothing provided supports an answer."
+        )
+    )
+    citations: list[Citation] = Field(
+        description="One entry per claim taken from a passage: its [n] number and an exact quote."
+    )
+    model_inference: str
+    recommendation: str
+    confidence: float | None
+    abstained: bool
+    abstained_because: str | None

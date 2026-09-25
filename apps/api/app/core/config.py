@@ -45,5 +45,13 @@ class Settings(BaseSettings):
     # to its own writable path.
     embed_cache_dir: Path = REPO_ROOT / "ingest" / "_cache" / "models"
 
+    # How many fused chunks Turn B sees. The retrieval baseline
+    # (evals/results/retrieval-2026-09-25.md) puts the gold page in the top 5
+    # for 61% of questions and the top 20 for 82%; every extra passage costs
+    # ~500 tokens against Groq's free-tier limits and gives the model more to
+    # get distracted by. 6 is a starting point to be MEASURED by the full
+    # eval, not a tuned value.
+    rag_context_chunks: int = 6
+
 
 settings = Settings()

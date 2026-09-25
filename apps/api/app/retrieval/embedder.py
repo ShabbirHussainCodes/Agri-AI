@@ -43,12 +43,29 @@ class QueryEmbedder:
         from transformers import AutoTokenizer
 
         cache_dir.mkdir(parents=True, exist_ok=True)
-        model_path = hf_hub_download(
-            repo_id=MODEL_REPO, filename=ONNX_FILENAME, cache_dir=str(cache_dir)
-        )
+
+        # Cache first, network only if the model is not cached yet. Without
+        # local_files_only, huggingface_hub makes an HTTP request to check for
+        # updates on every process start -- a needless network dependency in
+        # production, and in cassette tests (test_ask.py) an unrecorded
+        # request that makes replay fail.
+        def load(local_only: bool):
+            path = hf_hub_download(
+                repo_id=MODEL_REPO, filename=ONNX_FILENAME, cache_dir=str(cache_dir),
+                local_files_only=local_only,
+            )
+            tok = AutoTokenizer.from_pretrained(
+                MODEL_REPO, cache_dir=str(cache_dir), local_files_only=local_only
+            )
+            return path, tok
+
+        try:
+            model_path, self.tokenizer = load(local_only=True)
+        except Exception:  # noqa: BLE001 -- not cached yet: download once
+            model_path, self.tokenizer = load(local_only=False)
+
         self.session = ort.InferenceSession(model_path, providers=["CPUExecutionProvider"])
         self._input_names = {i.name for i in self.session.get_inputs()}
-        self.tokenizer = AutoTokenizer.from_pretrained(MODEL_REPO, cache_dir=str(cache_dir))
         self.max_length = max_length
 
     def embed_query(self, text: str) -> np.ndarray:

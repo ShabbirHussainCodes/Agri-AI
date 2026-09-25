@@ -11,10 +11,11 @@ Format: `docs/decisions/ADR-000-template.md`.
 | [0003](ADR-0003-rag-pgvector-supabase.md) | RAG on pgvector inside Supabase | Accepted |
 | [0004](ADR-0004-vision-provider-and-llm-routing.md) | Vision = Groq qwen; chat = gpt-oss; Gemini free tier rejected | Accepted |
 | [0005](ADR-0005-deterministic-agrochemical-safety.md) | Deterministic agrochemical safety layer | Accepted |
-| [0006](ADR-0006-evidence-typed-response.md) | Evidence-typed response model | Accepted |
+| [0006](ADR-0006-evidence-typed-response.md) | Evidence-typed response model | Accepted (partly superseded by 0013) |
 | [0007](ADR-0007-multilingual-retrieval.md) | Multilingual retrieval without query translation; evaluation-first | Accepted |
 | [0008](ADR-0008-storage-supabase-behind-interface.md) | Supabase Storage behind a StorageProvider interface | Accepted |
 | [0009](ADR-0009-supabase-project-isolation.md) | Separate Supabase project; BillingMars isolation | Accepted |
 | [0010](ADR-0010-language-scope-hindi-english.md) | MVP language scope: Hindi + English only | Accepted |
 | [0011](ADR-0011-python-3-14-dev-runtime.md) | Python 3.14 (not 3.12) for the AI backend | Accepted |
 | [0012](ADR-0012-corpus-domain-sanity-validation.md) | Licence is not enough: corpus content needs domain sanity validation | Accepted |
+| [0013](ADR-0013-evidence-based-abstention.md) | Abstention from validated evidence, not a similarity floor; code authors provenance | Accepted |

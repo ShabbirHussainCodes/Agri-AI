@@ -11,8 +11,8 @@ Docling parse (laptop) → recursive chunking (~500 tokens, 15% overlap)
   → Supabase Postgres: pgvector HNSW on vector(384) + tsvector GIN
   → metadata filter from farm profile (with widening cascade)
   → hybrid dense + full-text, fused with RRF (k=50)
-  → top-20 → confidence floor (abstain if below) → generate with numbered citations
-  → code-level citation validation
+  → top-k (6) → generate with numbered passages + verbatim-quote citations
+  → code-level citation validation → code decides abstention (ADR-0013)
 ```
 
 **v2 (quality):** + contextual retrieval at ingest · bge-m3 embedder (1024-d) · bge-reranker-v2-m3 on top-20 · domain-grounded query rewriting · selective routing. Record the Ragas delta vs the v1 baseline.
@@ -39,7 +39,7 @@ Recursive/fixed chunking (semantic chunking rejected — cost not justified). v2
 ## 6. Grounding, citations, abstention
 
 - Numbered chunks `[1]…[n]`; every factual sentence carries a marker; code validates each cited index exists and drops/flags uncited factual sentences.
-- Confidence floor (calibrated on the eval set) abstains before the LLM when retrieval is weak.
+- ~~Confidence floor (calibrated on the eval set) abstains before the LLM when retrieval is weak.~~ **Measured and dropped (ADR-0013, 2026-09-25):** e5 top similarities for answerable (0.755–0.906) and out-of-corpus (0.764–0.856) questions overlap, so no threshold separates them. Abstention is decided after generation, in code, from validated citations. The widening cascade (§4) is implemented but disabled for v1 for the same reason.
 - Safety-critical facts (dose, chemical, banned status) abstain unless a verified citation/table entry exists.
 
 ## 7. Corpus & licensing (tiered)

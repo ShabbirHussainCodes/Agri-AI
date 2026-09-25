@@ -1,6 +1,6 @@
 # ADR-0006: Evidence-typed response model
 
-- **Status:** Accepted
+- **Status:** Accepted — partly superseded by [ADR-0013](ADR-0013-evidence-based-abstention.md) (2026-09-25): the LLM now writes a smaller `DraftAdvisory` and code builds `AdvisoryResponse`; the evidence-typed response itself is unchanged.
 - **Date:** 2026-08-27
 - **Deciders:** Shabbir (+ Claude)
 
