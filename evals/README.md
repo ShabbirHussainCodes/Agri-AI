@@ -54,9 +54,20 @@ Grow toward 80–120 as the corpus grows. Two documents cannot support more answ
 
 Follow-up from ADR-0012: add agronomic sanity assertions (rabi/kharif expectations for major Indian crops) so that class of source error becomes measurable rather than dependent on someone noticing.
 
+## Runners
+
+| script | what it measures | needs |
+|---|---|---|
+| `run_retrieval_eval.py` | retrieval only: recall@5/@20 and MRR of the gold page, dense vs lexical vs hybrid; top-similarity distributions | API venv, local stack. No LLM. |
+| `run_agent_eval.py` | the whole `/ask` path with the real model: behaviour accuracy per bucket, who abstained (model / code / dose guard), dose statements in the model's draft vs reaching the farmer, injection payloads in output, citation validity, gold-page citation | API venv, local stack, Groq key. ~2 Groq calls per question. Resumable (`--resume`). |
+| `run_ragas_eval.py` | LLM-judged Ragas 0.4.3: Context Precision / Context Recall (retrieval) and Faithfulness / Answer Relevancy (answers) | **separate** venv `evals/.venv-ragas` on Python 3.13 (`requirements-ragas.txt`), Groq key. Reads the `*-ragas-input.jsonl` the agent eval writes; judge calls are disk-cached. |
+
+Order: retrieval eval → agent eval → Ragas. Summaries land in `results/` (committed); full per-question detail in `_runs/` (gitignored).
+
+`tests/` holds pure unit tests for the deterministic scoring (`pytest evals/tests`).
+
 ## Still to build
 
-- `ragas_run.py` — Context Precision/Recall, Faithfulness, Response Relevancy. Baseline recorded in Phase 4.
 - `promptfoo.yaml` — prompt regression in CI.
 
 See `docs/testing/testing-strategy.md` and `docs/rag/rag-design.md` §9.

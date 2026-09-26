@@ -1,0 +1,25 @@
+# Phase 4 step 6b -- Ragas judge environment. SEPARATE venv (evals/.venv-ragas),
+# on Python 3.13, never installed into the API venv:
+#   - Ragas pulls in langchain, datasets, scikit-network, ... none of which the
+#     API needs at runtime; keeping them out keeps the API image small.
+#   - scikit-network publishes no Python 3.14 wheel (checked on PyPI 2026-09-26),
+#     so on the API's 3.14 it would have to compile from source. On 3.13 every
+#     package below resolves to a prebuilt macOS arm64 wheel (checked with
+#     pip download --only-binary=:all: --python-version 3.13).
+ragas==0.4.3
+# Without this floor pip's resolver backtracked to instructor 1.3.2 (mid-2024);
+# 1.11+ resolves cleanly alongside ragas 0.4.3.
+instructor>=1.11
+# ragas 0.4.3 imports langchain_community.chat_models.vertexai at import
+# time; langchain-community 0.4.2 removed that module, so the latest version
+# breaks `import ragas` (reproduced 2026-09-26). 0.4.1 still has it.
+langchain-community==0.4.1
+
+# AnswerRelevancy needs embeddings. We reuse AgriAI's own e5 query embedder
+# (apps/api/app/retrieval/embedder.py) with the same pins as the API, rather
+# than pulling sentence-transformers + torch just for the judge.
+onnxruntime==1.29.0
+transformers==5.16.1
+tokenizers==0.23.2
+huggingface_hub==1.30.0
+numpy==2.5.3

@@ -5,7 +5,8 @@
 *.pem
 *.key
 service-account*.json
-AGRIAI_*  # accidental key dumps
+# accidental key dumps
+AGRIAI_*
 
 # ---- Python ----
 __pycache__/
@@ -37,14 +38,16 @@ ingest/_cache/
 *.onnx
 *.gguf
 models/
-data/agrochemical/_raw/       # raw source PDFs; only the parsed, version-stamped table is committed
+# raw source PDFs; only the parsed, version-stamped table is committed
+data/agrochemical/_raw/
 
 # ---- Local dev ----
 .DS_Store
 Thumbs.db
 *.local
 docker-compose.override.yml
-.agriai_write_test            # stray probe file, safe to delete
+# stray probe file, safe to delete
+.agriai_write_test
 
 # ---- IDE ----
 .vscode/*
@@ -54,6 +57,8 @@ docker-compose.override.yml
 
 # ---- Test / eval artifacts ----
 evals/_runs/
+# Ragas judge venv (evals/requirements-ragas.txt)
+evals/.venv-ragas/
 tests/cassettes/*.tmp
 .langfuse/
 agriai-phase0.tgz
