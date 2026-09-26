@@ -24,10 +24,16 @@ Which rows get which metric:
     no claims to be faithful to; its quality is the deterministic abstention
     accuracy in agent-<date>.md.
 
-JUDGE CAVEAT (written into the results file too): the judge is an LLM, by
-default the same Groq model that generated the answers, so scores can be
-biased towards its own phrasing. Treat them as a baseline to compare later
-runs against, not as absolute truth.
+JUDGE CHOICE (decided with Shabbir, 2026-09-26): `openai/gpt-oss-20b`, NOT
+the 120b model that writes the answers. Two reasons:
+  1. Budget. Groq's free tier gives gpt-oss-120b 200,000 tokens/day, which
+     the agent eval alone nearly exhausts (~4.5-5k tokens per question). The
+     429 message names the limit per model, so 20b has its own budget.
+  2. Bias. A judge grading its own model's answers tends to favour its own
+     phrasing; a different model reduces (does not remove) that.
+Cost of the choice: 20b is a weaker judge. The caveat is written into the
+results file. Treat scores as a baseline to compare later runs against, not
+as absolute truth.
 
 Runs in its own venv (evals/requirements-ragas.txt), from the repo root:
     python evals/run_ragas_eval.py evals/_runs/<stamp>-ragas-input.jsonl --limit 2
@@ -52,7 +58,7 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO_ROOT / "apps" / "api"))
 
 GROQ_OPENAI_BASE_URL = "https://api.groq.com/openai/v1"
-DEFAULT_JUDGE = "openai/gpt-oss-120b"
+DEFAULT_JUDGE = "openai/gpt-oss-20b"  # see JUDGE CHOICE in the module docstring
 
 
 def _groq_key() -> str:
@@ -180,8 +186,9 @@ async def main() -> int:
         f"({len(eligible)} answer-expected questions with a reference answer). "
         "Context metrics cover every one of them; answer metrics cover only those the system actually answered.",
         "",
-        "> **Judge caveat:** the judge is an LLM, by default the same model that wrote the answers, so scores may "
-        "favour its own phrasing. This is a baseline for comparing later runs, not an absolute quality measure.",
+        "> **Judge caveat:** the judge is an LLM (by default `gpt-oss-20b`, a smaller model than the `gpt-oss-120b` "
+        "that wrote the answers — chosen for Groq free-tier budget and to avoid self-grading). Scores are a baseline "
+        "for comparing later runs, not an absolute quality measure.",
         "",
         "| metric | mean | n scored | judge errors |",
         "|---|---:|---:|---:|",
