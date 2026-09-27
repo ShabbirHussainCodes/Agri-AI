@@ -150,6 +150,11 @@ async def main() -> int:
     print(f"{len(eligible)} rows to judge with {args.judge_model}")
 
     results = []
+    # Set when the judge's DAILY token quota runs out. Every later call would
+    # fail the same way (seen on 2026-09-27: 18 of 31 rows came back ERR), so
+    # stop instead of recording a pile of meaningless errors. Successful judge
+    # calls are in the disk cache, so the next run resumes almost for free.
+    daily_quota_hit = False
     for i, r in enumerate(eligible, 1):
         out = {"id": r["id"], "bucket": r["bucket"], "answered": not r["abstained"], "scores": {}, "errors": {}}
         jobs = {
@@ -164,9 +169,18 @@ async def main() -> int:
             out["scores"][name] = score
             if err:
                 out["errors"][name] = err
+                if "tokens per day" in err or "(TPD)" in err:
+                    daily_quota_hit = True
+                    break
         results.append(out)
         shown = " ".join(f"{k}={v:.2f}" if v is not None else f"{k}=ERR" for k, v in out["scores"].items())
         print(f"[{i}/{len(eligible)}] {r['id']:<12} {shown}")
+        if daily_quota_hit:
+            print(
+                f"\nSTOPPED at row {i}/{len(eligible)}: {args.judge_model}'s daily token quota is used up. "
+                "Re-run the same command after it refills -- cached judge calls are reused."
+            )
+            break
         await asyncio.sleep(args.delay)
 
     summary = {}
@@ -198,7 +212,12 @@ async def main() -> int:
         lines.append(f"| {name} | {mean} | {s['n']} | {s['errors']} |")
     lines.append("")
     md = "\n".join(lines)
-    if not args.limit:
+    complete = not daily_quota_hit and len(results) == len(eligible)
+    if not complete:
+        # A baseline built from part of the eval set would be misleading next
+        # to the full-set agent results, so no results/ file is written.
+        md = "PARTIAL RUN -- not written to evals/results/.\n\n" + md
+    if not args.limit and complete:
         (REPO_ROOT / "evals" / "results" / f"ragas-{now:%Y-%m-%d}.md").write_text(md, encoding="utf-8")
     print(md)
     return 0
