@@ -117,14 +117,27 @@ Never write absolute competitive claims such as "all existing systems are statel
 
 ## 10. Current status
 
-**Phase 3 — COMPLETED (corpus + eval set).** `ingest/` runs on the laptop: Docling parse → structure-aware chunking (every chunk keeps `page_no` and `section_path`) → local ONNX `multilingual-e5-small` embeddings → `public.documents` / `public.chunks` (HNSW cosine + generated `tsvector`, read-only for `authenticated`). Embeddings are built from heading-contextualised text while `content` stays raw, so a citation quotes the real passage. **113 chunks** from two item-level-verified CC-BY-4.0 CGSpace documents are in the local stack; 35 chunks were excluded or screened out, each with a printed reason. `evals/questions.jsonl` holds **55 gold questions** grounded only in what was actually ingested.
+**Phase 4 — COMPLETED (RAG v1, tag `v0.4-rag-baseline`).** `POST /farms/{id}/ask` now retrieves before it answers. Hybrid retrieval (dense `multilingual-e5-small` cosine + lexical `tsvector`, fused with RRF k=50 in Python) runs over the 113-chunk corpus. A two-turn agent follows: Turn A calls tools, Turn B writes strict `DraftAdvisory` JSON. `app/agent/finalize.py` then builds the `AdvisoryResponse` in code. Every citation must quote its passage verbatim, provenance is code-authored, and abstention is decided from validated evidence (ADR-0013 — the similarity floor was measured and dropped). An interim dose guard (`app/safety/interim_dose_guard.py`) scrubs dose and waiting-period statements from anything that reaches the farmer until Phase 6 exists.
 
-Two things from this phase constrain everything after it:
+Recorded baselines. Later phases must beat these, and Phase 10 reports its delta against them:
+
+- **Retrieval** (`evals/results/retrieval-2026-09-25.md`, 38 questions with a gold page): hybrid recall@5 0.61, recall@20 0.82, MRR 0.49.
+- **Agent end-to-end** (`evals/results/agent-2026-09-27.md`, all 55 questions, deterministic scoring):
+  - behaviour accuracy 95%
+  - dose statements reaching the farmer: 0
+  - injection payload in the output: 0/8
+  - citations validated on 100% of answers
+  - gold page cited on 66% of answers
+- **Ragas** (`evals/results/ragas-2026-09-29.md`, 31 answer-expected questions, judge `gpt-oss-20b`): context precision 0.69, context recall 0.87, faithfulness 0.94, answer relevancy 0.92, with 3 judge errors across all metrics. A smaller model judged these scores, so they are for comparing runs, not an absolute quality measure.
+
+Read those numbers together. Citations validate on 100% of answers, yet faithfulness drops below 1 on multi-hop and Hinglish answers. A verbatim quote proves the passage exists, not that it supports the claim built on it. The same gap sits behind unans-001 (§11).
+
+Two things from Phase 3 still constrain everything:
 
 - **ADR-0012.** The Mandla crop calendar was extracted correctly and verified cell by cell against the PDF, then excluded anyway because the source's own values were unsafe for farmer-facing advice. Licence and provenance qualify a *source* for use, not its *content* for advice — safety-relevant agricultural claims need a domain sanity check too. Source content in the corpus is **not** AgriAI-verified knowledge, and the two must never be conflated in a response, in docs, or in demo material.
-- **The corpus carries real application rates** (`B. subtilis @ 4 g/L`, `Tilt® 25% EC @ 1 mL/L`, and others in 10 chunks) as a research trial's protocol, not label recommendations. Rule 1 permits dosages only from the deterministic agrochemical lookup, and that lookup is Phase 6. **Nothing from this corpus goes in front of a farmer until `app/safety/` exists.** Until then the only guard is the `dose_safety_abstention` eval bucket, which Phase 4 must measure.
+- **The corpus carries real application rates** (`B. subtilis @ 4 g/L`, `Tilt® 25% EC @ 1 mL/L`, and others in 10 chunks) as a research trial's protocol, not label recommendations. Rule 1 permits dosages only from the deterministic agrochemical lookup, and that lookup is Phase 6. Until then the only guards are the interim dose guard (a regex scrub, not a lookup) and the `dose_safety_abstention` eval bucket. In the Phase 4 run the model abstained on 10/10 of that bucket, and the guard caught the one dose the model echoed back from a farmer's question. **Nothing from this corpus goes in front of a real farmer until the Phase 6 safety layer replaces the interim guard.**
 
-See `docs/roadmap/roadmap.md` for the phase tracker. Phase 4 (RAG v1) is next; its first job is a recorded Ragas baseline against this eval set.
+See `docs/roadmap/roadmap.md` for the phase tracker. Next come the Phase 4 follow-ups in §11 (two safety fixes, then the token-budget measurement), then Phase 5 (weather + irrigation).
 
 ## 11. Known open items / things to verify before they harden
 
@@ -138,3 +151,9 @@ See `docs/roadmap/roadmap.md` for the phase tracker. Phase 4 (RAG v1) is next; i
 - Docling's reading order on two-column PDFs drops end-of-line characters and, near large tables, splices prose into table rows. Measured across both backends; pypdfium is better but not clean. Visibly damaged chunks are screened out, but pypdfium also reported out-of-page bbox geometry on pages 9–12 of `10568/180732`, so the damage zone may be wider than what the screen catches. 14 chunks from those pages are in the corpus with no visible damage — status unknown, to be measured by the eval set.
 - The corpus is English-only. Hindi retrieval is untested against a Hindi *source*; the Hindi eval questions test Hindi query → English passage (ADR-0007), which is a different claim.
 - Domain sanity validation (ADR-0012) is currently one person reading, not a test. Adding agronomic sanity assertions to the eval set is the follow-up.
+- **unans-001 (dangerous, fix first):** real but irrelevant quotes pass citation validation. The system answered a wheat-sowing question with "June–Sept"; wheat is a rabi crop. ADR-0013 checks that a quote exists, not that it is relevant to the question or crop. Needs a relevance / crop-mismatch safeguard, measured against the baseline.
+- **inj-003 bug:** when the model abstains, the response can carry an *empty* recommendation. Fall back to the standard abstain message.
+- **en-fact-001:** a study finding was framed as a farm recommendation. No current metric catches this.
+- **Retrieval ranking:** equal-weight RRF buries a single leg's #1 hit (en-fact-008). Ragas context precision (0.69) and Hinglish precision (0.25–0.45) point the same way. Context recall is 0 on en-fact-005, tab-004, inj-001 and inj-003. The fix belongs in retrieval tuning, measured as a delta.
+- **Groq free tier is the binding constraint:** each model allows 30 RPM / 1K RPD / 8K TPM / 200K TPD, per the console on 2026-09-27. One `/ask` costs ~4.5–5k tokens, so the whole app gets roughly 40 questions a day. A full Ragas run needs about two days of `gpt-oss-20b` quota. The `gpt-oss-20b` judge also fails with `json_validate_failed` on large multi-passage prompts; those failures are recorded as judge errors. Measure the effect of cutting the context budget from 6 to 4 passages first. A multi-provider fallback is **under discussion, not approved, no ADR**: every candidate provider needs a data-use check, and a fallback may never bypass RAG, citations, abstention or the safety checks.
+- The Groq console lists `qwen/qwen3.8-27b`, while ADR-0004 names `qwen/qwen3.6-27b`. Verify the current vision model name before Phase 7.

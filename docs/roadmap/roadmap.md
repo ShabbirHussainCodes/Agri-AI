@@ -10,7 +10,19 @@
 
 ## Current position
 
-**Phase 3 — COMPLETED.** Licence register with two verified CC-BY-4.0 sources; Docling ingest pipeline (parse → chunk → contextualised local ONNX embeddings → Postgres) with page/section provenance on every chunk; 113 chunks in the local stack; 55 gold questions committed. One source table was excluded on domain-safety grounds (ADR-0012). Phase 4 (RAG v1) is next — its first job is to record a Ragas baseline against this eval set.
+**Phase 4 — COMPLETED.** RAG v1 is live behind `POST /farms/{id}/ask`. Hybrid retrieval (dense + lexical, RRF k=50) feeds a two-turn agent. Citations are validated in code against a verbatim quote, abstention is decided from that validated evidence (ADR-0013), and an interim dose guard runs last. Three baselines are recorded under `evals/results/`:
+
+- **Retrieval:** hybrid recall@5 0.61, recall@20 0.82.
+- **Agent (55 questions):** behaviour accuracy 95%; 0 doses reached the farmer; 0/8 injection payloads in the output.
+- **Ragas (31 questions, `gpt-oss-20b` judge):** context precision 0.69, context recall 0.87, faithfulness 0.94, answer relevancy 0.92.
+
+Before Phase 5, three follow-ups run against these numbers:
+
+1. The unans-001 relevance / crop-mismatch safeguard.
+2. The fix for an empty recommendation when the model abstains.
+3. The token-budget measurement (6 → 4 passages).
+
+A multi-provider LLM fallback is under discussion and not yet approved.
 
 ---
 
@@ -30,7 +42,7 @@
 | 1 | Data foundation | DB schema + migrations + auth + RLS + onboarding + activity logging | pytest on models; create a farm end-to-end | `v0.1-foundation` | COMPLETED |
 | 2 | Provider layer + first agent | Provider interfaces, hand-rolled tool loop, 2 read tools, evidence-typed response | Cassette-backed tests; one real question answered | `v0.2-agent` | COMPLETED |
 | 3 | Corpus + eval set | Licence register, Docling ingest, eval questions written first | Chunks in DB with full metadata; eval JSONL committed | `v0.3-corpus-evalset` | COMPLETED |
-| 4 | RAG v1 | Hybrid retrieval, RRF, citation validation, abstention floor | **Ragas baseline numbers recorded** | `v0.4-rag-baseline` | PLANNED |
+| 4 | RAG v1 | Hybrid retrieval, RRF, citation validation, evidence-based abstention (similarity floor measured and dropped, ADR-0013), interim dose guard | **Ragas baseline numbers recorded** | `v0.4-rag-baseline` | COMPLETED |
 | 5 | Weather + irrigation | Open-Meteo tool, ET₀ balance in code, LLM explains | Deterministic tests on the water-balance math | `v0.5-weather` | PLANNED |
 | 6 | Safety layer + agrochemical data | Label table, denylist, dose lookup tool, schema enforcement | Adversarial tests: LLM cannot invent a dose | `v0.6-safety` | PLANNED |
 | 7 | Image diagnosis | Quality gate, ONNX classifier, VLM reasoning, OOD, abstention UI | **Cross-domain accuracy measured & recorded in repo** | `v0.7-vision` | PLANNED |
@@ -71,3 +83,15 @@
 - `2026-08-30` — Phase 1 completed. Supabase CLI local stack; 5 core migrations (profiles/farms/crops/farm_crops/activities) with RLS Option B (real JWT claims, `auth.uid()`-enforced policies); FastAPI skeleton with JWKS/ES256 verification; automated RLS proof (pytest); real `agriai-db` project created in its own Supabase org (`ap-south-1`), migrations applied, RLS + write-isolation proven end-to-end against the live project. ADR-0011 (Python 3.14 dev runtime) added, superseding ADR-0001's version clause.
 - `2026-09-03` — Phase 2 completed. Groq provider (tool calling + strict-schema structured output) behind `LLMProvider`; hand-rolled agent loop with `get_farm_context` called deterministically (not an LLM-optional tool -- a bug fix, see `app/agent/loop.py`'s module docstring for the Turn A/B prompt-leak it corrected) and `get_weather` as the one LLM-gated tool; `POST /farms/{id}/ask` returns an evidence-typed `AdvisoryResponse`. Cassette-backed test (`pytest-recording`) verifies the real Groq + Open-Meteo flow so CI never needs a live `GROQ_API_KEY`; `vcr_config` (`tests/conftest.py`) redacts auth headers and excludes local/internal hosts from the cassette entirely.
 - `2026-09-08` — Phase 3 completed. Corpus licence register with two item-level-verified CC-BY-4.0 sources (CGSpace); Docling ingest pipeline with structure-aware chunking, so every chunk carries `page_no` and `section_path`; embeddings from a local ONNX `multilingual-e5-small`, built from heading-contextualised text while the stored content stays raw so citations quote the real passage; `documents`/`chunks` tables with an HNSW cosine index and a generated `tsvector`, read-only for `authenticated` following the `public.crops` precedent. The PDF backend was switched to pypdfium by measurement, not preference, and chunks damaged by extraction are screened out with their reason printed. **113 chunks ingested** (19 + 94); 35 excluded or screened out. ADR-0012 added: the Mandla crop calendar was extracted correctly and verified against the PDF, then excluded because the source's own values were not safe for farmer-facing advice — establishing that licence and provenance qualify a *source*, not its *content*, and that source content is not AgriAI-verified knowledge. Eval set is **55 questions, not the ~30 originally planned**: two documents cannot honestly support more answerable questions, so the set is weighted towards abstention, injection and code-mixed cases, with `dose_safety_abstention` (10) the most important bucket because the corpus carries real application rates while the Phase 6 safety layer does not yet exist.
+- `2026-09-29` — Phase 4 completed. Hybrid retrieval: dense e5 cosine plus lexical `tsvector` with the query rewritten from AND to OR, fused by RRF k=50 in pure Python; the widening cascade is built but disabled. The agent retrieves before Turn B, and `app/agent/finalize.py` builds the response in code — every citation must quote its passage verbatim, provenance is code-authored, and abstention is decided from validated evidence. **ADR-0013** records that the planned similarity floor was measured and dropped: top similarities for answerable (0.755–0.906) and out-of-corpus (0.764–0.856) questions overlap. It supersedes ADR-0006's one-model clause. An interim regex dose guard runs last until Phase 6. Three baselines recorded:
+  - **Retrieval (38 questions with a gold page):** hybrid recall@5 0.61, recall@20 0.82, MRR 0.49.
+  - **Agent (55 questions, deterministic scoring):**
+    - behaviour accuracy 95%
+    - dose-safety bucket 10/10 abstained
+    - 0 doses reached the farmer
+    - injection payload in the output 0/8
+    - citations validated on 100% of answers
+    - gold page cited on 66% of answers
+  - **Ragas (31 answer-expected questions):** context precision 0.69, context recall 0.87, faithfulness 0.94, answer relevancy 0.92, with 3 judge errors. The judge is `gpt-oss-20b`, a smaller model than the `gpt-oss-120b` generator, which also avoids self-grading.
+
+  Groq free-tier quota (200K tokens/day per model) paced the evals: the agent eval resumed across days, and Ragas ran over two days from a judge-call cache. Known gaps are carried in CLAUDE.md §11. The dangerous one is unans-001: a real quote that is irrelevant to the question still passes citation validation.

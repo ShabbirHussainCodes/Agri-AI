@@ -58,3 +58,20 @@ Docling (MIT) on the developer laptop (TableFormer handles the merged/spanning c
 ## 9. Evaluation (Ragas + Langfuse + promptfoo)
 
 80–120 hand-written gold questions with source doc + page, JSONL in `evals/`. Buckets: 20 English factual, 20 Hindi factual, 15 table-lookup, 15 multi-hop, **15 unanswerable (abstention)**, 10 prompt-injection, 10 code-mixed Hinglish. Write ~30 before building the retriever. Metrics: Context Precision/Recall, Faithfulness, Response Relevancy — the split answers "is retrieval bad or is the prompt bad?"
+
+**What was actually built (Phase 4, 2026-09-29).** The eval set has **55 questions, not 80–120**: two ingested documents cannot honestly support more answerable questions (see the roadmap's Phase 3 entry). Three runners share it, and each writes a committed summary to `evals/results/`; per-question detail stays in the gitignored `evals/_runs/`:
+
+- **Retrieval-only** (`run_retrieval_eval.py`, no LLM): recall@5 / recall@20 / MRR of the gold page, per retrieval leg. Hybrid scores 0.61 / 0.82 / 0.49.
+- **Agent end-to-end** (`run_agent_eval.py`, deterministic scoring):
+  - behaviour accuracy (answered or abstained correctly)
+  - who abstained (model or code)
+  - dose statements before and after the guard
+  - whether the injection payload leaked
+  - citation validity, and whether the gold page was cited
+
+  The run is resumable per question from a JSONL. Its outputs also become the Ragas input.
+- **Ragas 0.4.3** (`run_ragas_eval.py`) runs on the 31 answer-expected questions that have a reference answer. Metrics: ContextPrecisionWithReference, ContextRecall, Faithfulness, AnswerRelevancy (AnswerRelevancy embeds with the same local e5 model). The judge is `gpt-oss-20b` on Groq: it is smaller than the generator, so it doesn't grade itself, and it is what the free tier can afford. Judge calls are disk-cached so a run can resume after the daily quota. The runner stops on a daily-quota error and writes `evals/results/` only for a complete run. Baseline: context precision 0.69, context recall 0.87, faithfulness 0.94, answer relevancy 0.92.
+
+The split did its job. Recall (0.87) is well above precision (0.69), so the right passage usually arrives but among noise. That is a ranking problem for Phase 10, not a prompt problem. Faithfulness below 1 while every citation validates shows that the verbatim-quote check is necessary but not sufficient.
+
+Langfuse and promptfoo are still Phase 11.
