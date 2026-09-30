@@ -12,6 +12,13 @@ changed for the eval:
   2. finalize_advisory() is wrapped to record the model's DRAFT and the exact
      passages it saw, so scoring can tell "the model abstained" from "code
      withheld it" from "the dose guard caught it".
+  3. The LLM provider is wrapped (via FastAPI's dependency override) to add
+     up the tokens each question consumed, as Groq reports them -- so the
+     free-tier budget is measured, not estimated. Only the final attempt of
+     a retried question is counted.
+
+Passage budget: set AGRIAI_RAG_CONTEXT_CHUNKS to change how many passages
+Turn B sees (default 6); the value is printed in the summary.
 
 Scoring is deterministic (evals/agent_eval_scoring.py). LLM-judged Ragas
 metrics are step 6b (evals/run_ragas_eval.py), which reads the
@@ -50,9 +57,11 @@ import agent_eval_scoring as scoring  # noqa: E402
 from app.agent import loop  # noqa: E402
 from app.core.config import settings  # noqa: E402
 from app.main import app  # noqa: E402
+from app.providers.base import LLMProvider  # noqa: E402
+from app.routers.ask import get_llm_provider  # noqa: E402
 from tests.conftest import signup_test_user  # noqa: E402
 
-_state: dict = {"inject": None, "capture": None}
+_state: dict = {"inject": None, "capture": None, "usage": None}
 _original_retrieve = loop.retrieve
 _original_finalize = loop.finalize_advisory
 
@@ -81,6 +90,45 @@ loop.retrieve = _retrieve_with_injection
 loop.finalize_advisory = _finalize_and_capture
 
 
+class _CountingProvider(LLMProvider):
+    """Delegates to the real provider and adds up reported token usage."""
+
+    def __init__(self, inner: LLMProvider):
+        self.inner = inner
+
+    async def chat(self, messages, **kwargs):
+        result = await self.inner.chat(messages, **kwargs)
+        u = _state["usage"]
+        if u is not None:
+            u["calls"] += 1
+            if result.usage is None:
+                u["unreported_calls"] += 1
+            else:
+                u["prompt_tokens"] += result.usage.prompt_tokens
+                u["completion_tokens"] += result.usage.completion_tokens
+                u["total_tokens"] += result.usage.total_tokens
+        return result
+
+
+def _fresh_usage() -> dict:
+    return {"calls": 0, "unreported_calls": 0, "prompt_tokens": 0, "completion_tokens": 0, "total_tokens": 0}
+
+
+def _token_lines(records: list[dict]) -> list[str]:
+    totals = sorted(r["usage"]["total_tokens"] for r in records
+                    if r.get("usage") and r["usage"]["calls"] and not r["usage"]["unreported_calls"])
+    lines = [f"- Passages shown to Turn B (rag_context_chunks): **{settings.rag_context_chunks}**"]
+    if totals:
+        mean = sum(totals) / len(totals)
+        median = totals[len(totals) // 2] if len(totals) % 2 else (totals[len(totals) // 2 - 1] + totals[len(totals) // 2]) / 2
+        prompt = [r["usage"]["prompt_tokens"] for r in records if r.get("usage") and r["usage"]["calls"]]
+        lines.append(f"- Tokens per question, all turns (Groq-reported): mean **{mean:.0f}**, median {median:.0f}, "
+                     f"min {totals[0]}, max {totals[-1]} (n={len(totals)}); mean prompt tokens {sum(prompt) / len(prompt):.0f}")
+    else:
+        lines.append("- Tokens per question: not recorded (run predates usage tracking, or the provider reported none)")
+    return lines
+
+
 def _load_done(path: Path) -> dict[str, dict]:
     done = {}
     if path.exists():
@@ -97,16 +145,17 @@ async def _ask(client, headers, farm_id, question: dict, *, max_retries: int, ba
     error = None
     for attempt in range(max_retries + 1):
         _state["capture"] = None
+        _state["usage"] = _fresh_usage()
         resp = await client.post(f"/farms/{farm_id}/ask", headers=headers, json={"question": question["question"]})
         if resp.status_code == 200:
             cap = _state["capture"] or {}
-            return resp.json(), cap.get("draft"), cap.get("passages", []), None
+            return resp.json(), cap.get("draft"), cap.get("passages", []), None, _state["usage"]
         error = f"HTTP {resp.status_code}: {resp.text[:200]}"
         if attempt < max_retries:
             wait = backoff * (2 ** attempt)
             print(f"    {question['id']}: {error} -- retrying in {wait:.0f}s")
             await asyncio.sleep(wait)
-    return None, None, [], error
+    return None, None, [], error, _state["usage"]
 
 
 async def main() -> int:
@@ -133,6 +182,9 @@ async def main() -> int:
     done = _load_done(run_path)
     print(f"{len(questions)} questions, {len(done)} already done -> {run_path}")
 
+    real_provider = get_llm_provider()
+    app.dependency_overrides[get_llm_provider] = lambda: _CountingProvider(real_provider)
+
     async with app.router.lifespan_context(app):
         transport = httpx.ASGITransport(app=app)
         async with httpx.AsyncClient(transport=transport, base_url="http://test", timeout=None) as client:
@@ -149,17 +201,19 @@ async def main() -> int:
                 for i, q in enumerate(questions, 1):
                     if q["id"] in done:
                         continue
-                    response, draft, passages, error = await _ask(
+                    response, draft, passages, error, usage = await _ask(
                         client, headers, farm_id, q, max_retries=args.max_retries, backoff=args.backoff
                     )
                     row = scoring.score_row(q, response, draft, passages, error)
-                    rec = {"question": q, "response": response, "draft": draft, "passages": passages, "row": row}
+                    rec = {"question": q, "response": response, "draft": draft, "passages": passages,
+                           "row": row, "usage": usage, "rag_context_chunks": settings.rag_context_chunks}
                     out.write(json.dumps(rec, ensure_ascii=False) + "\n")
                     out.flush()
                     done[q["id"]] = rec
                     status = "ERROR" if error else ("abstain" if response["abstained"] else "answer")
                     ok = "" if error else ("ok" if row["behaviour_correct"] else "WRONG")
-                    print(f"[{i}/{len(questions)}] {q['id']:<12} {status:<8} {ok}")
+                    tokens = f"{usage['total_tokens']} tok" if usage and usage["calls"] else ""
+                    print(f"[{i}/{len(questions)}] {q['id']:<12} {status:<8} {ok:<5} {tokens}")
                     await asyncio.sleep(args.delay)
 
     # Re-read the whole file so a resumed run summarises everything.
@@ -185,6 +239,7 @@ async def main() -> int:
 
     run_at = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
     md = scoring.to_markdown(summary, run_at, settings.groq_chat_model)
+    md = md.rstrip("\n") + "\n\n" + "\n".join(_token_lines(list(latest.values()))) + "\n"
     results = REPO_ROOT / "evals" / "results"
     results.mkdir(exist_ok=True)
     if not args.limit and not args.only:

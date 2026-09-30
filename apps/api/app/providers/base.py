@@ -16,6 +16,18 @@ class ToolCall:
     arguments: dict[str, Any]
 
 
+@dataclass(frozen=True)
+class TokenUsage:
+    """Tokens one provider call consumed, as the provider reported them.
+
+    Recorded so the free-tier budget (CLAUDE.md section 11) is MEASURED per
+    /ask instead of estimated; the eval runner sums it per question."""
+
+    prompt_tokens: int
+    completion_tokens: int
+    total_tokens: int
+
+
 @dataclass
 class ChatResult:
     """Normalised result of one provider call, regardless of vendor.
@@ -26,6 +38,8 @@ class ChatResult:
 
     content: str | None = None
     tool_calls: list[ToolCall] = field(default_factory=list)
+    # None when the provider did not report usage -- never a guessed number.
+    usage: TokenUsage | None = None
 
 
 class LLMProvider(ABC):

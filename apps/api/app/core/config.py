@@ -48,9 +48,10 @@ class Settings(BaseSettings):
     # How many fused chunks Turn B sees. The retrieval baseline
     # (evals/results/retrieval-2026-09-25.md) puts the gold page in the top 5
     # for 61% of questions and the top 20 for 82%; every extra passage costs
-    # ~500 tokens against Groq's free-tier limits and gives the model more to
-    # get distracted by. 6 is a starting point to be MEASURED by the full
-    # eval, not a tuned value.
+    # ~380 prompt tokens (measured) against the free-tier limits and gives the model more to
+    # get distracted by. MEASURED 2026-09-30 (evals/results/token-budget-
+    # 2026-09-30.md): 4 saves 14.6% of tokens but loses multi-002, whose
+    # evidence is ranked 5th, so 6 stays until better ranking (Phase 10).
     rag_context_chunks: int = 6
 
 

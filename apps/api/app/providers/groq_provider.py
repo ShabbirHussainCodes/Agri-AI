@@ -11,7 +11,7 @@ from typing import Any
 
 from groq import AsyncGroq
 
-from app.providers.base import ChatResult, LLMProvider, ToolCall
+from app.providers.base import ChatResult, LLMProvider, TokenUsage, ToolCall
 
 
 def _make_strict(schema: dict[str, Any]) -> dict[str, Any]:
@@ -76,9 +76,11 @@ class GroqProvider(LLMProvider):
 
         completion = await self._client.chat.completions.create(**kwargs)
         message = completion.choices[0].message
+        usage = _usage(completion)
 
         if message.tool_calls:
             return ChatResult(
+                usage=usage,
                 tool_calls=[
                     ToolCall(
                         id=tc.id,
@@ -88,4 +90,19 @@ class GroqProvider(LLMProvider):
                     for tc in message.tool_calls
                 ]
             )
-        return ChatResult(content=message.content)
+        return ChatResult(content=message.content, usage=usage)
+
+
+def _usage(completion: Any) -> TokenUsage | None:
+    """Groq's response is OpenAI-compatible and normally carries `usage`;
+    read it defensively so a response without it records None instead of
+    failing the farmer's request over bookkeeping."""
+    u = getattr(completion, "usage", None)
+    try:
+        return TokenUsage(
+            prompt_tokens=int(u.prompt_tokens),
+            completion_tokens=int(u.completion_tokens),
+            total_tokens=int(u.total_tokens),
+        )
+    except (AttributeError, TypeError, ValueError):
+        return None
