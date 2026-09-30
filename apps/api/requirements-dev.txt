@@ -2,3 +2,5 @@
 pytest>=8.3
 pytest-asyncio>=0.24
 pytest-recording>=0.13
+# tests/test_crop_scope.py reads ingest/sources.yaml (ADR-0014).
+pyyaml>=6.0

@@ -70,6 +70,19 @@ sources:
         # crop_name is deliberately absent: this manual covers a mixed kitchen
         # garden, so tagging it to one crop would be wrong.
         state: Madhya Pradesh
+        # crops_covered (ADR-0014): the crops this manual is a SOURCE for. A
+        # question naming a crop is answered only from documents covering it.
+        # Reviewed 2026-09-30 (Shabbir approved): the kitchen-garden
+        # vegetables, spices and fruit the manual's own prose discusses --
+        # placement, layering, nutrient needs, maintenance, season. NOT field
+        # crops: wheat and rice appear only as PDS rations, millets only as a
+        # declining traditional food, and "black cotton soils" is a soil type.
+        # The one table that gave per-crop months is excluded (below), so none
+        # of these entries is a sowing calendar.
+        crops_covered: [tomato, eggplant, chilli, okra, amaranth, spinach,
+                        fenugreek, gourd, cowpea, beans, turmeric, taro, ginger,
+                        coriander, cucumber, sweet_potato, papaya, moringa,
+                        banana, citrus]
         # Appendix 1 (the crop calendar) is excluded from the corpus.
         #
         # This is NOT an extraction problem. The table was extracted
@@ -117,6 +130,12 @@ sources:
         # loudly on a mismatch rather than silently storing NULL.
         crop_name: Tomato
         state: Tamil Nadu
+        # crops_covered (ADR-0014): tomato only. Eggplant appears solely as a
+        # grafting ROOTSTOCK; marking it covered would let a brinjal question
+        # be answered from tomato trial data. Rootstock questions still work,
+        # because crop_scope does not count the rootstock species as the crop
+        # in a grafting question.
+        crops_covered: [tomato]
         notes: >
           TNAU-authored content reachable under CC-BY via the journal, even
           though the TNAU portal itself is Tier C -- a reusable route to Indian

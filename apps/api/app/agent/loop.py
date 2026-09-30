@@ -46,6 +46,7 @@ from app.providers.base import LLMProvider
 from app.retrieval.context import build_passage_block
 from app.retrieval.embedder import get_query_embedder
 from app.retrieval.hybrid import Embedder, retrieve
+from app.safety import crop_scope
 from app.schemas.advisory import AdvisoryResponse, DraftAdvisory
 
 # ADR-0013: a dense-similarity threshold cannot tell answerable from
@@ -150,7 +151,17 @@ async def run_agent(
         raise
     except Exception as exc:  # noqa: BLE001
         raise AgentError(f"Retrieval failed: {exc}") from exc
-    passage_block, passages = build_passage_block(retrieval.chunks)
+
+    # Crop scope (ADR-0014). A question that names a crop is answered only
+    # from documents a human marked as a source for that crop. This filters
+    # what Turn B may SEE; it does not abstain on its own, because a wheat
+    # irrigation question can still be answered from the farm record and the
+    # weather, which need no corpus source. finalize_advisory re-checks it.
+    named_crops = crop_scope.crops_named_in(question)
+    scoped = crop_scope.scope_passages(retrieval.chunks, named_crops)
+    passage_block, passages = build_passage_block(
+        scoped, uncovered_crops=named_crops if (named_crops and not scoped) else frozenset()
+    )
     live_data: weather.WeatherData | None = None
 
     messages: list[dict[str, Any]] = [
@@ -215,7 +226,11 @@ async def run_agent(
 
         draft = DraftAdvisory.model_validate(json.loads(final.content))
         return finalize_advisory(
-            draft, farm_data=farm_data, live_data=live_data, passages=passages
+            draft,
+            farm_data=farm_data,
+            live_data=live_data,
+            passages=passages,
+            named_crops=named_crops,
         )
 
     except AgentError:

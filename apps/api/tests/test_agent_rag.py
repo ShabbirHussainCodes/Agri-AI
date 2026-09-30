@@ -39,6 +39,18 @@ class FakeProvider(LLMProvider):
         self.calls.append(messages)
         if response_schema is None:
             return ChatResult(content="no tools needed")  # Turn A: ask for nothing
+        if self.mode == "blind":
+            # Answers with a citation without reading the passages -- what a
+            # model inventing a sowing window from general knowledge looks like.
+            return ChatResult(content=json.dumps({
+                "evidence_basis": "retrieved_passages",
+                "citations": [{"passage": 1, "quote": "wheat is sown between June and September"}],
+                "model_inference": "General knowledge.",
+                "recommendation": "Sow wheat between June and September.",
+                "confidence": 0.8,
+                "abstained": False,
+                "abstained_because": None,
+            }))
         words = _passage_one(messages[-1]["content"]).split()[:8]
         quote = " ".join(words)
         if self.mode == "fabricated":
@@ -95,3 +107,18 @@ async def test_dose_in_answer_is_blocked_by_interim_guard(client):
     assert body["abstained"] is True
     assert body["abstained_because"] == interim_dose_guard.SAFE_ABSTAIN_REASON
     assert body["recommendation"] == interim_dose_guard.SAFE_MESSAGE
+
+
+async def test_crop_with_no_covering_source_shows_turn_b_no_passages(client):
+    # unans-001 (ADR-0014): no ingested document is a source for wheat, so the
+    # kitchen-garden rainfall passages that misled the model are never shown,
+    # and an answer that cites anyway is withheld.
+    provider = FakeProvider("blind")
+    body = await _ask(client, provider, "When should I sow wheat in Madhya Pradesh?")
+    turn_b_passages = provider.calls[-1][-1]["content"]
+    assert PASSAGE_OPEN not in turn_b_passages
+    assert "no source that covers" in turn_b_passages
+    assert body["abstained"] is True
+    assert body["retrieved_evidence"] == []
+    assert "June" not in body["recommendation"]
+

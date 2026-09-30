@@ -6,6 +6,7 @@ allowed to use it?", so the pipeline reads it rather than taking a file path
 on the command line: a PDF that is not registered and approved cannot be
 ingested by accident.
 """
+import re
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -19,6 +20,11 @@ SOURCES_FILE = INGEST_DIR / "sources.yaml"
 # (approved 2026-09-07). Anything NonCommercial, ShareAlike, or unstated is
 # refused here rather than being caught later by a human reading a diff.
 ALLOWED_LICENCES = {"CC-BY-4.0", "CC-BY-3.0-IGO", "apache-2.0", "GODL-India"}
+
+# Shape of a canonical crop key. Whether each key is actually KNOWN is checked
+# by apps/api/tests/test_crop_scope.py against the API's lexicon; the ingest
+# job deliberately does not import API code (config.py explains the split).
+_CROP_KEY = re.compile(r"[a-z][a-z0-9_]*")
 
 
 @dataclass(frozen=True)
@@ -42,6 +48,11 @@ class ApprovedItem:
     # sources.yaml WITH a written reason, so an exclusion is a reviewable
     # decision in Git rather than an invisible filter in code.
     exclude_pages: frozenset[int]
+
+    # ADR-0014: crops this document is a curated SOURCE for (canonical keys of
+    # apps/api/app/safety/crop_scope.py). Required, with no default: every
+    # document needs an explicit human decision, even if it is "none" ([]).
+    crops_covered: tuple[str, ...]
 
 
 def _clean(text: str | None) -> str | None:
@@ -73,6 +84,20 @@ def load_approved_items() -> list[ApprovedItem]:
                     "first (see ingest/README.md); _downloads/ is gitignored."
                 )
 
+            if "crops_covered" not in raw:
+                raise ValueError(
+                    f"{raw['handle']}: `crops_covered` is missing. Every document "
+                    "needs an explicit crop-scope decision (ADR-0014); write [] "
+                    "if it is a source for no specific crop."
+                )
+            crops_covered = tuple(raw["crops_covered"] or [])
+            bad = [c for c in crops_covered if not _CROP_KEY.fullmatch(str(c))]
+            if bad:
+                raise ValueError(
+                    f"{raw['handle']}: crops_covered {bad} are not canonical "
+                    "crop keys (lowercase snake_case, e.g. 'sweet_potato')."
+                )
+
             languages = raw.get("languages") or ["en"]
             items.append(
                 ApprovedItem(
@@ -89,6 +114,7 @@ def load_approved_items() -> list[ApprovedItem]:
                     crop_name=raw.get("crop_name"),
                     state=raw.get("state"),
                     exclude_pages=frozenset(raw.get("exclude_pages") or []),
+                    crops_covered=crops_covered,
                 )
             )
 

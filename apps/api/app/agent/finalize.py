@@ -12,6 +12,8 @@ Order matters, and each step can only make the answer MORE cautious:
        - evidence_basis == "none"                          -> abstain
        - any citation failed validation                    -> abstain
        - basis is "retrieved_passages" but no valid cite   -> abstain
+       - the question names a crop and a cited passage's
+         document is not a curated source for it (ADR-0014) -> abstain
   4. Interim dose guard LAST, over everything text-shaped the farmer would
      read, including quotes -- so nothing earlier can route around it.
 
@@ -23,7 +25,7 @@ from app.agent.tools.farm_context import FarmContextData
 from app.agent.tools.weather import WeatherData
 from app.retrieval.citations import check_citations
 from app.retrieval.hybrid import RetrievedChunk
-from app.safety import interim_dose_guard
+from app.safety import crop_scope, interim_dose_guard
 from app.schemas.advisory import AdvisoryResponse, DraftAdvisory, EvidenceItem
 
 # abstained_because values set by code (the model may also set its own text).
@@ -31,6 +33,7 @@ MODEL_ABSTAINED = "model_abstained"
 INSUFFICIENT_EVIDENCE = "insufficient_evidence"
 INVALID_CITATION = "invalid_citation"
 NO_VALID_CITATION = "no_valid_citation"
+CROP_NOT_COVERED = "crop_not_covered"
 
 ABSTAIN_MESSAGE = (
     "AgriAI could not find verified information to answer this reliably, so it is not "
@@ -45,7 +48,10 @@ def finalize_advisory(
     farm_data: FarmContextData,
     live_data: WeatherData | None,
     passages: list[RetrievedChunk],
+    named_crops: frozenset[str],
 ) -> AdvisoryResponse:
+    """`named_crops`: crops the farmer's question names (crop_scope). Required,
+    not defaulted, so a new caller cannot skip the crop check by omission."""
     checks = check_citations(draft.citations, passages)
     citations_valid = all(c.ok for c in checks)
     evidence = [
@@ -73,6 +79,14 @@ def finalize_advisory(
         abstain_reason = INVALID_CITATION
     elif draft.evidence_basis == "retrieved_passages" and not evidence:
         abstain_reason = NO_VALID_CITATION
+    elif named_crops and any(
+        not crop_scope.covers(c.chunk, named_crops) for c in checks if c.ok and c.chunk is not None
+    ):
+        # Defence in depth: run_agent already hides out-of-scope passages from
+        # Turn B, so this only fires if that filtering is ever bypassed. It
+        # checks every piece of evidence the farmer would be shown, whatever
+        # evidence_basis the model claimed.
+        abstain_reason = CROP_NOT_COVERED
 
     response = AdvisoryResponse(
         structured_data=farm_data,

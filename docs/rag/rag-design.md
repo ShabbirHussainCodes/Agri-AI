@@ -41,6 +41,7 @@ Recursive/fixed chunking (semantic chunking rejected — cost not justified). v2
 - Numbered chunks `[1]…[n]`; every factual sentence carries a marker; code validates each cited index exists and drops/flags uncited factual sentences.
 - ~~Confidence floor (calibrated on the eval set) abstains before the LLM when retrieval is weak.~~ **Measured and dropped (ADR-0013, 2026-09-25):** e5 top similarities for answerable (0.755–0.906) and out-of-corpus (0.764–0.856) questions overlap, so no threshold separates them. Abstention is decided after generation, in code, from validated citations. The widening cascade (§4) is implemented but disabled for v1 for the same reason.
 - Safety-critical facts (dose, chemical, banned status) abstain unless a verified citation/table entry exists.
+- **Crop scope (ADR-0014, 2026-09-30):** a question that names a crop sees only passages from documents curated as a source for that crop (`documents.crops_covered`, set in `ingest/sources.yaml`), and `finalize` withholds any answer whose evidence comes from a non-covering document (`crop_not_covered`). A validated quote proves the passage exists; coverage proves the source is about that crop. Neither proves the claim follows from the quote — that is still measured by Ragas faithfulness.
 
 ## 7. Corpus & licensing (tiered)
 

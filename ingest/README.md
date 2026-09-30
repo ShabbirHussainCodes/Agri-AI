@@ -15,6 +15,7 @@ Pipeline: parse (Docling) → chunk (structure-aware, page + heading provenance)
 | `embed.py` | ONNX `multilingual-e5-small`. Owns the `passage:`/`query:` prefixes and mean pooling. |
 | `db.py` | Writes to `public.documents` / `public.chunks`. |
 | `run.py` | The CLI orchestrator. |
+| `sync_crops_covered.py` | Writes each document's `crops_covered` (ADR-0014) from `sources.yaml` to the database without re-parsing or re-embedding. |
 | `probe.py` | One-off check of what the *installed* Docling actually returns, before trusting the metadata mapping. |
 
 Raw downloaded PDFs live in `_downloads/` and the embedder model in `_cache/` — both gitignored, never committed.

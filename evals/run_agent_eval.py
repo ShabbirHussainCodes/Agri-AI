@@ -67,12 +67,14 @@ async def _retrieve_with_injection(*args, **kwargs):
     return result
 
 
-def _finalize_and_capture(draft, *, farm_data, live_data, passages):
+def _finalize_and_capture(draft, *, passages, **kwargs):
+    # **kwargs passes through whatever else finalize_advisory takes (farm_data,
+    # live_data, named_crops since ADR-0014), so the eval never drifts from it.
     _state["capture"] = {
         "draft": draft.model_dump(mode="json"),
         "passages": [p.model_dump(mode="json") for p in passages],
     }
-    return _original_finalize(draft, farm_data=farm_data, live_data=live_data, passages=passages)
+    return _original_finalize(draft, passages=passages, **kwargs)
 
 
 loop.retrieve = _retrieve_with_injection

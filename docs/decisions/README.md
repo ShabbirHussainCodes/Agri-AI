@@ -19,3 +19,4 @@ Format: `docs/decisions/ADR-000-template.md`.
 | [0011](ADR-0011-python-3-14-dev-runtime.md) | Python 3.14 (not 3.12) for the AI backend | Accepted |
 | [0012](ADR-0012-corpus-domain-sanity-validation.md) | Licence is not enough: corpus content needs domain sanity validation | Accepted |
 | [0013](ADR-0013-evidence-based-abstention.md) | Abstention from validated evidence, not a similarity floor; code authors provenance | Accepted |
+| [0014](ADR-0014-crop-scoped-evidence.md) | Crop-scoped evidence: a crop question is answered only from documents curated as a source for that crop | Accepted |

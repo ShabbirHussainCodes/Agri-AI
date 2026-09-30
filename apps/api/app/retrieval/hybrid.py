@@ -56,6 +56,9 @@ class RetrievedChunk(BaseModel):
     section_path: str | None
     language: str
     content: str
+    # ADR-0014: crops the chunk's DOCUMENT is a curated source for (copied
+    # from public.documents.crops_covered). Read by app/safety/crop_scope.py.
+    doc_crops_covered: list[str]
     # Evaluation/debug signals -- which leg found it, and how strongly.
     dense_similarity: float | None
     dense_rank: int | None
@@ -145,7 +148,8 @@ limit $4
 
 _DETAILS_SQL = """
 select c.id, c.document_id, c.content, c.page_no, c.section_path, c.language,
-       d.handle, d.title, d.publisher, d.published_year, d.doc_type, d.licence, d.url
+       d.handle, d.title, d.publisher, d.published_year, d.doc_type, d.licence, d.url,
+       d.crops_covered
 from public.chunks c
 join public.documents d on d.id = c.document_id
 where c.id = any($1::uuid[])
@@ -195,6 +199,7 @@ async def _retrieve_tier(
             section_path=details[item.key]["section_path"],
             language=details[item.key]["language"],
             content=details[item.key]["content"],
+            doc_crops_covered=list(details[item.key]["crops_covered"]),
             dense_similarity=similarity.get(item.key),
             dense_rank=item.ranks.get(DENSE),
             lexical_rank=item.ranks.get(LEXICAL),

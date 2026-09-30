@@ -44,9 +44,10 @@ async def upsert_document(
         """
         insert into public.documents (
             source_id, handle, title, publisher, published_year,
-            doc_type, licence, url, language, file_sha256, page_count
+            doc_type, licence, url, language, file_sha256, page_count,
+            crops_covered
         )
-        values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+        values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
         on conflict (handle) do update set
             source_id      = excluded.source_id,
             title          = excluded.title,
@@ -58,6 +59,7 @@ async def upsert_document(
             language       = excluded.language,
             file_sha256    = excluded.file_sha256,
             page_count     = excluded.page_count,
+            crops_covered  = excluded.crops_covered,
             ingested_at    = now()
         returning id
         """,
@@ -72,6 +74,7 @@ async def upsert_document(
         item.language,
         file_sha256,
         page_count,
+        list(item.crops_covered),
     )
     return row["id"]
 

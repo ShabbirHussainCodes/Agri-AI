@@ -29,8 +29,10 @@ def draft(**overrides) -> DraftAdvisory:
     return DraftAdvisory(**base)
 
 
-def run(d: DraftAdvisory):
-    return finalize.finalize_advisory(d, farm_data=FARM, live_data=None, passages=PASSAGES)
+def run(d: DraftAdvisory, *, named_crops: frozenset[str] = frozenset(), passages=PASSAGES):
+    return finalize.finalize_advisory(
+        d, farm_data=FARM, live_data=None, passages=passages, named_crops=named_crops
+    )
 
 
 def test_valid_citation_answers_with_code_authored_provenance():
@@ -100,3 +102,52 @@ def test_dose_in_a_model_abstention_text_is_still_scrubbed():
     r = run(draft(abstained=True, abstained_because="no_verified_dose_source", citations=[],
                   recommendation="I can't recommend a dose, but the trial used 4 g/L."))
     assert r.recommendation == interim_dose_guard.SAFE_MESSAGE
+
+
+# --- Crop scope (ADR-0014) -------------------------------------------------
+
+# The unans-001 shape: a real sentence about rainfall, from a document that is
+# not a source for wheat, quoted to answer a wheat question.
+RAIN = make_chunk(
+    "In Mandla, where nearly 90% of rainfall is concentrated between June and September.",
+    title="Kitchen gardens in Mandla",
+    crops=("tomato", "okra"),
+)
+
+
+def test_real_quote_from_a_document_not_covering_the_crop_is_withheld():
+    d = draft(
+        citations=[Citation(passage=1, quote="nearly 90% of rainfall is concentrated between June and September")],
+        recommendation="Sow wheat at the onset of the monsoon, between June and September.",
+    )
+    r = run(d, named_crops=frozenset({"wheat"}), passages=[RAIN])
+    assert r.abstained and r.abstained_because == finalize.CROP_NOT_COVERED
+    assert r.recommendation == finalize.ABSTAIN_MESSAGE  # the wrong season never reaches the farmer
+    assert r.retrieved_evidence == []
+    assert r.citations_valid  # the quote itself was genuine -- that is the whole point
+
+
+def test_covered_crop_answers_normally():
+    r = run(draft(), named_crops=frozenset({"tomato"}))
+    assert not r.abstained and len(r.retrieved_evidence) == 1
+
+
+def test_every_named_crop_must_be_covered():
+    r = run(draft(), named_crops=frozenset({"tomato", "wheat"}))
+    assert r.abstained and r.abstained_because == finalize.CROP_NOT_COVERED
+
+
+def test_question_naming_no_crop_is_not_crop_checked():
+    r = run(draft(), named_crops=frozenset(), passages=[make_chunk(PASSAGES[0].content, crops=())])
+    assert not r.abstained
+
+
+def test_crop_question_answered_from_farm_and_weather_needs_no_corpus_source():
+    # "Kya aaj mujhe apne gehun ko paani dena chahiye?" -- the cassette case.
+    r = run(
+        draft(evidence_basis="farm_and_weather_data", citations=[],
+              recommendation="Heavy rain is forecast tomorrow; no need to irrigate today."),
+        named_crops=frozenset({"wheat"}),
+    )
+    assert not r.abstained
+

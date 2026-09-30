@@ -32,8 +32,22 @@ def _neutralise_markers(text: str) -> str:
     return text.replace(PASSAGE_OPEN, "[passage-marker]").replace(PASSAGE_CLOSE, "[passage-marker]")
 
 
-def build_passage_block(chunks: list[RetrievedChunk]) -> tuple[str, list[RetrievedChunk]]:
-    """Returns (prompt_text, passages). passages[i] is passage [i+1]."""
+def build_passage_block(
+    chunks: list[RetrievedChunk], *, uncovered_crops: frozenset[str] = frozenset()
+) -> tuple[str, list[RetrievedChunk]]:
+    """Returns (prompt_text, passages). passages[i] is passage [i+1].
+
+    `uncovered_crops`: set when crop scoping (ADR-0014) removed every
+    retrieved passage, so the model is told why there is no evidence instead
+    of the misleading "the knowledge base returned nothing"."""
+    if not chunks and uncovered_crops:
+        crops = ", ".join(sorted(uncovered_crops))
+        return (
+            "RETRIEVED PASSAGES: none. The knowledge base has no source that covers "
+            f"this crop ({crops}), so evidence_basis cannot be 'retrieved_passages'. "
+            "Do not answer the crop-specific part from general knowledge.",
+            [],
+        )
     if not chunks:
         return (
             "RETRIEVED PASSAGES: none. The knowledge base returned nothing for this "
