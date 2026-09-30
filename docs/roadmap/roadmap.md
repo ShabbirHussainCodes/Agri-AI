@@ -18,11 +18,24 @@
 
 Before Phase 5, three follow-ups run against these numbers:
 
-1. The unans-001 relevance / crop-mismatch safeguard.
-2. The fix for an empty recommendation when the model abstains.
+1. ~~The unans-001 relevance / crop-mismatch safeguard.~~ Done 2026-09-30 (ADR-0014).
+2. ~~The fix for an empty recommendation when the model abstains.~~ Done 2026-09-30.
 3. The token-budget measurement (6 → 4 passages).
 
-A multi-provider LLM fallback is under discussion and not yet approved.
+**LLM fallback — staged, decided 2026-09-30 (Shabbir + Claude).** The measured problem is Groq quota, not provider outages, so the fallback is built only as far as measurement proves it is needed:
+
+1. Token-budget measurement (above) — the cheapest fix for quota.
+2. Evaluate `gpt-oss-20b` as the *generator* on the same 55-question eval. It qualifies only with the same safety results as 120b (0 doses reach the farmer, 0 injection payloads, all citations valid) and a behaviour accuracy within a margin agreed before the run.
+3. Is the need proven, i.e. quota errors seen in real development or demo use after step 1?
+   - **No** → no fallback yet.
+   - **Yes** → same-provider fallback `gpt-oss-120b` → `gpt-oss-20b`, on quota errors only.
+4. An independent second provider comes later (post-MVP, Phase 11 at the earliest), and only after its own data-use check.
+
+Standing rules for any fallback:
+- Switch only on a quota or temporary operational failure, never because an answer looks poor.
+- Never bypass RAG, citations, abstention, `DraftAdvisory` or the safety checks.
+
+An ADR is written when step 3 says yes. Until then no fallback code exists; the `LLMProvider` interface keeps the door open.
 
 ---
 
