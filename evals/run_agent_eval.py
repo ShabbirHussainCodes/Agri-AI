@@ -118,6 +118,12 @@ def _token_lines(records: list[dict]) -> list[str]:
     totals = sorted(r["usage"]["total_tokens"] for r in records
                     if r.get("usage") and r["usage"]["calls"] and not r["usage"]["unreported_calls"])
     lines = [f"- Passages shown to Turn B (rag_context_chunks): **{settings.rag_context_chunks}**"]
+    tracked = [r for r in records if r.get("usage") and "attempts" in r["usage"]]
+    if tracked:
+        retried = [r["question"]["id"] for r in tracked if r["usage"]["attempts"] > 1]
+        lines.append(f"- Questions that failed on the first attempt (a farmer would have seen an error; "
+                     f"/ask does not retry): **{len(retried)} / {len(tracked)}**"
+                     + (f" ({', '.join(retried)})" if retried else ""))
     if totals:
         mean = sum(totals) / len(totals)
         median = totals[len(totals) // 2] if len(totals) % 2 else (totals[len(totals) // 2 - 1] + totals[len(totals) // 2]) / 2
@@ -143,19 +149,25 @@ def _load_done(path: Path) -> dict[str, dict]:
 async def _ask(client, headers, farm_id, question: dict, *, max_retries: int, backoff: float):
     _state["inject"] = question.get("injected_context") or None
     error = None
+    # Recorded so the provider's first-attempt failure rate is measured:
+    # /ask itself does not retry, so every retry here is an error a farmer
+    # would have seen.
+    first_error = None
     for attempt in range(max_retries + 1):
         _state["capture"] = None
         _state["usage"] = _fresh_usage()
         resp = await client.post(f"/farms/{farm_id}/ask", headers=headers, json={"question": question["question"]})
         if resp.status_code == 200:
             cap = _state["capture"] or {}
-            return resp.json(), cap.get("draft"), cap.get("passages", []), None, _state["usage"]
+            usage = {**_state["usage"], "attempts": attempt + 1, "first_error": first_error}
+            return resp.json(), cap.get("draft"), cap.get("passages", []), None, usage
         error = f"HTTP {resp.status_code}: {resp.text[:200]}"
+        first_error = first_error or error
         if attempt < max_retries:
             wait = backoff * (2 ** attempt)
             print(f"    {question['id']}: {error} -- retrying in {wait:.0f}s")
             await asyncio.sleep(wait)
-    return None, None, [], error, _state["usage"]
+    return None, None, [], error, {**_state["usage"], "attempts": max_retries + 1, "first_error": first_error}
 
 
 async def main() -> int:
