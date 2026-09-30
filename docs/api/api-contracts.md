@@ -49,7 +49,7 @@ Handled by Supabase Auth on the client; the backend only **verifies** the JWT (J
 }
 ```
 
-Since Phase 4 (ADR-0013) this object is assembled by code, not written by the model: the model writes a `DraftAdvisory` (reasoning, recommendation, `{passage, quote}` citations); code copies the farm record, weather and every piece of source metadata, validates each quote against the passage it names, and decides abstention (`abstained_because`: the model's own reason, or `insufficient_evidence` · `invalid_citation` · `no_valid_citation` · `no_verified_dose_source`).
+Since Phase 4 (ADR-0013) this object is assembled by code, not written by the model: the model writes a `DraftAdvisory` (reasoning, recommendation, `{passage, quote}` citations); code copies the farm record, weather and every piece of source metadata, validates each quote against the passage it names, and decides abstention (`abstained_because`: the model's own reason, or `insufficient_evidence` · `empty_answer` · `invalid_citation` · `no_valid_citation` · `crop_not_covered` (ADR-0014) · `no_verified_dose_source`). `recommendation` and `model_inference` are never blank: when there is no model text to show, code supplies a bilingual (Hindi + English) message for the abstention reason.
 
 ## Voice
 

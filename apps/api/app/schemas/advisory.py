@@ -27,7 +27,7 @@ structured_data/live_data stay typed to the real tool output shapes
 from typing import Literal
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from app.agent.tools.farm_context import FarmContextData
 from app.agent.tools.weather import WeatherData
@@ -65,6 +65,16 @@ class AdvisoryResponse(BaseModel):
     # Set by code, never by the model: True when every citation the model
     # made was checked and verified against the passage it named.
     citations_valid: bool
+
+    @field_validator("recommendation", "model_inference")
+    @classmethod
+    def _not_blank(cls, value: str) -> str:
+        """Backstop for the inj-003 bug: the farmer must never receive a blank
+        answer. finalize_advisory fills every abstention with a message; this
+        makes any future code path that forgets fail loudly instead."""
+        if not value.strip():
+            raise ValueError("must not be blank")
+        return value
 
 
 EvidenceBasis = Literal["retrieved_passages", "farm_and_weather_data", "none"]

@@ -151,3 +151,49 @@ def test_crop_question_answered_from_farm_and_weather_needs_no_corpus_source():
     )
     assert not r.abstained
 
+
+# --- Blank abstentions (inj-003 bug, agent eval 2026-09-27) ---------------
+
+def test_blank_model_abstention_gets_the_code_message():
+    r = run(draft(abstained=True, abstained_because="out_of_corpus", citations=[],
+                  evidence_basis="none", recommendation="", model_inference=""))
+    assert r.abstained and r.abstained_because == "out_of_corpus"
+    assert r.recommendation == finalize.ABSTAIN_MESSAGE
+    assert r.model_inference == "Model abstained: out_of_corpus."
+
+
+def test_blank_dose_abstention_gets_the_dose_message():
+    r = run(draft(abstained=True, abstained_because=interim_dose_guard.SAFE_ABSTAIN_REASON,
+                  citations=[], recommendation="  ", model_inference=""))
+    assert r.recommendation == interim_dose_guard.SAFE_MESSAGE
+
+
+def test_blank_injection_abstention_gets_the_injection_message():
+    r = run(draft(abstained=True, abstained_because=finalize.INJECTION_ATTEMPT,
+                  citations=[], recommendation="", model_inference=""))
+    assert r.recommendation == finalize.INJECTION_MESSAGE
+
+
+def test_answer_with_no_text_is_withheld():
+    r = run(draft(recommendation=""))
+    assert r.abstained and r.abstained_because == finalize.EMPTY_ANSWER
+    assert r.recommendation == finalize.ABSTAIN_MESSAGE
+
+
+def test_response_schema_refuses_a_blank_recommendation():
+    import pytest
+    from pydantic import ValidationError
+
+    from app.schemas.advisory import AdvisoryResponse
+
+    with pytest.raises(ValidationError):
+        AdvisoryResponse(structured_data=FARM, model_inference="x", recommendation=" ",
+                         abstained=True, citations_valid=True)
+
+
+def test_farmer_messages_are_bilingual_and_never_trip_the_dose_guard():
+    for message in (finalize.ABSTAIN_MESSAGE, finalize.INJECTION_MESSAGE, interim_dose_guard.SAFE_MESSAGE):
+        assert "KVK" in message and "1800-180-1551" in message
+        assert any("\u0900" <= ch <= "\u097f" for ch in message)  # has Hindi (Devanagari)
+        assert not interim_dose_guard.find_dose_statement(message)
+

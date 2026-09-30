@@ -53,11 +53,14 @@ _DAYS = re.compile(rf"{_NUM}\s*(?:days?|दिन)", re.I)
 _SENTENCE_SPLIT = re.compile(r"(?<=[.!?।])\s+|\n+")
 
 SAFE_ABSTAIN_REASON = "no_verified_dose_source"
+# Bilingual, Hindi first (same convention as app/agent/finalize.py).
 SAFE_MESSAGE = (
-    "AgriAI cannot give pesticide doses or waiting periods yet -- these must come from the "
-    "official product label, and a verified label table is not part of the system yet. "
-    "Please follow the label on the product, or ask your local KVK or the Kisan Call "
-    "Centre (1800-180-1551)."
+    "AgriAI अभी दवा (कीटनाशक) की मात्रा नहीं बता सकता, और न ही यह कि छिड़काव के बाद कितने "
+    "दिन तक फसल न तोड़ें। यह जानकारी हमेशा दवा के पैकेट पर छपे लेबल से ही लें। ज़्यादा "
+    "जानकारी के लिए कृषि विज्ञान केंद्र (KVK) या किसान कॉल सेंटर (1800-180-1551) से पूछें।\n\n"
+    "AgriAI cannot tell you a pesticide dose yet, or how many days to wait after spraying "
+    "before harvesting. Always take this from the label printed on the product pack. For "
+    "more help, ask your Krishi Vigyan Kendra (KVK) or the Kisan Call Centre (1800-180-1551)."
 )
 
 

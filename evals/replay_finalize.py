@@ -54,6 +54,7 @@ def main() -> int:
 
     changed, scoped_ids, table = [], [], []
     old_ok = new_ok = n = 0
+    old_blank = new_blank = 0
     for rec in rows:
         q, draft, resp = rec["question"], rec.get("draft"), rec.get("response")
         if resp is None:
@@ -63,6 +64,8 @@ def main() -> int:
         old_abstained = bool(resp["abstained"])
         named = crop_scope.crops_named_in(q["question"])
 
+        old_blank += not (resp.get("recommendation") or "").strip()
+        new_recommendation = resp.get("recommendation") or ""
         if draft is None:
             # The run recorded no draft (e.g. the request failed before Turn B);
             # nothing to replay, keep the recorded outcome.
@@ -82,6 +85,8 @@ def main() -> int:
                 named_crops=named,
             )
             new_abstained, new_reason = new.abstained, new.abstained_because
+            new_recommendation = new.recommendation
+        new_blank += not new_recommendation.strip()
 
         old_ok += old_abstained == expect_abstain
         new_ok += new_abstained == expect_abstain
@@ -92,6 +97,7 @@ def main() -> int:
     print(f"# Finalize replay -- {args.run.name}\n")
     print(f"Questions replayed: {n}")
     print(f"Behaviour accuracy: recorded {old_ok}/{n} ({old_ok / n:.0%}) -> replayed {new_ok}/{n} ({new_ok / n:.0%})")
+    print(f"Blank recommendation shown to the farmer: recorded {old_blank} -> replayed {new_blank}")
     print(f"Outcome changed by the new rules: {', '.join(changed) or 'none'}")
     print(f"Passage block would change under crop scoping (verify live with --only): "
           f"{','.join(scoped_ids) or 'none'}\n")
