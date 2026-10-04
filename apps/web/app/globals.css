@@ -1,0 +1,31 @@
+@import "tailwindcss";
+
+/* No web fonts: the farmer's phone may be low-end and on slow data, and Android already
+   ships a Devanagari font. System stack only. */
+:root {
+  --background: #fafaf9;
+  --foreground: #1c1917;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: system-ui, -apple-system, "Segoe UI", "Noto Sans", "Noto Sans Devanagari", Roboto, sans-serif;
+}
+
+html {
+  font-size: 17px;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Visible keyboard / switch focus on every control. */
+:focus-visible {
+  outline: 3px solid #166534;
+  outline-offset: 2px;
+}
