@@ -57,6 +57,14 @@ def main() -> int:
 
     coverage = load_coverage()
     rows = [json.loads(l) for l in args.run.read_text(encoding="utf-8").splitlines() if l.strip()]
+    # Score against the CURRENT eval set, not the copy frozen inside the run: an
+    # expectation can change after a run (tab-004, 2026-10-05), and both columns
+    # must be judged by the same rule or the comparison is meaningless.
+    current = {
+        q["id"]: q
+        for q in (json.loads(l) for l in (REPO_ROOT / "evals" / "questions.jsonl").read_text(encoding="utf-8").splitlines() if l.strip())
+    }
+    re_expected = []
 
     changed, scoped_ids, table = [], [], []
     old_ok = new_ok = n = 0
@@ -66,7 +74,10 @@ def main() -> int:
         if resp is None:
             continue
         n += 1
-        expect_abstain = q["expected_behaviour"] == "abstain"
+        expected = current.get(q["id"], q)["expected_behaviour"]
+        if expected != q["expected_behaviour"]:
+            re_expected.append(q["id"])
+        expect_abstain = expected == "abstain"
         old_abstained = bool(resp["abstained"])
         named = crop_scope.crops_named_in(q["question"])
 
@@ -99,12 +110,13 @@ def main() -> int:
         new_ok += new_abstained == expect_abstain
         if new_abstained != old_abstained:
             changed.append(q["id"])
-        table.append((q["id"], q["expected_behaviour"], sorted(named), old_abstained, new_abstained, new_reason))
+        table.append((q["id"], expected, sorted(named), old_abstained, new_abstained, new_reason))
 
     print(f"# Finalize replay -- {args.run.name}\n")
     print(f"Questions replayed: {n}")
     print(f"Behaviour accuracy: recorded {old_ok}/{n} ({old_ok / n:.0%}) -> replayed {new_ok}/{n} ({new_ok / n:.0%})")
     print(f"Blank recommendation shown to the farmer: recorded {old_blank} -> replayed {new_blank}")
+    print(f"Expectation changed since the run was recorded (scored by today's): {', '.join(re_expected) or 'none'}")
     print(f"Outcome changed by the new rules: {', '.join(changed) or 'none'}")
     print(f"Passage block would change under crop scoping (verify live with --only): "
           f"{','.join(scoped_ids) or 'none'}\n")

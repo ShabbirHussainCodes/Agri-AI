@@ -51,6 +51,10 @@ MUST_ALLOW = [
     "Irrigate now: the soil is short of 45 mm of water and the limit is 50 mm.",
     "It is expected to reach the limit in about 3 days.",
     "Water it in the morning. Your farm is 1.5 ha.",
+    # en-fact-007 (regression found by replay, 2026-10-05): a water-harvesting
+    # tank is not a sprayer tank, and these numbers come from a validated quote.
+    "Lay it out as 8 to 15 raised beds about 1 m wide each, with a small water-harvesting tank (Jal Kund) and compost pits.",
+    "The hand pump is about 20 m from the kitchen garden.",
     "इस सवाल का पक्का जवाब देने के लिए AgriAI के पास जाँची हुई जानकारी नहीं है।",
     "लगभग 88 प्रतिशत खेती वाला क्षेत्र वर्षा आधारित है।",
     "Ask your Krishi Vigyan Kendra (KVK) or the Kisan Call Centre (1800-180-1551).",

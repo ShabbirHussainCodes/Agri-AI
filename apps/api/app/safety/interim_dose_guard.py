@@ -123,11 +123,20 @@ _DAYS = re.compile(
 _SENTENCE_SPLIT = re.compile(r"(?<=[.!?।])\s+|\n+")
 
 # "Talks about applying a chemical", for the grounded-number rule.
+#
+# "tank", "pump", "टंकी" and "पंप" are deliberately NOT here (removed 2026-10-05).
+# They made a water-harvesting tank an application sentence: en-fact-007's valid
+# answer ("a small water-harvesting tank (Jal Kund) ... 8-15 raised beds about
+# 1 m wide") was withheld as a dose. A replay of the Phase 4 drafts caught it
+# (behaviour accuracy 53/55 -> 51/55). Sprayer-tank doses are still caught by
+# layer 1 (_BASE and the household-measure rule), and a chemical conversation
+# checks every sentence regardless of this list. What is no longer caught is
+# listed as gap-004 in evals/chemical_guard_cases.jsonl.
 _APPLICATION_VOCAB = re.compile(
     r"\b(?:spray(?:ed|ing|s)?|sprayer|apply|applied|applying|application|drench(?:ed|ing)?|dose|dosage"
-    r"|dilute[d]?|mix|mixing|pesticides?|fungicides?|insecticides?|herbicides?|pump|tank|chhidkav|dawai|dawa"
+    r"|dilute[d]?|mix|mixing|pesticides?|fungicides?|insecticides?|herbicides?|chhidkav|dawai|dawa"
     r"|daalo|dalo|daalein|milao|ghol)\b"
-    r"|छिड़काव|छिड़क|डाल|मिला|घोल|दवा|दवाई|कीटनाशक|फफूंदनाशक|फफूँदनाशक|खरपतवारनाशक|पंप|टंकी|मात्रा",
+    r"|छिड़काव|छिड़क|डाल|मिला|घोल|दवा|दवाई|कीटनाशक|फफूंदनाशक|फफूँदनाशक|खरपतवारनाशक|मात्रा",
     re.I,
 )
 
