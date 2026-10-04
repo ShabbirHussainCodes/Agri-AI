@@ -1,0 +1,87 @@
+{
+  "table_version": "crop-water-v1",
+  "method": "FAO-56 single crop coefficient, constant root depth (ADR-0015)",
+  "primary_source": "Allen et al. 1998, FAO Irrigation and Drainage Paper No. 56 (Crop evapotranspiration)",
+  "crops": [
+    {
+      "name_en": "Wheat",
+      "status": "unverified",
+      "verified_by": null,
+      "verified_on": null,
+      "kc_ini": null,
+      "kc_mid": null,
+      "kc_end": null,
+      "stage_days": null,
+      "stage_length_basis": null,
+      "root_depth_m": null,
+      "p": null,
+      "sources": {},
+      "notes": "Unfilled. See data/crop_water/README.md for what to read and which rows to avoid."
+    },
+    {
+      "name_en": "Tomato",
+      "status": "unverified",
+      "verified_by": null,
+      "verified_on": null,
+      "kc_ini": null,
+      "kc_mid": null,
+      "kc_end": null,
+      "stage_days": null,
+      "stage_length_basis": null,
+      "root_depth_m": null,
+      "p": null,
+      "sources": {},
+      "notes": "Unfilled. See data/crop_water/README.md."
+    },
+    {
+      "name_en": "Maize",
+      "status": "unverified",
+      "verified_by": null,
+      "verified_on": null,
+      "kc_ini": null,
+      "kc_mid": null,
+      "kc_end": null,
+      "stage_days": null,
+      "stage_length_basis": null,
+      "root_depth_m": null,
+      "p": null,
+      "sources": {},
+      "notes": "Unfilled. Use the field/grain maize row, not sweet corn. See data/crop_water/README.md."
+    }
+  ],
+  "soils": [
+    {
+      "texture": "sandy",
+      "status": "unverified",
+      "verified_by": null,
+      "verified_on": null,
+      "fao56_class": null,
+      "theta_fc": null,
+      "theta_wp": null,
+      "sources": {},
+      "notes": "Farmer's word: retili. Unfilled."
+    },
+    {
+      "texture": "loamy",
+      "status": "unverified",
+      "verified_by": null,
+      "verified_on": null,
+      "fao56_class": null,
+      "theta_fc": null,
+      "theta_wp": null,
+      "sources": {},
+      "notes": "Farmer's word: domat. Unfilled."
+    },
+    {
+      "texture": "clayey",
+      "status": "unverified",
+      "verified_by": null,
+      "verified_on": null,
+      "fao56_class": null,
+      "theta_fc": null,
+      "theta_wp": null,
+      "sources": {},
+      "notes": "Farmer's word: chikni / kali. Unfilled."
+    }
+  ]
+}
