@@ -1,0 +1,43 @@
+{
+  "table_version": "SYNTHETIC-eval-fixture",
+  "method": "SYNTHETIC numbers for the irrigation eval harness. NOT agronomy. Never use in production.",
+  "primary_source": "none: invented round numbers so expected results can be worked out by hand",
+  "crops": [
+    {
+      "name_en": "Wheat", "status": "verified", "verified_by": "eval fixture (synthetic)", "verified_on": "2026-10-04",
+      "kc_ini": 1.0, "kc_mid": 1.0, "kc_end": 1.0,
+      "stage_days": {"initial": 10, "development": 20, "mid": 30, "late": 10},
+      "stage_length_basis": "synthetic", "root_depth_m": 0.5, "p": 0.5,
+      "sources": {"kc": "synthetic", "stage_days": "synthetic", "root_depth_m": "synthetic", "p": "synthetic"}
+    },
+    {
+      "name_en": "Tomato", "status": "verified", "verified_by": "eval fixture (synthetic)", "verified_on": "2026-10-04",
+      "kc_ini": 1.0, "kc_mid": 1.0, "kc_end": 1.0,
+      "stage_days": {"initial": 10, "development": 20, "mid": 30, "late": 10},
+      "stage_length_basis": "synthetic", "root_depth_m": 0.5, "p": 0.4,
+      "sources": {"kc": "synthetic", "stage_days": "synthetic", "root_depth_m": "synthetic", "p": "synthetic"}
+    },
+    {
+      "name_en": "Maize", "status": "verified", "verified_by": "eval fixture (synthetic)", "verified_on": "2026-10-04",
+      "kc_ini": 1.0, "kc_mid": 1.0, "kc_end": 1.0,
+      "stage_days": {"initial": 20, "development": 40, "mid": 60, "late": 40},
+      "stage_length_basis": "synthetic (long season so a crop can be older than the 92-day weather window)",
+      "root_depth_m": 0.6, "p": 0.5,
+      "sources": {"kc": "synthetic", "stage_days": "synthetic", "root_depth_m": "synthetic", "p": "synthetic"}
+    }
+  ],
+  "soils": [
+    {
+      "texture": "loamy", "status": "verified", "verified_by": "eval fixture (synthetic)", "verified_on": "2026-10-04",
+      "fao56_class": "synthetic", "theta_fc": 0.30, "theta_wp": 0.10, "sources": {"theta": "synthetic"}
+    },
+    {
+      "texture": "sandy", "status": "verified", "verified_by": "eval fixture (synthetic)", "verified_on": "2026-10-04",
+      "fao56_class": "synthetic", "theta_fc": 0.20, "theta_wp": 0.10, "sources": {"theta": "synthetic"}
+    },
+    {
+      "texture": "clayey", "status": "verified", "verified_by": "eval fixture (synthetic)", "verified_on": "2026-10-04",
+      "fao56_class": "synthetic", "theta_fc": 0.40, "theta_wp": 0.20, "sources": {"theta": "synthetic"}
+    }
+  ]
+}

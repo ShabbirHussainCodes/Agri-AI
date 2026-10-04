@@ -10,6 +10,16 @@
 
 ## Current position
 
+**Phase 5 — IN PROGRESS (code built 2026-10-04; not COMPLETED, so no tag yet).** The irrigation water balance (ADR-0015) is written and tested without a database or network: FAO-56 root-zone bucket in `app/agronomy/`, a fail-closed crop/soil reference table, the `get_irrigation_status` tool, a `water_balance` field in the response, and code checks on the model's verdict and numbers. A COMPLETED phase must run end to end, and these are still open:
+
+1. **A human fills and verifies `data/crop_water/crop-water-v1.json`** against FAO-56 (checklist: `data/crop_water/README.md`). Until then every irrigation question answers `cannot_assess`, by design.
+2. **The first live Open-Meteo call**: the variable names and `past_days=92` could not be tested from the build environment.
+3. **Apply migration `20261004120000`** (`supabase migration up`) and run the DB-backed tests, including `tests/test_farm_update.py` (not run in the build environment).
+4. **The live irrigation eval** (`evals/run_irrigation_eval.py --live`), after its token cost is agreed. Its result becomes the baseline. The dry run passes 16/16 and proves only the harness.
+5. **A Hindi read-through** of the code-authored irrigation messages.
+
+Then tag `v0.5-weather`.
+
 **Phase 4 — COMPLETED.** RAG v1 is live behind `POST /farms/{id}/ask`. Hybrid retrieval (dense + lexical, RRF k=50) feeds a two-turn agent. Citations are validated in code against a verbatim quote, abstention is decided from that validated evidence (ADR-0013), and an interim dose guard runs last. Three baselines are recorded under `evals/results/`:
 
 - **Retrieval:** hybrid recall@5 0.61, recall@20 0.82.
@@ -60,7 +70,7 @@ An ADR is written when step 3 says yes. Until then no fallback code exists; the 
 | 2 | Provider layer + first agent | Provider interfaces, hand-rolled tool loop, 2 read tools, evidence-typed response | Cassette-backed tests; one real question answered | `v0.2-agent` | COMPLETED |
 | 3 | Corpus + eval set | Licence register, Docling ingest, eval questions written first | Chunks in DB with full metadata; eval JSONL committed | `v0.3-corpus-evalset` | COMPLETED |
 | 4 | RAG v1 | Hybrid retrieval, RRF, citation validation, evidence-based abstention (similarity floor measured and dropped, ADR-0013), interim dose guard | **Ragas baseline numbers recorded** | `v0.4-rag-baseline` | COMPLETED |
-| 5 | Weather + irrigation | Open-Meteo tool, ET₀ balance in code, LLM explains | Deterministic tests on the water-balance math | `v0.5-weather` | PLANNED |
+| 5 | Weather + irrigation | Open-Meteo tool, ET₀ balance in code, LLM explains; fail-closed crop table; verdict and number checks in code (ADR-0015) | Deterministic tests on the water-balance math (done); live eval baseline (open) | `v0.5-weather` | IN PROGRESS |
 | 6 | Safety layer + agrochemical data | Label table, denylist, dose lookup tool, schema enforcement | Adversarial tests: LLM cannot invent a dose | `v0.6-safety` | PLANNED |
 | 7 | Image diagnosis | Quality gate, ONNX classifier, VLM reasoning, OOD, abstention UI | **Cross-domain accuracy measured & recorded in repo** | `v0.7-vision` | PLANNED |
 | 8 | Voice | MediaRecorder → Whisper → editable transcript → agent | Own WER measurement on ~30 real utterances | `v0.8-voice` | PLANNED |
@@ -112,3 +122,4 @@ An ADR is written when step 3 says yes. Until then no fallback code exists; the 
   - **Ragas (31 answer-expected questions):** context precision 0.69, context recall 0.87, faithfulness 0.94, answer relevancy 0.92, with 3 judge errors. The judge is `gpt-oss-20b`, a smaller model than the `gpt-oss-120b` generator, which also avoids self-grading.
 
   Groq free-tier quota (200K tokens/day per model) paced the evals: the agent eval resumed across days, and Ragas ran over two days from a judge-call cache. Known gaps are carried in CLAUDE.md §11. The dangerous one is unans-001: a real quote that is irrelevant to the question still passes citation validation.
+- `2026-10-04` — Phase 5 built, not yet COMPLETED (see Current position). **ADR-0015.** FAO-56 single-Kc root-zone water balance in code (`app/agronomy/water_balance.py`): depletion bucket, Kc curve, a verdict rule agreed before any run (`irrigate_now` when depletion at the start of today, rounded to 0.1 mm, reaches RAW; otherwise `wait` with the day RAW is reached at forecast ET₀ and no forecast rain credited; `cannot_assess` with a reason for any missing input). ET₀ comes from Open-Meteo; the balance is ours. **The crop/soil reference table ships fail-closed:** a row is used only when marked verified by a named human with a source per value group, and every row is unverified, because search snippets of the FAO-56 tables mixed rows (sweet corn for maize) and could not be trusted (the primary pages were unreachable from the build environment). New: `get_irrigation_status` tool; `AdvisoryResponse.water_balance`; `DraftAdvisory.irrigation_verdict`; `app/safety/irrigation_guard.py` and `number_grounding.py` (the model's verdict must equal code's and every number it states must be in the evidence, else code's own bilingual message is shown); `farms.soil_texture` and `PATCH /farms/{id}`, added because a farm created without a location or soil type could otherwise never gain one. The existing Phase 2 cassette is unchanged (`get_weather` untouched, `irrigation_verdict` defaults for older payloads). Verified without a database: hand-computed golden cases, invariants and mutation checks on the engine, the guard, finalize and the eval scoring; the loop wiring runs against fakes. The 16-scenario irrigation eval's dry run (scripted model) passes 16/16 and checks the harness and the hand-computed fixtures only.
