@@ -28,7 +28,16 @@ Hindi + English only for MVP. Language is a profile setting and a per-request hi
 ## Structure (`apps/web/`)
 
 ```
-app/            routes (App Router)
-components/      UI components (timeline, ask, scan, onboarding, evidence card)
-public/          manifest, service worker, icons
+app/            routes (App Router): / (login or farm list), /farms/new, /farms/[id] (diary + ask)
+components/     Shell, AuthForm, SoilPicker, LocationField, AskBox, AnswerCard (evidence cards),
+                Diary, LogIrrigation, ProfilePanel, ui primitives
+lib/            api client, generated API types, i18n catalogue (hi/en), auth context
+public/         icons (a service worker does not exist yet)
+tests/          Playwright e2e against a stubbed API
 ```
+
+**Status (ADR-0017, 2026-10-05):** v0 is built: login, onboarding, farm diary, ask with evidence-typed
+answers, "I irrigated today", profile edit. Mostly client components calling FastAPI directly with the
+Supabase JWT; types generated from `openapi.json`. **Not built:** voice, scan, mandi, push, offline
+shell/service worker (the PWA principles above are the target, not the current state). Whether the
+manifest makes a phone offer "install" is not verified.

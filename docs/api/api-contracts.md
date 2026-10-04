@@ -18,7 +18,7 @@ Handled by Supabase Auth on the client; the backend only **verifies** the JWT (J
 |---|---|---|
 | POST | `/farms` | `{name, lat?, lon?, area_ha?, district?, state?, soil_texture?}` → `Farm`. `soil_texture` is `sandy` (retili) · `loamy` (domat) · `clayey` (chikni/kali); lat/lon are range-checked |
 | GET | `/farms` | → `Farm[]` (only the caller's) |
-| GET | `/farms/{id}` | → `Farm` *(planned; not built yet: only `GET /farms` exists)* |
+| GET | `/farms/{id}` | → `Farm`; a farm that is not the caller's is a 404 (ADR-0017) |
 | PATCH | `/farms/{id}` | any of `{name, lat, lon, area_ha, district, state, soil_texture}` → `Farm`. Only the fields sent change; an explicit `null` clears a nullable field; an empty body is a 422; a farm that is not the caller's is a 404 (ADR-0015: a farm created without a location or soil type could otherwise never gain one) |
 | POST | `/farms/{id}/crops` | `{crop_id, variety, sowing_date}` → `FarmCrop` (stage computed) |
 | GET | `/farms/{id}/timeline` | → chronological `activities` + `advisories` + `disease_scans` |
@@ -27,13 +27,14 @@ Handled by Supabase Auth on the client; the backend only **verifies** the JWT (J
 
 | Method | Path | Notes |
 |---|---|---|
-| POST | `/farms/{id}/activities` | `{type, occurred_on, details}` → `Activity`. When proposed by the agent, requires explicit user confirmation before this is called. |
+| POST | `/farm-crops/{farm_crop_id}/activities` | `{type, occurred_on, details}` → `Activity`. When proposed by the agent, requires explicit user confirmation before this is called. |
 
 ## Ask (the agent)
 
 | Method | Path | Body → Response |
 |---|---|---|
-| POST | `/farms/{id}/ask` | `{question, language?}` → `AdvisoryResponse` |
+| POST | `/farms/{id}/ask` | `{question}` (1–1000 chars) → `AdvisoryResponse`. Saved to `advisories`. **429** `{error:{code:"ask_limit_reached", scope:"user"\|"global", message}}` (bilingual) when the rolling 24-hour cap is reached, before any LLM call (ADR-0017). A farm that is not the caller's is a 404. |
+| GET | `/farms/{id}/advisories` | → `AdvisoryRecord[]`, newest first: `{id, farm_id, question, response, abstained, created_at}` |
 
 `AdvisoryResponse` (evidence-typed):
 ```

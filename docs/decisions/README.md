@@ -21,3 +21,4 @@ Format: `docs/decisions/ADR-000-template.md`.
 | [0013](ADR-0013-evidence-based-abstention.md) | Abstention from validated evidence, not a similarity floor; code authors provenance | Accepted |
 | [0014](ADR-0014-crop-scoped-evidence.md) | Crop-scoped evidence: a crop question is answered only from documents curated as a source for that crop | Accepted |
 | [0015](ADR-0015-irrigation-water-balance.md) | Irrigation advice is a deterministic FAO-56 water balance; the model explains, code checks | Accepted |
+| [0017](ADR-0017-web-app-and-deployment.md) | Web app v0 (client-side Next.js), /ask caps, free-tier deployment topology | Accepted |

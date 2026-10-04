@@ -21,7 +21,7 @@ A farm belongs to a profile. `id`, `profile_id` (FK), `name`, `lat`, `lon` (geoc
 The timeline spine. `id`, `farm_crop_id` (FK), `type` (irrigation|fertiliser|spray|sowing|scouting|other), `occurred_on`, `details` (JSONB for type-specific fields), `source` (farmer|agent-confirmed), `created_at`. Written only via the confirmed `log_activity` path.
 
 ### `advisories`
-A recorded AI interaction/outcome. `id`, `farm_id` (FK), `question`, `response` (the evidence-typed object as JSONB), `abstained` (bool), `created_at`. This is what makes the next answer context-aware and gives an audit trail.
+A recorded AI interaction/outcome. `id`, `farm_id` (FK), `question`, `response` (the evidence-typed object as JSONB), `abstained` (bool), `created_at`. This is what makes the next answer context-aware and gives an audit trail. Built in migration `20261005120000` (ADR-0017): RLS through farm ownership, `select`/`insert` only for `authenticated`; `public.asks_in_last_day()` (security definer) counts rows across all users for the global `/ask` cap.
 
 ### `disease_scans`
 `id`, `farm_crop_id` (FK), `image_path` (Supabase Storage key), `top_candidates` (JSONB), `ood_score`, `quality_flags` (JSONB), `outcome` (JSONB — grounded recommendation or abstention), `farmer_feedback` (nullable — confirm/correct, future field dataset), `created_at`.
