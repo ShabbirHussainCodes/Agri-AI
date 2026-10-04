@@ -59,5 +59,9 @@ class Settings(BaseSettings):
     # Tests and the eval set this to a SYNTHETIC table; production must not.
     crop_water_table: Path | None = None
 
+    # Phase 6 (ADR-0016): the verified agrochemical label table. Unset = data/agrochemical/
+    # major-uses-v1.json in the repo (no rows ship). Tests use a SYNTHETIC one; production must not.
+    agrochem_table: Path | None = None
+
 
 settings = Settings()

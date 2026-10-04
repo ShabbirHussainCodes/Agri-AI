@@ -39,6 +39,7 @@ from app.agent.tools.farm_context import FarmContextData
 from app.agent.tools.weather import WeatherData
 from app.agronomy.water_balance import WaterBalanceResult
 from app.retrieval.citations import Citation
+from app.safety.agrochemical_lookup import LabelEntry
 
 
 class EvidenceItem(BaseModel):
@@ -65,6 +66,9 @@ class AdvisoryResponse(BaseModel):
     live_data: WeatherData | None = None
     # ADR-0015: set only when get_irrigation_status ran. Written by code.
     water_balance: WaterBalanceResult | None = None
+    # ADR-0016: verified label cards (dose, waiting period) copied by code from the
+    # agrochemical table. The only place a dose reaches the farmer; empty on any abstention.
+    agrochemical_label: list[LabelEntry] = []
     retrieved_evidence: list[EvidenceItem] = []
     model_inference: str
     recommendation: str

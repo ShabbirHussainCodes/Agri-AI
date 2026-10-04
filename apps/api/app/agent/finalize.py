@@ -14,6 +14,9 @@ Order matters, and each step can only make the answer MORE cautious:
        - basis is "retrieved_passages" but no valid cite   -> abstain
        - the question names a crop and a cited passage's
          document is not a curated source for it (ADR-0014) -> abstain
+  3b. Banned molecule (ADR-0016): the farmer's question, the model's text or a
+      shown quote names a molecule on the denylist -> abstain `banned_molecule`
+      and show a code-authored message. Only an injection refusal outranks it.
   4. Irrigation (ADR-0015):
        - the water balance is cannot_assess                -> abstain with
          the balance's own reason; the farmer reads a code-authored message
@@ -26,8 +29,11 @@ Order matters, and each step can only make the answer MORE cautious:
          code's words (built from the computed numbers)
   Then the farmer-facing text: an abstention the model left blank gets the
   code-authored message for its reason (bilingual, Hindi + English).
-  5. Interim dose guard LAST, over everything text-shaped the farmer would
-     read, including quotes -- so nothing earlier can route around it.
+  5. Dose guard LAST (ADR-0016), over everything text-shaped the farmer would
+     read, including quotes -- so nothing earlier can route around it. The
+     model's prose also gets the grounded-number rule: in a sentence about
+     applying a chemical every number must come from the question, the farm
+     record, weather or a code-authored message, never from a retrieved passage.
 
 When code overrides the model, the model's own recommendation is replaced,
 never shown: an answer that failed its evidence check must not reach the
@@ -39,7 +45,8 @@ from app.agronomy.messages import irrigation_message
 from app.agronomy.water_balance import WaterBalanceResult
 from app.retrieval.citations import check_citations
 from app.retrieval.hybrid import RetrievedChunk
-from app.safety import crop_scope, interim_dose_guard, irrigation_guard
+from app.safety.agrochemical_lookup import LabelEntry
+from app.safety import chemical_guard, crop_scope, interim_dose_guard, irrigation_guard, number_grounding
 from app.schemas.advisory import AdvisoryResponse, DraftAdvisory, EvidenceItem
 
 # abstained_because values set by code (the model may also set its own text).
@@ -51,7 +58,7 @@ CROP_NOT_COVERED = "crop_not_covered"
 
 CANNOT_ASSESS = "cannot_assess"  # fallback if a cannot_assess result somehow has no reason
 # Refusals for safety, which no irrigation message may replace.
-_SAFETY_REFUSALS = {"injection_attempt", interim_dose_guard.SAFE_ABSTAIN_REASON}
+_SAFETY_REFUSALS = {"injection_attempt", interim_dose_guard.SAFE_ABSTAIN_REASON, chemical_guard.BANNED_MOLECULE}
 EMPTY_ANSWER = "empty_answer"
 INJECTION_ATTEMPT = "injection_attempt"  # the reason Turn B's prompt tells the model to use
 
@@ -97,6 +104,8 @@ def finalize_advisory(
     named_crops: frozenset[str],
     water_balance: WaterBalanceResult | None = None,
     question_text: str = "",
+    denylist: chemical_guard.Denylist | None = None,
+    agrochemical_label: list[LabelEntry] | None = None,
 ) -> AdvisoryResponse:
     """`named_crops`: crops the farmer's question names (crop_scope). Required,
     not defaulted, so a new caller cannot skip the crop check by omission.
@@ -104,7 +113,11 @@ def finalize_advisory(
     `water_balance`: the result of get_irrigation_status, if it ran. None is
     safe as a default: with no result the model cannot claim an irrigation
     verdict at all (irrigation_guard). `question_text` is evidence too: a
-    number the farmer typed may be repeated back."""
+    number the farmer typed may be repeated back. `denylist`: defaults to the
+    shipped data/denylists file; an unreadable file raises (no list, no answer).
+    `agrochemical_label`: label cards the lookup tool found. Shown only on an answer,
+    and re-checked against the denylist here (defence in depth)."""
+    labels = agrochemical_label or []
     checks = check_citations(draft.citations, passages)
     citations_valid = all(c.ok for c in checks)
     evidence = [
@@ -144,6 +157,21 @@ def finalize_advisory(
         # evidence_basis the model claimed.
         abstain_reason = CROP_NOT_COVERED
 
+    # Banned molecule (ADR-0016). Names in the question, the model's text or a
+    # shown quote. Only an injection refusal outranks it: a farmer asking about a
+    # listed molecule must read the code's message, not the model's.
+    banned_text: str | None = None
+    banned_names = ""
+    banned = chemical_guard.find_banned(
+        [question_text, draft.recommendation, draft.model_inference, *(e.quote for e in evidence),
+         *(label.molecule for label in labels)],
+        denylist or chemical_guard.get_denylist(),
+    )
+    if banned and abstain_reason != INJECTION_ATTEMPT:
+        abstain_reason = chemical_guard.BANNED_MOLECULE
+        banned_text = chemical_guard.banned_message(banned)
+        banned_names = ", ".join(e.molecule for e in banned)
+
     # Irrigation (ADR-0015). Only when nothing above already decided: an
     # injection, a dose, a bad citation or a crop mismatch keeps priority.
     irrigation_text: str | None = None  # code-authored message shown instead of the model's
@@ -177,7 +205,11 @@ def finalize_advisory(
         draft.recommendation, draft.model_inference, evidence
     )
     code_overrode_model = abstain_reason is not None and not draft.abstained
-    if irrigation_text is not None and abstain_reason is not None:
+    if banned_text is not None:
+        recommendation = banned_text
+        model_inference = f"Answer replaced by code: {chemical_guard.BANNED_MOLECULE} ({banned_names})."
+        shown_evidence = []
+    elif irrigation_text is not None and abstain_reason is not None:
         # cannot_assess: code's message, whatever the model wrote or abstained with.
         recommendation = irrigation_text
         model_inference = f"Answer withheld by code: {abstain_reason}."
@@ -210,6 +242,7 @@ def finalize_advisory(
         structured_data=farm_data,
         live_data=live_data,
         water_balance=water_balance,
+        agrochemical_label=labels if abstain_reason is None else [],
         retrieved_evidence=shown_evidence,
         model_inference=model_inference,
         recommendation=recommendation,
@@ -219,7 +252,16 @@ def finalize_advisory(
         citations_valid=citations_valid,
     )
 
-    return _apply_interim_dose_guard(response)
+    chemical_context = any(
+        chemical_guard.is_chemical_text(t, denylist or chemical_guard.get_denylist())
+        for t in (question_text, draft.recommendation, draft.model_inference)
+    )
+    allowed = frozenset().union(*(
+        number_grounding.numbers_in(t)
+        for t in _evidence_texts(farm_data, live_data, water_balance, evidence, question_text, include_quotes=False)
+        + [banned_text or "", irrigation_text or ""]
+    ))
+    return _apply_interim_dose_guard(response, allowed, chemical_context)
 
 
 def _evidence_texts(
@@ -228,25 +270,35 @@ def _evidence_texts(
     water_balance: WaterBalanceResult | None,
     evidence: list[EvidenceItem],
     question_text: str,
+    *,
+    include_quotes: bool = True,
 ) -> list[str]:
-    """Everything the model was allowed to take a number from (number_grounding)."""
+    """Everything the model was allowed to take a number from (number_grounding).
+    `include_quotes=False` leaves out retrieved passages: a number that appears
+    only in a corpus quote (a trial's dose) is not a source for advice."""
     texts = [farm_data.model_dump_json(), question_text]
     if live_data is not None:
         texts.append(live_data.model_dump_json())
     if water_balance is not None:
         texts.append(water_balance.model_dump_json())
-    texts += [e.quote for e in evidence]
+    if include_quotes:
+        texts += [e.quote for e in evidence]
     return texts
 
 
-def _apply_interim_dose_guard(response: AdvisoryResponse) -> AdvisoryResponse:
-    texts = [response.recommendation, response.model_inference]
-    texts += [e.quote for e in response.retrieved_evidence]
-    if any(interim_dose_guard.find_dose_statement(t) for t in texts):
+def _apply_interim_dose_guard(
+    response: AdvisoryResponse, allowed: frozenset[float], chemical_context: bool
+) -> AdvisoryResponse:
+    prose = [response.recommendation, response.model_inference]
+    quotes = [e.quote for e in response.retrieved_evidence]
+    if any(interim_dose_guard.find_dose_statement(t) for t in prose + quotes) or any(
+        interim_dose_guard.find_ungrounded_application_number(t, allowed, any_sentence=chemical_context) for t in prose
+    ):
         return response.model_copy(update={
             "recommendation": interim_dose_guard.SAFE_MESSAGE,
             "model_inference": "Withheld by the interim dose guard (CLAUDE.md rule 1).",
             "retrieved_evidence": [],
+            "agrochemical_label": [],
             "abstained": True,
             "abstained_because": interim_dose_guard.SAFE_ABSTAIN_REASON,
         })

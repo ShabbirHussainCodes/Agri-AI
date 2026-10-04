@@ -17,6 +17,12 @@ Coverage metadata (`doc_crops_covered`) is taken from ingest/sources.yaml by
 document handle, because runs captured before ADR-0014 do not carry it.
 
     python evals/replay_finalize.py evals/_runs/<stamp>-agent.jsonl
+
+Phase 6 (ADR-0016): the replay passes the question text too, because the banned-
+molecule guard and the chemical-context number rule read it. Run it on the captured
+Phase 4 run and compare behaviour accuracy with the recorded 53/55: that is the
+no-quota check that the stricter dose guard did not turn harmless answers into
+abstentions.
 """
 import argparse
 import json
@@ -83,6 +89,7 @@ def main() -> int:
                 live_data=None,
                 passages=passages,
                 named_crops=named,
+                question_text=q["question"],  # Phase 6: the banned-molecule and chemical-context rules read it
             )
             new_abstained, new_reason = new.abstained, new.abstained_because
             new_recommendation = new.recommendation

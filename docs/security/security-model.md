@@ -36,7 +36,7 @@ Per-user limits on `/ask`, `/scans`, `/speech` — protects the free-tier provid
 
 - **Deterministic safety layer runs after the LLM.** Banned-molecule denylist + dose/waiting-period lookup + citation validation + retrieval floor. No LLM output and no injected corpus text can bypass it.
 - **Prompt injection:** retrieved corpus text is untrusted — delimited, never able to trigger tools; injection cases are in the eval set.
-- **The LLM never emits a pesticide dose.** Doses come only from the version-stamped `agrochemicals` table (ADR-0005).
+- **The LLM never emits a pesticide dose.** Doses come only from verified rows of the version-stamped agrochemical table, copied by code into a label card; the model never sees them (ADR-0005, ADR-0016). Backstops that run after the model: a dose / waiting-period guard (47 of 47 adversarial phrasings blocked, from 12 before Phase 6) with a grounded-number rule, and a banned-molecule denylist.
 - **Malicious documents:** ingestion parses on the laptop, not in production; parsed text is treated as data, not instructions.
 - **Write tools require explicit user confirmation.**
 

@@ -40,6 +40,8 @@ Indexes: HNSW on `embedding`, GIN on `tsv`, btree on the filter columns.
 
 ## 4. Reference / safety data
 
+> **Phase 6 note (ADR-0016):** until the data outgrows a file, the label table is `data/agrochemical/major-uses-v1.json` and the denylist is `data/denylists/banned-central-v1.json`, read by `app/safety/`, not these Postgres tables. Every row's verification is then a reviewable Git diff and no migration is needed. The column list below is the design for when they move into the database.
+
 ### `agrochemicals` (version-stamped)
 `id`, `table_version` (e.g. `cibrc-major-uses-2025-08`), `molecule`, `formulation`, `crop`, `pest`, `dose_ai`, `dose_formulation`, `dilution_l`, `waiting_period_days`, `label_date`, `source`. **Only the deterministic layer reads this; the LLM never writes or invents rows.**
 

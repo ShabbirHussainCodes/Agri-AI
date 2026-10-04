@@ -1,0 +1,56 @@
+{
+  "list_version": "banned-central-v1",
+  "scope": "central",
+  "primary_source": "CIB&RC (ppqs.gov.in): list of pesticides banned, refused registration and restricted in India. NOT yet read by anyone on this project: every entry below is an unverified seed. See data/denylists/README.md.",
+  "entries": [
+    {
+      "molecule": "endosulfan",
+      "aliases": ["endosulphan", "thiodan", "एंडोसल्फान"],
+      "category": "unclassified", "status": "unverified",
+      "verified_by": null, "verified_on": null, "source_ref": null,
+      "note": "Seed from the author's recollection that it is banned in India. Unverified: blocks advice, never claims a legal status."
+    },
+    {
+      "molecule": "aldrin",
+      "aliases": ["एल्ड्रिन"],
+      "category": "unclassified", "status": "unverified",
+      "verified_by": null, "verified_on": null, "source_ref": null,
+      "note": "Seed from recollection. Unverified."
+    },
+    {
+      "molecule": "dieldrin",
+      "aliases": ["डायल्ड्रिन"],
+      "category": "unclassified", "status": "unverified",
+      "verified_by": null, "verified_on": null, "source_ref": null,
+      "note": "Seed from recollection. Unverified."
+    },
+    {
+      "molecule": "chlordane",
+      "aliases": ["क्लोरडेन"],
+      "category": "unclassified", "status": "unverified",
+      "verified_by": null, "verified_on": null, "source_ref": null,
+      "note": "Seed from recollection. Unverified."
+    },
+    {
+      "molecule": "heptachlor",
+      "aliases": ["हेप्टाक्लोर"],
+      "category": "unclassified", "status": "unverified",
+      "verified_by": null, "verified_on": null, "source_ref": null,
+      "note": "Seed from recollection. Unverified."
+    },
+    {
+      "molecule": "lindane",
+      "aliases": ["लिंडेन"],
+      "category": "unclassified", "status": "unverified",
+      "verified_by": null, "verified_on": null, "source_ref": null,
+      "note": "Seed from recollection. Unverified."
+    },
+    {
+      "molecule": "ddt",
+      "aliases": ["डीडीटी"],
+      "category": "unclassified", "status": "unverified",
+      "verified_by": null, "verified_on": null, "source_ref": null,
+      "note": "Seed from recollection that agricultural use is not permitted (restricted to public-health vector control). Unverified: the category is left unclassified until read from the official list."
+    }
+  ]
+}

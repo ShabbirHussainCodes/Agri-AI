@@ -41,17 +41,18 @@ from uuid import UUID
 import asyncpg
 
 from app.agent.finalize import finalize_advisory
-from app.agent.tools import farm_context, irrigation, weather
+from app.agent.tools import agrochemical, farm_context, irrigation, weather
 from app.agronomy.crop_water import CropTableError
 from app.agronomy.messages import IRRIGATION_UNAVAILABLE
 from app.agronomy.water_balance import WaterBalanceResult
+from app.safety.agrochemical_lookup import AgrochemTableError, LabelEntry
 from app.core.config import settings
 from app.core.errors import AgentError
 from app.providers.base import LLMProvider
 from app.retrieval.context import build_passage_block
 from app.retrieval.embedder import get_query_embedder
 from app.retrieval.hybrid import Embedder, retrieve
-from app.safety import crop_scope
+from app.safety import chemical_guard, crop_scope
 from app.schemas.advisory import AdvisoryResponse, DraftAdvisory
 
 # ADR-0013: a dense-similarity threshold cannot tell answerable from
@@ -109,6 +110,11 @@ Rules:
 TURN_B_IRRIGATION_RULE = """
 - A get_irrigation_status result is present: its verdict, depletion_mm, raw_mm and days_to_raw were calculated by code. Set irrigation_verdict to its verdict exactly, and never recalculate or change those numbers. Give water amounts in mm only (never litres, hectares or acres). If the verdict is "cannot_assess", give no irrigation timing: say what is missing, using its reason. Forecast rain is not counted in the verdict: you may mention forecast_rain_mm and say irrigation can wait if that rain comes."""
 
+# Appended to Turn B's prompt ONLY when lookup_agrochemical found a label card
+# (ADR-0016). Without a card the base rule stands: never state a dose, abstain.
+TURN_B_LABEL_RULE = """
+- A lookup_agrochemical result says the system will show the farmer a label card with the dose and waiting period. Never write a dose, rate, dilution, percentage or waiting period yourself, and do not abstain just because the farmer asked for one: say the card has the details and that the label on the product pack is the legal source. You may name the molecule."""
+
 TOOLS = [weather.TOOL_SPEC, irrigation.TOOL_SPEC]
 
 
@@ -118,6 +124,9 @@ async def _dispatch_tool(
     name: str,
     *,
     named_crops: frozenset[str] = frozenset(),
+    arguments: dict[str, Any] | None = None,
+    denylist: chemical_guard.Denylist | None = None,
+    collector: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     """Every branch here is explicit -- an unknown tool name or a tool
     failure becomes evidence the model can see and reason about (e.g.
@@ -135,11 +144,23 @@ async def _dispatch_tool(
                     table_path=settings.crop_water_table,
                 )
             )
+        elif name == agrochemical.TOOL_NAME and denylist is not None:
+            outcome = agrochemical.run_lookup(
+                arguments or {},
+                table=agrochemical.table_for(settings.agrochem_table),
+                denylist=denylist,
+            )
+            if collector is not None:
+                collector["agrochemical_label"] = outcome.entries  # for the farmer's card, never the model
+            return outcome.payload
         else:
             return {"error": f"unknown tool: {name}"}
         return result.model_dump(mode="json")
     except weather.WeatherUnavailable as exc:
         return {"error": str(exc)}
+    except AgrochemTableError:
+        logger.exception("agrochemical table is unusable")
+        return {"error": "pesticide label data is unavailable"}
     except CropTableError:
         # A broken reference table is a deployment error. The model must not
         # see (and repeat) the file path in the exception text.
@@ -164,6 +185,14 @@ async def run_agent(
     # DB failure here is a Postgres/RLS error, not an agent error -- it
     # deliberately falls through to the existing postgres_error_handler
     # (main.py), not the AgentError handling below.
+    # Safety data first, before any model call spends quota: with no denylist the
+    # guards cannot promise anything, so the farmer gets an honest error, never
+    # an unguarded answer (ADR-0016).
+    try:
+        denylist = chemical_guard.get_denylist()
+    except chemical_guard.DenylistError as exc:
+        raise AgentError(f"Safety data unavailable: {exc}") from exc
+
     farm_data = await farm_context.get_farm_context(conn, farm_id)
 
     # Deterministic retrieval (Phase 4 decision). Unfiltered for v1: the
@@ -197,6 +226,10 @@ async def run_agent(
     )
     live_data: weather.WeatherData | None = None
     water_balance: WaterBalanceResult | None = None
+    collected: dict[str, Any] = {}
+    # The label lookup is offered only to chemical questions (ADR-0016): its
+    # ~150 tokens stay off every other question.
+    tools = [*TOOLS, agrochemical.TOOL_SPEC] if agrochemical.question_is_chemical(question, denylist) else TOOLS
 
     messages: list[dict[str, Any]] = [
         {"role": "system", "content": TURN_A_SYSTEM_PROMPT},
@@ -211,7 +244,7 @@ async def run_agent(
 
     try:
         for _ in range(MAX_TOOL_ROUNDS):
-            result = await provider.chat(messages, model=model, tools=TOOLS)
+            result = await provider.chat(messages, model=model, tools=tools)
 
             if not result.tool_calls:
                 break
@@ -231,7 +264,8 @@ async def run_agent(
             )
             for tc in result.tool_calls:
                 tool_result = await _dispatch_tool(
-                    conn, farm_id, tc.name, named_crops=named_crops
+                    conn, farm_id, tc.name, named_crops=named_crops,
+                    arguments=tc.arguments, denylist=denylist, collector=collected,
                 )
                 if tc.name == "get_weather" and "error" not in tool_result:
                     # Kept typed so code, not the model, fills live_data.
@@ -257,7 +291,12 @@ async def run_agent(
         # plus any tool-call rounds, with Turn A's system message dropped.
         # The passages are appended here, and only here -- Turn A never saw
         # them (see module docstring).
-        turn_b_prompt = TURN_B_SYSTEM_PROMPT + (TURN_B_IRRIGATION_RULE if water_balance is not None else "")
+        label_cards: list[LabelEntry] = collected.get("agrochemical_label", [])
+        turn_b_prompt = (
+            TURN_B_SYSTEM_PROMPT
+            + (TURN_B_IRRIGATION_RULE if water_balance is not None else "")
+            + (TURN_B_LABEL_RULE if label_cards else "")
+        )
         turn_b_messages = [
             {"role": "system", "content": turn_b_prompt},
             *messages[1:],
@@ -282,6 +321,8 @@ async def run_agent(
             named_crops=named_crops,
             water_balance=water_balance,
             question_text=question,
+            denylist=denylist,
+            agrochemical_label=label_cards,
         )
 
     except AgentError:
