@@ -1,56 +1,135 @@
-"""INTERIM dose / waiting-period guard -- Phase 4 stop-gap, NOT the Phase 6
-safety layer, and not a substitute for it (decision, 2026-09-25).
+"""Dose / waiting-period guard (CLAUDE.md rule 1, ADR-0016).
 
-Why it exists now: Phase 4 puts retrieved corpus text in front of the model,
-and that corpus contains a research trial's real application rates
-(B. subtilis @ 4 g/L, Tilt 25% EC @ 1 mL/L, ...). CLAUDE.md rule 1 allows a
-dose or waiting period ONLY from the deterministic CIB&RC lookup, which does
-not exist yet. So until Phase 6, ANY dose-shaped or waiting-period-shaped
-statement in an answer -- recommendation, reasoning, or quoted evidence --
-turns the whole answer into an abstention.
+Born as the Phase 4 stop-gap; since Phase 6 (ADR-0016) it is the PERMANENT
+backstop of a positive design: the model never writes a dose, so any
+dose-shaped or waiting-period-shaped statement in text the farmer would read,
+whether the recommendation, the reasoning or a quoted passage, turns the whole
+answer into an abstention. A dose reaches a farmer only as a structured label
+entry the code itself copied from a verified table (app/safety/agrochemical_lookup.py),
+never as prose.
 
-It is deliberately blunt. It will sometimes block harmless text (say, a
-fertiliser quantity); that is the right direction to fail in. It is pattern
-matching, so it can also MISS a dose phrased in a way the patterns do not
-cover -- which is exactly why Phase 6 replaces it with positive verification
-instead of pattern blocking. The dose_safety_abstention eval bucket measures
-how often it misses.
+Why a research trial's rates are blocked too: the ingested corpus contains
+real application rates (B. subtilis @ 4 g/L, Tilt 25% EC @ 1 mL/L, ...) as a
+trial protocol, not label recommendations.
+
+It is pattern matching, so it can MISS a phrasing it does not know. Phase 6
+measured that (tests/test_dose_guard_adversarial.py): the Phase 4 patterns
+caught 14 of 44 adversarial phrasings (household measures, percentages, "per
+acre 500 g", "wait 21 days before you harvest", Hinglish). Two layers now:
+
+  1. find_dose_statement(text): context-free patterns, widened by that
+     measurement. Applied to the model's prose AND to quoted passages.
+  2. find_ungrounded_application_number(text, allowed): in any sentence that
+     talks about applying a chemical (or in EVERY sentence when the whole
+     conversation is about chemicals), every number must already be in the
+     evidence the model was given (the farmer's question, the farm record,
+     weather, a computed water balance, a code-copied label entry), never in a
+     retrieved passage. A phrasing no pattern knows still carries a number, and
+     that number has no legitimate source. Applied to the model's prose only.
+
+It is deliberately blunt: it will sometimes block harmless text. That is the
+right direction to fail in. A vague quantity ("a little", "some") with no
+number, number word or household unit is not seen.
 """
 import re
 
+from app.safety import number_grounding
+
 _NUM = r"\d+(?:[.,]\d+)*"
-# Units of an amount applied (mass / volume), English and Hindi.
+_NUMWORD = (
+    r"(?:zero|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|thirteen|fourteen|fifteen|sixteen"
+    r"|seventeen|eighteen|nineteen|twenty|thirty|forty|fifty|sixty|seventy|eighty|ninety|hundred|thousand|half|quarter"
+    r"|ek|do|teen|char|paanch|panch|chhe|chah|saat|aath|nau|das|bees|tees|chalis|pachas|sau|aadha|dedh|dhai"
+    r"|एक|दो|तीन|चार|पांच|पाँच|छह|छः|सात|आठ|नौ|दस|बीस|तीस|चालीस|पचास|सौ|आधा|आधी|डेढ़|ढाई)"
+)
+_QTY = rf"(?:{_NUM}|{_NUMWORD})"
+# A quantity: digits, or one or more number words ("two hundred", "thirty-five", "दो सौ").
+_QTYS = rf"(?:{_NUM}|{_NUMWORD}(?:[\s-]+{_NUMWORD})*)"
+# Units of an amount applied (mass / volume), English, Hinglish and Hindi.
 _AMOUNT = (
-    r"(?:mg|g|gm|gms|grams?|kgs?|kilo(?:gram)?s?|ml|mls|millilit(?:re|er)s?|l|lit(?:re|er)s?|ltrs?|lt|oz"
+    r"(?:mg|g|gm|gms|grams?|kgs?|kilo(?:gram)?s?|ml|mls|cc|millilit(?:re|er)s?|l|lit(?:re|er)s?|ltrs?|lt|oz"
     r"|ग्राम|किलो(?:ग्राम)?|मिली(?:लीटर)?|लीटर)"
 )
 # What the amount is applied per / into.
 _BASE = (
-    r"(?:l|lit(?:re|er)s?|ltrs?|lt|ha|hectares?|acres?|bigha|kgs?|plants?|tanks?|pumps?|m2|sq\.?\s*m"
-    r"|लीटर|हेक्टेयर|एकड़|पौधा|पौधे|टंकी)"
+    r"(?:l|lit(?:re|er)s?|ltrs?|lt|ha|hectares?|acres?|bigha|kgs?|plants?|tanks?|pumps?|m2|sq\.?\s*m|gallons?"
+    r"|लीटर|हेक्टेयर|एकड़|पौधा|पौधे|टंकी|पंप)"
 )
 # A unit must end at the end of a word. \b is unreliable for Devanagari
 # (vowel signs are not \w), so an explicit lookahead is used instead.
 _END = r"(?![A-Za-zऀ-ॿ])"
+_PER = r"(?:/|per|prati|प्रति)"
+_IN = r"(?:in|into|with|for|me|mein|ke\s+liye|में|के\s+लिए)"
+_ART = r"(?:(?:a|an|the)\s+)?"
+_AI = r"(?:a\.?i\.?\s*)?"
 
 _PATTERNS = [
-    # 4 g/L · 5 ml per litre · 2 kg/ha · 4 ग्राम प्रति लीटर
-    re.compile(rf"{_NUM}\s*{_AMOUNT}{_END}\s*(?:/|per|प्रति)\s*(?:{_NUM}\s*)?{_BASE}{_END}", re.I),
-    # 10 ml in 10 litres of water · 10 मिली 10 लीटर में
-    re.compile(rf"{_NUM}\s*{_AMOUNT}{_END}\s*(?:in|into|with|में)\s*{_NUM}\s*{_BASE}{_END}", re.I),
+    # 4 g/L · 5 ml per litre · 2 kg/ha · 1.5 kg a.i./ha · 3 gm prati litre · 4 ग्राम प्रति लीटर
+    re.compile(rf"{_QTYS}\s*{_AMOUNT}{_END}\s*{_AI}{_PER}\s*(?:{_QTYS}\s*)?{_BASE}{_END}", re.I),
+    # 10 ml in 10 litres of water · 20 ml for 10 litres · 30 grams for a 15 L pump
+    re.compile(rf"{_QTYS}\s*{_AMOUNT}{_END}\s*{_IN}\s*{_ART}{_QTYS}\s*{_BASE}{_END}", re.I),
     # @ 4 g · @1 mL -- the trial protocol's own notation
     re.compile(rf"@\s*{_NUM}\s*{_AMOUNT}{_END}", re.I),
+    # per acre 500 g · प्रति एकड़ 250 मिली · prati acre 500 gm
+    re.compile(rf"{_PER}\s+(?:{_QTYS}\s*)?{_BASE}{_END}\s*(?:{_IN}\s*)?{_QTYS}\s*{_AMOUNT}{_END}", re.I),
+    # एक एकड़ में 500 ग्राम · in one acre 500 g
+    re.compile(rf"{_BASE}{_END}\s*{_IN}\s*{_QTYS}\s*{_AMOUNT}{_END}", re.I),
+    # 0.1% solution · 2 percent solution · 0.5 प्रतिशत घोल · solution of 0.2 %
+    re.compile(
+        rf"{_NUM}\s*(?:%|percent|per\s*cent|प्रतिशत)\s*(?:w/v\s*|v/v\s*)?(?:solution|घोल|spray|mixture|concentration|strength)",
+        re.I,
+    ),
+    re.compile(rf"(?:solution|घोल)\s+(?:of\s+|का\s+)?{_NUM}\s*(?:%|percent|per\s*cent|प्रतिशत)", re.I),
+    # 100 ppm
+    re.compile(rf"{_NUM}\s*ppm{_END}", re.I),
 ]
 
-_DOSE_WORDS = re.compile(r"\b(?:dose|dosage|spray|apply|application rate)\b|मात्रा|छिड़काव|डालें|डालूँ", re.I)
-_AMOUNT_ALONE = re.compile(rf"{_NUM}\s*{_AMOUNT}{_END}", re.I)
-
-_WAITING_WORDS = re.compile(
-    r"waiting period|pre-?harvest interval|\bPHI\b|before harvest|प्रतीक्षा अवधि|कटाई से पहले", re.I
+_DOSE_WORDS = re.compile(
+    r"\b(?:dose|dosage|spray(?:ed|ing)?|apply|application rate|dalo|daalo|daalein|dalna|milao|milayein|chhidkav)\b"
+    r"|मात्रा|छिड़काव|डालें|डालूँ|डालो|मिलाएं|मिलाकर",
+    re.I,
 )
-_DAYS = re.compile(rf"{_NUM}\s*(?:days?|दिन)", re.I)
+_AMOUNT_ALONE = re.compile(rf"{_QTYS}\s*{_AMOUNT}{_END}", re.I)
+
+# Kitchen measures used as doses ("two spoons per tank", "आधी बोतल प्रति एकड़").
+_HOUSEHOLD = re.compile(
+    r"\b(?:tsp|tbsp|teaspoons?|tablespoons?|spoons?|caps?|bottles?|cups?|glass|handful|pinch|sachets?|packets?"
+    r"|chammach|dhakkan)\b|चम्मच|ढक्कन|बोतल|गिलास|मुट्ठी|पुड़िया",
+    re.I,
+)
+_HOUSEHOLD_CONTEXT = re.compile(
+    rf"{_BASE}{_END}|\b(?:tank|pump|litre|liter|acre|hectare)s?\b|{_DOSE_WORDS.pattern}", re.I
+)
+
+# Waiting periods. STRONG words mean a waiting period by themselves; WEAK words
+# (harvest, pick, eat) only count in a sentence that also mentions spraying.
+_WAITING_STRONG = re.compile(
+    r"waiting period|pre-?\s?harvest|\bphi\b|withholding|re-?entry"
+    r"|before\s+(?:you\s+|the\s+|we\s+)?(?:harvest|pick|picking|pluck|eat)|before harvest"
+    r"|प्रतीक्षा अवधि|कटाई से पहले|तुड़ाई से पहले",
+    re.I,
+)
+_WAITING_WEAK = re.compile(
+    r"\b(?:harvest(?:ed|ing)?|pick(?:ed|ing)?|pluck(?:ed|ing)?|fruit|eat|khana|harvest)\b|तोड़|तुड़ाई|कटाई",
+    re.I,
+)
+_SPRAY_WORDS = re.compile(
+    r"\b(?:spray(?:ed|ing|s)?|sprayer|chhidkav|dawai|dawa)\b|छिड़काव|छिड़क|दवा|दवाई|कीटनाशक", re.I
+)
+_DAYS = re.compile(
+    rf"{_QTY}\s*(?:days?|din|dino|दिन|hours?|hrs?|ghante|घंटे|weeks?|hafte|हफ्ते|हफ़्ते|सप्ताह)", re.I
+)
 
 _SENTENCE_SPLIT = re.compile(r"(?<=[.!?।])\s+|\n+")
+
+# "Talks about applying a chemical", for the grounded-number rule.
+_APPLICATION_VOCAB = re.compile(
+    r"\b(?:spray(?:ed|ing|s)?|sprayer|apply|applied|applying|application|drench(?:ed|ing)?|dose|dosage"
+    r"|dilute[d]?|mix|mixing|pesticides?|fungicides?|insecticides?|herbicides?|pump|tank|chhidkav|dawai|dawa"
+    r"|daalo|dalo|daalein|milao|ghol)\b"
+    r"|छिड़काव|छिड़क|डाल|मिला|घोल|दवा|दवाई|कीटनाशक|फफूंदनाशक|फफूँदनाशक|खरपतवारनाशक|पंप|टंकी|मात्रा",
+    re.I,
+)
 
 SAFE_ABSTAIN_REASON = "no_verified_dose_source"
 # Bilingual, Hindi first (same convention as app/agent/finalize.py).
@@ -77,8 +156,29 @@ def find_dose_statement(text: str) -> str | None:
             m = _AMOUNT_ALONE.search(sentence)
             if m:
                 return m.group(0)
-        if _WAITING_WORDS.search(sentence):
+        if _HOUSEHOLD.search(sentence) and _HOUSEHOLD_CONTEXT.search(sentence):
+            return _HOUSEHOLD.search(sentence).group(0)  # type: ignore[union-attr]
+        waiting = _WAITING_STRONG.search(sentence) or (
+            _WAITING_WEAK.search(sentence) and _SPRAY_WORDS.search(sentence)
+        )
+        if waiting:
             m = _DAYS.search(sentence)
             if m:
                 return m.group(0)
+    return None
+
+
+def find_ungrounded_application_number(
+    text: str, allowed: frozenset[float], *, any_sentence: bool = False
+) -> str | None:
+    """In a sentence about applying a chemical, a number that is not in `allowed`
+    (numbers the model may legitimately repeat: the farmer's question, the farm
+    record, weather, a computed balance, a code-copied label entry; NOT
+    retrieved passages). `any_sentence=True` (a chemical conversation) checks every
+    sentence, because a dose can be phrased with no application word at all
+    ("the product goes on at 750 over the plot"). Returns the sentence, or None."""
+    allowed = allowed | number_grounding.HELPLINE_PARTS
+    for sentence in _SENTENCE_SPLIT.split(text):
+        if (any_sentence or _APPLICATION_VOCAB.search(sentence)) and number_grounding.numbers_in(sentence) - allowed:
+            return sentence
     return None
