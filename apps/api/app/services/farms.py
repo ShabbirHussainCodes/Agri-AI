@@ -46,6 +46,12 @@ async def update_farm(conn: asyncpg.Connection, farm_id: UUID, data: FarmUpdate)
     )
 
 
+async def get_farm(conn: asyncpg.Connection, farm_id: UUID) -> asyncpg.Record | None:
+    """None when the farm does not exist or is not the caller's: RLS hides it, so
+    the two look the same, on purpose."""
+    return await conn.fetchrow("select * from public.farms where id = $1", farm_id)
+
+
 async def list_farms(conn: asyncpg.Connection) -> list[asyncpg.Record]:
     # No WHERE profile_id = ... here on purpose — RLS already restricts
     # this to the caller's own rows. Adding a redundant filter would just

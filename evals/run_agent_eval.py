@@ -56,6 +56,10 @@ import httpx  # noqa: E402
 import agent_eval_scoring as scoring  # noqa: E402
 from app.agent import loop  # noqa: E402
 from app.core.config import settings  # noqa: E402
+
+# ADR-0017: /ask caps and saves answers. An eval is 55 questions in one go: no cap.
+settings.ask_limit_per_user_per_day = 0
+settings.ask_limit_global_per_day = 0
 from app.main import app  # noqa: E402
 from app.providers.base import LLMProvider  # noqa: E402
 from app.routers.ask import get_llm_provider  # noqa: E402

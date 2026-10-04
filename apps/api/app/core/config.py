@@ -63,5 +63,17 @@ class Settings(BaseSettings):
     # major-uses-v1.json in the repo (no rows ship). Tests use a SYNTHETIC one; production must not.
     agrochem_table: Path | None = None
 
+    # ADR-0017: the browser app. The API answers cross-origin requests only from
+    # this origin (plus any extras, e.g. a Vercel preview URL). JWT travels in a
+    # header, never a cookie, so credentials are not allowed.
+    web_base_url: str = "http://localhost:3000"
+    cors_extra_origins: list[str] = []
+
+    # ADR-0017: /ask is capped because the free-tier LLM budget is ~40 questions a
+    # day (CLAUDE.md section 11) and signup is open. Rolling 24 hours. 0 = no cap:
+    # use it for local development and for the eval runner, never in production.
+    ask_limit_per_user_per_day: int = 10
+    ask_limit_global_per_day: int = 35
+
 
 settings = Settings()

@@ -1,4 +1,5 @@
 from fastapi import Depends, FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.auth import AuthContext, get_current_user
 from app.core.config import settings
@@ -11,6 +12,15 @@ from app.core.errors import AgentError, agent_error_handler, postgres_error_hand
 import asyncpg
 
 app = FastAPI(title="AgriAI API", version="0.1.0", lifespan=lifespan)
+# ADR-0017: the browser app is a different origin. Only it may call the API from a
+# browser. The JWT is sent in the Authorization header, so cookies/credentials stay off.
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[settings.web_base_url, *settings.cors_extra_origins],
+    allow_methods=["GET", "POST", "PATCH", "OPTIONS"],
+    allow_headers=["Authorization", "Content-Type"],
+    allow_credentials=False,
+)
 app.include_router(farms_router.router)
 app.include_router(farm_crops_router.router)
 app.include_router(crops_router.router)

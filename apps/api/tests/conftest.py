@@ -13,6 +13,7 @@ import pytest_asyncio
 from httpx import ASGITransport
 
 from app.main import app
+from app.core.config import settings
 
 SUPABASE_AUTH_URL = "http://127.0.0.1:54321/auth/v1"
 SUPABASE_PUBLISHABLE_KEY = "sb_publishable_ACJWlzQHlZjBrEguHvfOxg_3BJgxAaH"
@@ -27,10 +28,17 @@ async def client():
     # "DB pool not initialised". app.router.lifespan_context(app) is the
     # same async context manager FastAPI/Starlette use internally when a
     # real server boots the app -- no extra dependency needed.
-    async with app.router.lifespan_context(app):
-        transport = ASGITransport(app=app)
-        async with httpx.AsyncClient(transport=transport, base_url="http://test") as c:
-            yield c
+    # ADR-0017: /ask is capped in production (rolling 24 h, across all users). Tests
+    # create many answers, so they run uncapped; the cap has its own DB-free tests.
+    saved = (settings.ask_limit_per_user_per_day, settings.ask_limit_global_per_day)
+    settings.ask_limit_per_user_per_day = settings.ask_limit_global_per_day = 0
+    try:
+        async with app.router.lifespan_context(app):
+            transport = ASGITransport(app=app)
+            async with httpx.AsyncClient(transport=transport, base_url="http://test") as c:
+                yield c
+    finally:
+        settings.ask_limit_per_user_per_day, settings.ask_limit_global_per_day = saved
 
 
 @pytest.fixture(scope="module")

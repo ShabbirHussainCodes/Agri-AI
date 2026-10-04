@@ -30,6 +30,21 @@ async def list_farms(
     return [dict(r) for r in rows]
 
 
+@router.get("/{farm_id}", response_model=Farm)
+async def get_farm(
+    farm_id: UUID,
+    user: AuthContext = Depends(get_current_user),
+    conn=Depends(get_authed_conn),
+):
+    row = await farms_service.get_farm(conn, farm_id)
+    if row is None:
+        return JSONResponse(
+            status_code=404,
+            content={"error": {"code": "not_found", "message": "No such farm."}},
+        )
+    return dict(row)
+
+
 @router.patch("/{farm_id}", response_model=Farm)
 async def update_farm(
     farm_id: UUID,
