@@ -22,13 +22,7 @@ COPY data data
 
 # Bake the ~470 MB embedding model into the image so a cold start does not download it. This
 # is the same file and revision logic the app uses at runtime (app/retrieval/embedder.py).
-RUN python - <<'PY'
-from huggingface_hub import hf_hub_download
-from transformers import AutoTokenizer
-repo = "intfloat/multilingual-e5-small"
-hf_hub_download(repo_id=repo, filename="onnx/model.onnx", cache_dir="/app/models")
-AutoTokenizer.from_pretrained(repo, cache_dir="/app/models")
-PY
+RUN python -c "from huggingface_hub import hf_hub_download; from transformers import AutoTokenizer; r='intfloat/multilingual-e5-small'; hf_hub_download(repo_id=r, filename='onnx/model.onnx', cache_dir='/app/models'); AutoTokenizer.from_pretrained(r, cache_dir='/app/models')"
 
 # HF Spaces runs as user 1000 and expects port 7860 (the Space's README.md sets app_port).
 RUN useradd -m -u 1000 user && chown -R user /app
