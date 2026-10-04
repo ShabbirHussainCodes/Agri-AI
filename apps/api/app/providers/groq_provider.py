@@ -30,6 +30,10 @@ def _make_strict(schema: dict[str, Any]) -> dict[str, Any]:
     first real cassette recording (next step after this) is what actually
     proves it against the live API, not this function in isolation.
     """
+    # `default` is dropped: every property is required here, so a default can
+    # never apply, and strict mode may not accept the keyword (Phase 5 added the
+    # first field with a default, DraftAdvisory.irrigation_verdict).
+    schema.pop("default", None)
     if schema.get("type") == "object" or "properties" in schema:
         props = schema.get("properties", {})
         schema["additionalProperties"] = False

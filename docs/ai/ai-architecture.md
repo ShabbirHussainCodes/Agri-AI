@@ -34,6 +34,7 @@ Every advisory is one object (one Pydantic model = LLM schema + FastAPI response
 
 - `structured_data` — from the farm record (crop, stage, area, soil card values).
 - `live_data` — from weather/price APIs, timestamped.
+- `water_balance` — numbers *computed* by code from the farm record, weather and a reviewed reference table (irrigation, ADR-0015). Written by code, never by the model.
 - `retrieved_evidence[]` — each with `source_org`, `doc_title`, `published_year`, `page`, and the quoted span.
 - `model_inference` — what the model concluded.
 - `recommendation` — the actionable output.

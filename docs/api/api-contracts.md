@@ -16,9 +16,10 @@ Handled by Supabase Auth on the client; the backend only **verifies** the JWT (J
 
 | Method | Path | Body → Response |
 |---|---|---|
-| POST | `/farms` | `{name, lat, lon, area_ha, district?, state?}` → `Farm` |
+| POST | `/farms` | `{name, lat?, lon?, area_ha?, district?, state?, soil_texture?}` → `Farm`. `soil_texture` is `sandy` (retili) · `loamy` (domat) · `clayey` (chikni/kali); lat/lon are range-checked |
 | GET | `/farms` | → `Farm[]` (only the caller's) |
-| GET | `/farms/{id}` | → `Farm` |
+| GET | `/farms/{id}` | → `Farm` *(planned; not built yet: only `GET /farms` exists)* |
+| PATCH | `/farms/{id}` | any of `{name, lat, lon, area_ha, district, state, soil_texture}` → `Farm`. Only the fields sent change; an explicit `null` clears a nullable field; an empty body is a 422; a farm that is not the caller's is a 404 (ADR-0015: a farm created without a location or soil type could otherwise never gain one) |
 | POST | `/farms/{id}/crops` | `{crop_id, variety, sowing_date}` → `FarmCrop` (stage computed) |
 | GET | `/farms/{id}/timeline` | → chronological `activities` + `advisories` + `disease_scans` |
 
@@ -39,6 +40,7 @@ Handled by Supabase Auth on the client; the backend only **verifies** the JWT (J
 {
   structured_data: {...},
   live_data: {...} | null,
+  water_balance: {...} | null,           // ADR-0015: computed by code, null unless get_irrigation_status ran
   retrieved_evidence: [ { chunk_id, source_org, doc_title, doc_type, published_year, page, licence, url, quote } ],
   model_inference: string,
   recommendation: string,
@@ -50,6 +52,10 @@ Handled by Supabase Auth on the client; the backend only **verifies** the JWT (J
 ```
 
 Since Phase 4 (ADR-0013) this object is assembled by code, not written by the model: the model writes a `DraftAdvisory` (reasoning, recommendation, `{passage, quote}` citations); code copies the farm record, weather and every piece of source metadata, validates each quote against the passage it names, and decides abstention (`abstained_because`: the model's own reason, or `insufficient_evidence` · `empty_answer` · `invalid_citation` · `no_valid_citation` · `crop_not_covered` (ADR-0014) · `no_verified_dose_source`). `recommendation` and `model_inference` are never blank: when there is no model text to show, code supplies a bilingual (Hindi + English) message for the abstention reason.
+
+**Irrigation (Phase 5, ADR-0015).** `water_balance` is a third kind of evidence next to `live_data` (measured) and `structured_data` (the farm record): numbers *computed* by code from both plus a reference table. Fields: `verdict` (`irrigate_now` · `wait` · `cannot_assess`), `reason` (set when `cannot_assess`), `as_of`, `crop`, `soil_texture`, `table_version`, `days_since_sowing`, `stage`, `kc_today`, `depletion_mm`, `raw_mm`, `taw_mm`, `days_to_raw` (first forecast day, 0 = today, whose end reaches `raw_mm`; null = not within the horizon), `forecast_et0_mm`, `forecast_rain_mm` (context only, never counted), `anchor_date`, `anchor_kind`, `last_irrigation_on`, `assumptions`, `data_source` (Open-Meteo attribution). All amounts are in mm. The model writes only the explanation and one word, `irrigation_verdict`, which code compares with the computed verdict. Extra `abstained_because` values: `irrigation_verdict_unsupported`, and, for a `cannot_assess` result, its `reason` (`no_location` · `no_active_crop` · `question_crop_differs` · `crop_not_supported` · `crop_reference_unverified` · `soil_texture_missing` · `soil_reference_unverified` · `not_sown_yet` · `past_season_length` · `no_weather_data` · `weather_gap` · `weather_unavailable` · `irrigation_unavailable` (the tool itself failed) · `no_anchor_in_window`). A model answer whose verdict or numbers disagree with the computed result is replaced by a code-authored message and stays an answer (`model_inference` says `Model text replaced by code: ...`).
+
+An irrigation logged through `POST /farm-crops/{id}/activities` with `type: "irrigation"` may carry `details.depth_mm`; without it the balance assumes the root zone was refilled completely.
 
 ## Voice
 

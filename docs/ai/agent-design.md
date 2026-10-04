@@ -30,7 +30,8 @@ return safety_layer(answer)                       # deterministic, runs last
 | Tool | Kind | Input | Output |
 |---|---|---|---|
 | `get_farm_context` | read | `farm_id` | crop, variety, sowing date, computed stage, area, soil card values, last N activities |
-| `get_weather` | read | `lat, lon, horizon` | forecast + soil moisture (5 layers) + soil temp (4 depths) + ET₀ |
+| `get_weather` | read | none (farm-bound) | Phase 2 subset: current temp and rain + 3-day rain forecast. The fuller forecast in the original spec was not built; irrigation uses `get_irrigation_status` instead |
+| `get_irrigation_status` | read | none (farm-bound) | computed FAO-56 root-zone water balance for the active crop: `verdict`, `depletion_mm`, `raw_mm`, `days_to_raw`, assumptions, or `cannot_assess` with a reason (ADR-0015) |
 | `search_knowledge` | read | `query, crop, state, stage, language` | ranked chunks + source + year + page |
 | `lookup_agrochemical` | read | `crop, pest, [molecule]` | registered molecule + dose + dilution + **waiting period** + label date, or `not_found` |
 | `get_market_price` | read | `commodity, district, days` | modal-price series + arrivals + percentile band |
@@ -49,7 +50,7 @@ return safety_layer(answer)                       # deterministic, runs last
 | Pesticide dose & waiting period | **code** | safety — a hallucinated number is real harm |
 | Banned-molecule check | **code** | legal / must be deterministic |
 | Days-after-sowing, growth stage | **code** | date math |
-| Irrigation need (ET₀ − rainfall) | **code**, LLM explains | FAO-56 is a formula |
+| Irrigation need (ET₀ − rainfall) | **code**, LLM explains | FAO-56 is a formula. Code also checks the model's verdict and every number it states against what code computed (`app/safety/irrigation_guard.py`, ADR-0015) |
 | Price percentile / trend | **code** | statistics |
 | Retrieval confidence floor / abstention | **code** | cheap, deterministic, runs before the LLM |
 | Citation validation | **code** | reliable fabrication check |

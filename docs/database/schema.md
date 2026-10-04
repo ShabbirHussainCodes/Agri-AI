@@ -12,7 +12,7 @@ The farm record **is** the product, so the relational model is first-class, not 
 The farmer. `id` (= Supabase `auth.uid()`), `display_name`, `preferred_language` (`hi`|`en`), `phone` (optional), `created_at`. Minimal PII by design.
 
 ### `farms`
-A farm belongs to a profile. `id`, `profile_id` (FK), `name`, `lat`, `lon` (geocoded once at registration, then stored — never re-geocoded), `district`, `state`, `agro_climatic_zone`, `area_ha`, soil card values (`soil_ph`, `soil_n`, `soil_p`, `soil_k`, nullable — farmer-entered, since there is no Soil Health Card API), `created_at`.
+A farm belongs to a profile. `id`, `profile_id` (FK), `name`, `lat`, `lon` (geocoded once at registration, then stored — never re-geocoded), `district`, `state`, `agro_climatic_zone`, `area_ha`, `soil_texture` (`sandy` | `loamy` | `clayey`, nullable; the farmer's own words retili / domat / chikni, added in migration `20261004120000` for the irrigation water balance, ADR-0015), soil card values (`soil_ph`, `soil_n`, `soil_p`, `soil_k`, nullable — farmer-entered, since there is no Soil Health Card API), `created_at`.
 
 ### `crops` (reference) and `farm_crops`
 `crops` is a reference table (crop id, names in hi/en, default calendar hints). `farm_crops` is a specific planting: `id`, `farm_id` (FK), `crop_id` (FK), `variety`, `sowing_date`, `expected_harvest`, `status` (active/harvested), `created_at`. Growth stage is **computed** from `sowing_date`, never stored as a mutable field.

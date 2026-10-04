@@ -17,6 +17,10 @@
 | **WhatsApp Cloud API** | Meta test WABA + test number | Optional, demo only. Real users need business verification — say so honestly in docs. |
 | **Telegram Bot API** | Free | Optional — proves the notification-adapter abstraction at zero cost. |
 
+## Open-Meteo in AgriAI (Phase 5, ADR-0015)
+
+`app/integrations/open_meteo.py` asks for `daily=et0_fao_evapotranspiration,precipitation_sum`, `timezone=auto`, `past_days=92`, `forecast_days=7`. Coordinates are rounded to 2 decimals (about 1 km) before leaving the server; Open-Meteo snaps to its own grid anyway. "Today" is the farm's local date from the response's `utc_offset_seconds`. The attribution string (CC BY 4.0) travels in `water_balance.data_source` and must be shown wherever the data is. The free API is for **non-commercial** use. The variable names and limits were taken from search results because open-meteo.com was unreachable from the build environment: the first live call is their proof (a wrong name makes Open-Meteo answer HTTP 400, which the client reports as `weather_unavailable`, never as data). `get_weather` (Phase 2) is unchanged and uses `rain_sum`.
+
 ## Client rules
 
 - Typed request/response models; explicit timeouts; graceful degradation on failure (cached value or honest "unavailable").

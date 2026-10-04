@@ -54,5 +54,10 @@ class Settings(BaseSettings):
     # evidence is ranked 5th, so 6 stays until better ranking (Phase 10).
     rag_context_chunks: int = 6
 
+    # Phase 5 (ADR-0015): the crop/soil reference table used by the irrigation
+    # water balance. Unset = data/crop_water/crop-water-v1.json in the repo.
+    # Tests and the eval set this to a SYNTHETIC table; production must not.
+    crop_water_table: Path | None = None
+
 
 settings = Settings()

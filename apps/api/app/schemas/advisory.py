@@ -23,6 +23,12 @@ fabricated because the model never produces it.
 
 structured_data/live_data stay typed to the real tool output shapes
 (FarmContextData, WeatherData), not a generic dict.
+
+Phase 5 (ADR-0015) adds a third kind of evidence: `water_balance`, numbers
+COMPUTED by code from the farm record, the weather and a reference table. It is
+neither measured (live_data) nor the farm record (structured_data), so it has
+its own field, and the model never writes it. DraftAdvisory gains one word,
+`irrigation_verdict`, which code compares with the computed verdict.
 """
 from typing import Literal
 from uuid import UUID
@@ -31,6 +37,7 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from app.agent.tools.farm_context import FarmContextData
 from app.agent.tools.weather import WeatherData
+from app.agronomy.water_balance import WaterBalanceResult
 from app.retrieval.citations import Citation
 
 
@@ -56,6 +63,8 @@ class AdvisoryResponse(BaseModel):
 
     structured_data: FarmContextData
     live_data: WeatherData | None = None
+    # ADR-0015: set only when get_irrigation_status ran. Written by code.
+    water_balance: WaterBalanceResult | None = None
     retrieved_evidence: list[EvidenceItem] = []
     model_inference: str
     recommendation: str
@@ -78,6 +87,7 @@ class AdvisoryResponse(BaseModel):
 
 
 EvidenceBasis = Literal["retrieved_passages", "farm_and_weather_data", "none"]
+IrrigationVerdict = Literal["irrigate_now", "wait", "cannot_assess", "not_applicable"]
 
 
 class DraftAdvisory(BaseModel):
@@ -90,7 +100,8 @@ class DraftAdvisory(BaseModel):
         description=(
             "What the answer rests on: 'retrieved_passages' if it uses anything from "
             "the retrieved passages (then citations are required), "
-            "'farm_and_weather_data' if it uses only this farm's record and weather, "
+            "'farm_and_weather_data' if it uses only this farm's record, weather and "
+            "irrigation status, "
             "'none' if nothing provided supports an answer."
         )
     )
@@ -102,3 +113,14 @@ class DraftAdvisory(BaseModel):
     confidence: float | None
     abstained: bool
     abstained_because: str | None
+    # Default only so a payload written before Phase 5 still parses (the
+    # recorded Phase 2 cassette); the schema sent to Groq lists every field
+    # as required (providers/groq_provider.py _make_strict), so a live model
+    # always writes it.
+    irrigation_verdict: IrrigationVerdict = Field(
+        default="not_applicable",
+        description=(
+            "Copy the 'verdict' of the get_irrigation_status result exactly. "
+            "'not_applicable' if no such result was provided."
+        ),
+    )
