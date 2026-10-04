@@ -13,7 +13,7 @@
 **Phase 5 — IN PROGRESS (code built 2026-10-04; not COMPLETED, so no tag yet).** The irrigation water balance (ADR-0015) is written and tested without a database or network: FAO-56 root-zone bucket in `app/agronomy/`, a fail-closed crop/soil reference table, the `get_irrigation_status` tool, a `water_balance` field in the response, and code checks on the model's verdict and numbers. A COMPLETED phase must run end to end, and these are still open:
 
 1. **A human fills and verifies `data/crop_water/crop-water-v1.json`** against FAO-56 (checklist: `data/crop_water/README.md`). Until then every irrigation question answers `cannot_assess`, by design.
-2. **The first live Open-Meteo call**: the variable names and `past_days=92` could not be tested from the build environment.
+2. ~~The first live Open-Meteo call.~~ Done 2026-10-04: 99 daily rows (2026-07-04 to 2026-10-10), so the variable names and `past_days=92` are proven.
 3. ~~Apply migration `20261004120000` and run the DB-backed tests.~~ Done 2026-10-04 on the project owner's machine: migration applied and the whole suite passed (334 passed: the 104 earlier tests plus 230 new, including `tests/test_farm_update.py`, RLS and the Phase 2 cassette test).
 4. **The live irrigation eval** (`evals/run_irrigation_eval.py --live`), after its token cost is agreed. Its result becomes the baseline. The dry run passes 16/16 and proves only the harness.
 5. **A Hindi read-through** of the code-authored irrigation messages.

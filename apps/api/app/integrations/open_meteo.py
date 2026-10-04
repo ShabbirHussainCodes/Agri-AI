@@ -6,8 +6,10 @@ Parameter names and limits (`et0_fao_evapotranspiration`, `past_days` 0-92,
 `forecast_days` up to 16) were taken from search results on 2026-10-04 because
 open-meteo.com was unreachable from the build environment. The response SHAPE
 (`utc_offset_seconds`, `daily.time`, `daily.<variable>`) was checked against the
-real response recorded in tests/cassettes/test_ask. The first live call is the
-proof of the variable names: a wrong one makes Open-Meteo answer HTTP 400, which
+real response recorded in tests/cassettes/test_ask. PROVEN LIVE on 2026-10-04, from
+the project owner's machine: fetch_daily(26.85, 80.95) returned 99 days (2026-07-04 to
+2026-10-10: 92 past days, today and 6 more), so both variable names, past_days=92 and
+forecast_days=7 are accepted. A wrong name would make Open-Meteo answer HTTP 400, which
 this client reports as OpenMeteoError, never as data.
 
 Privacy (CLAUDE.md section 5): farm location is personal data. Coordinates are

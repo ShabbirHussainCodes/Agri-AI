@@ -60,7 +60,7 @@ Direction of the error is given where it is known.
 
 ## Sources
 - FAO Irrigation and Drainage Paper No. 56 (Allen et al., 1998), chapter 8: the depletion balance and the stress coefficient were seen quoted in search results on 2026-10-04; the primary page `https://www.fao.org/4/x0490e/x0490e0e.htm` could not be fetched from the build environment. Check Eq. 82–85 against it.
-- Open-Meteo: `et0_fao_evapotranspiration` (mm, FAO-56 Penman-Monteith, grass reference), `forecast_days` up to 16, `past_days` 0–92, free API for non-commercial use under CC BY 4.0 (search results, 2026-10-04; `docs/integrations/external-integrations.md`). Not tested against the live API in this build (blocked): the first live call is the proof of the parameter names.
+- Open-Meteo: `et0_fao_evapotranspiration` (mm, FAO-56 Penman-Monteith, grass reference), `forecast_days` up to 16, `past_days` 0–92, free API for non-commercial use under CC BY 4.0 (search results, 2026-10-04; `docs/integrations/external-integrations.md`). Proven against the live API on 2026-10-04 (one call from the owner's machine: 99 daily rows, 2026-07-04 to 2026-10-10, so `past_days=92` plus `forecast_days=7` is accepted and matches the engine's window).
 
 ## Links
 ADR-0006, ADR-0012, ADR-0013, ADR-0014, `data/crop_water/README.md`, `apps/api/app/agronomy/`, `apps/api/app/safety/irrigation_guard.py`, `docs/ai/agent-design.md`.
