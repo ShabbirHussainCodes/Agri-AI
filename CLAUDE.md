@@ -42,7 +42,7 @@ Useful farming information is fragmented, technical, not personalised to the far
 | Reranker | `bge-reranker-v2-m3` (ONNX, top-20) — measure CPU latency first | ADR-0003 |
 | Doc parsing | Docling (MIT), offline on the developer laptop | — |
 | Object storage | Supabase Storage behind a `StorageProvider` interface | ADR-0008 |
-| Python hosting | HF Spaces (16 GB RAM free) or Cloud Run `asia-south1` | — |
+| Python hosting | Cloud Run `asia-south1` (HF Docker Spaces are no longer free, 2026-10-05) | ADR-0017 |
 | Frontend hosting | Vercel Hobby | — |
 | Scheduling | GitHub Actions cron + Supabase Cron | — |
 | Notifications | Web Push (VAPID); Telegram + WhatsApp test number optional | — |

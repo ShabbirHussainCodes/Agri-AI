@@ -7,7 +7,7 @@
 | Piece | Where | Notes |
 |---|---|---|
 | Frontend (Next.js PWA) | Vercel Hobby | non-commercial clause is fine for a portfolio project |
-| AI backend (FastAPI + ML) | HF Spaces (16 GB RAM free) **or** Cloud Run `asia-south1` | HF for zero-card; Cloud Run for Docker/GCP learning + Mumbai locality (needs a card) |
+| AI backend (FastAPI + ML) | Cloud Run `asia-south1` (chosen 2026-10-05) | HF Docker Spaces are no longer free; Cloud Run gives Mumbai locality and needs a billing account |
 | DB + auth + vector + storage | Supabase, project `agriai-db`, `ap-south-1` | free tier; see limits below |
 | Scheduling | GitHub Actions cron + Supabase Cron | one GH job doubles as the Supabase keep-alive |
 | Observability | Langfuse Cloud Hobby | OpenTelemetry-instrumented |
@@ -58,16 +58,16 @@ into the platform's own settings pages, never into Git, chat or a file in this r
 6. **Ingest the corpus into agriai-db** from your laptop (113 chunks; `ingest/README.md`) pointing the
    ingest job's database URL at the remote project. Without it `/ask` has nothing to retrieve.
 
-### 2. API on a Hugging Face Space
-1. Create a **Docker** Space (can be private or public; the API is reachable either way).
-2. `python deploy/hf-space/make_bundle.py <path-to-your-clone-of-the-space>`, then in that folder
-   `git add -A && git commit -m deploy && git push`. Re-run it whenever `data/` (crop table, denylist,
-   label table) or the API changes.
-3. Space → Settings → Variables and secrets. **Secrets:** `AGRIAI_DATABASE_URL`, `AGRIAI_GROQ_API_KEY`.
-   **Variables:** `AGRIAI_JWKS_URL`, `AGRIAI_WEB_BASE_URL` (the Vercel URL, exactly, no trailing slash),
-   `AGRIAI_ENV=production`. The caps default to 10 per user and 35 global per day.
-4. The first build downloads a ~470 MB model into the image; read the build log. Open
-   `https://<space>.hf.space/health` and then `/health/db` (should show `crops_seeded`).
+### 2. API on Google Cloud Run (`asia-south1`)
+Hugging Face is **not** used: its docs say free `cpu-basic` Docker Spaces need a PRO subscription (found 2026-10-05).
+Deployed 2026-10-05 from the repo, with these facts observed:
+1. Secrets go to Secret Manager (`agriai-database-url`: the Supabase **session pooler** string; `agriai-groq-key`), and the default compute service account needs `roles/secretmanager.secretAccessor`.
+2. A new GCP project also needs `roles/cloudbuild.builds.builder` on `<project-number>-compute@developer.gserviceaccount.com`, otherwise `gcloud run deploy --source` fails with a 403 on `storage.objects.get`.
+3. `python deploy/hf-space/make_bundle.py <dir>` builds a folder with the Dockerfile at its root (the script keeps its old name); from inside it:
+   `gcloud run deploy agriai-api --source . --region asia-south1 --allow-unauthenticated --port 7860 --memory 2Gi --cpu 1 --max-instances 1 --timeout 120 --set-env-vars AGRIAI_ENV=production,AGRIAI_JWKS_URL=<project jwks url>,AGRIAI_WEB_BASE_URL=<web url> --set-secrets AGRIAI_DATABASE_URL=agriai-database-url:latest,AGRIAI_GROQ_API_KEY=agriai-groq-key:latest`
+4. Check `<service url>/health` and `/health/db` (`crops_seeded`). Both returned 200 on first deploy.
+5. After the web URL exists: `gcloud run services update agriai-api --region asia-south1 --update-env-vars AGRIAI_WEB_BASE_URL=<web url>` (CORS allows exactly that origin).
+Not verified: Cloud Run's free-tier numbers and whether `asia-south1` is covered (the pricing page could not be read). The project runs on a Google free-trial credit; keep a budget alert and `--max-instances 1`. Observed cost so far: not checked.
 
 ### 3. Web on Vercel
 1. Import the GitHub repo, **Root Directory = `apps/web`**.

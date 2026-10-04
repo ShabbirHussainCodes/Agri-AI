@@ -41,3 +41,9 @@ cd ../web && npm run gen:types
 Voice, photo diagnosis, market prices, push notifications, offline use (no service worker). It
 ships a web manifest, but whether a phone offers "install" is **not verified** yet: check on a
 real Android phone over HTTPS. Hindi text has had no native-speaker review.
+
+## Deployed (Vercel)
+Root Directory `apps/web`, branch `main`. Environment variables are set in the Vercel project (Settings →
+Environment Variables), never in Git: `NEXT_PUBLIC_API_BASE_URL`, `NEXT_PUBLIC_SUPABASE_URL`,
+`NEXT_PUBLIC_SUPABASE_ANON_KEY`. They are read at build time, so changing one needs a redeploy. The API
+allows exactly one browser origin (its `AGRIAI_WEB_BASE_URL`), so a new web domain needs that updated too.
