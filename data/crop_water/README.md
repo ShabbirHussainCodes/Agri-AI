@@ -26,7 +26,14 @@ Then set `status` to `"verified"`, `verified_by` to your name and `verified_on` 
 
 ## Sanity check (ADR-0012)
 
-Reading the table is not enough. After filling a crop, compute its total ETc for one season from a typical ET0 and check that it is in the range an agronomist would expect. If it looks wrong, the row is wrong. Do not "correct" a value silently: write what you changed and why in `notes`.
+Reading the table is not enough. After filling a crop, print what its numbers imply and check that against a published figure for the same crop and region:
+
+```
+cd apps/api
+python -m app.agronomy.sanity_report --et0 <mean ET0 in mm/day for the sowing season>
+```
+
+It prints, for every verified row, the season length, mean Kc, the season's total ETc at that ET0, and each soil's available water, TAW and RAW. Take `--et0` from the weather of the farm and season you are checking (Open-Meteo's `et0_fao_evapotranspiration`, averaged); there is no default on purpose. It ships no acceptable range, because an unsourced range would be the same kind of number this table avoids. If a result looks wrong, the row is wrong. Do not "correct" a value silently: write what you changed and why in `notes`.
 
 ## After editing
 

@@ -14,7 +14,7 @@
 
 1. **A human fills and verifies `data/crop_water/crop-water-v1.json`** against FAO-56 (checklist: `data/crop_water/README.md`). Until then every irrigation question answers `cannot_assess`, by design.
 2. **The first live Open-Meteo call**: the variable names and `past_days=92` could not be tested from the build environment.
-3. **Apply migration `20261004120000`** (`supabase migration up`) and run the DB-backed tests, including `tests/test_farm_update.py` (not run in the build environment).
+3. ~~Apply migration `20261004120000` and run the DB-backed tests.~~ Done 2026-10-04 on the project owner's machine: migration applied and the whole suite passed (334 passed: the 104 earlier tests plus 230 new, including `tests/test_farm_update.py`, RLS and the Phase 2 cassette test).
 4. **The live irrigation eval** (`evals/run_irrigation_eval.py --live`), after its token cost is agreed. Its result becomes the baseline. The dry run passes 16/16 and proves only the harness.
 5. **A Hindi read-through** of the code-authored irrigation messages.
 

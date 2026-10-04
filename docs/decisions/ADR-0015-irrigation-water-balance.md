@@ -55,6 +55,7 @@ Direction of the error is given where it is known.
 
 ## Verification
 - Hand-computed golden cases, invariants and mutation checks: `tests/test_water_balance.py`. Table fail-closed behaviour: `tests/test_crop_water.py`. The guard: `tests/test_irrigation_guard.py`. No LLM, no network.
+- `app/agronomy/sanity_report.py` prints what a filled table implies (season ETc at a given ET₀, TAW, RAW) for the ADR-0012 domain check. It ships no acceptable range.
 - Agent-level behaviour is measured on a separate eval bucket with frozen weather and a **synthetic** reference table. It measures the pipeline (verdict agreement, grounded numbers, abstention on missing inputs, zero doses), **not** agronomic accuracy (CLAUDE.md rule 4).
 
 ## Sources
