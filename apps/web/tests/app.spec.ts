@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { askBody } from "../lib/askBody";
 import { answer, farm, farmCrop, FARM_ID, loginAs, mockApi, newState } from "./helpers";
 
 const SHOTS = "test-results/screens";
@@ -72,7 +73,7 @@ test("farm home: asking shows the advice in the chosen language and fills the di
   await page.screenshot({ path: `${SHOTS}/04-answer-hi.png`, fullPage: true });
   await page.getByRole("button", { name: "English" }).click();
   await expect(card).toContainText("No irrigation is needed right now.");
-  expect(state.requests.find((r) => r.path.endsWith("/ask"))?.body).toEqual({ question: "क्या आज सिंचाई करूँ?" });
+  expect(state.requests.find((r) => r.path.endsWith("/ask"))?.body).toEqual({ question: "क्या आज सिंचाई करूँ?", language: "hi" });
 });
 
 test("evidence types stay visibly separate: calculated, label card, documents, reasoning", async ({ page }) => {
@@ -261,5 +262,22 @@ test("no limitation card when the field is empty, absent (an answer saved earlie
   }
   await expect(page.getByTestId("answer")).toHaveCount(3);
   await expect(page.getByRole("heading", { name: /इस जवाब की सीमा/ })).toHaveCount(0);
+});
+
+test("the UI language travels with the question, and follows the language toggle", async ({ page }) => {
+  await loginAs(page);
+  const state = newState();
+  await mockApi(page, state);
+  await page.goto(`/farms/${FARM_ID}`);
+  await page.getByRole("button", { name: "English" }).click();
+  await page.getByLabel("Ask AgriAI").fill("When should I irrigate?");
+  await page.getByRole("button", { name: "Ask", exact: true }).click();
+  await expect(page.getByTestId("answer")).toBeVisible();
+  expect(state.requests.find((r) => r.path.endsWith("/ask"))?.body).toEqual({ question: "When should I irrigate?", language: "en" });
+});
+
+test("without the switch the body is just the question", () => {
+  expect(askBody("q", "hi", false)).toEqual({ question: "q" });
+  expect(askBody("q", "hi", true)).toEqual({ question: "q", language: "hi" });
 });
 

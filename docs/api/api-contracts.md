@@ -33,7 +33,7 @@ Handled by Supabase Auth on the client; the backend only **verifies** the JWT (J
 
 | Method | Path | Body → Response |
 |---|---|---|
-| POST | `/farms/{id}/ask` | `{question}` (1–1000 chars) → `AdvisoryResponse`. Saved to `advisories`. **429** `{error:{code:"ask_limit_reached", scope:"user"\|"global", message}}` (bilingual) when the rolling 24-hour cap is reached, before any LLM call (ADR-0017). A farm that is not the caller's is a 404. |
+| POST | `/farms/{id}/ask` | `{question, language?}` (question 1–1000 chars; `language` is `"hi"` or `"en"`, optional: it asks the model to write in that language, see `docs/ai/ui-language-hint.md`; anything else is a 422) → `AdvisoryResponse`. Saved to `advisories`. **429** `{error:{code:"ask_limit_reached", scope:"user"\|"global", message}}` (bilingual) when the rolling 24-hour cap is reached, before any LLM call (ADR-0017). A farm that is not the caller's is a 404. |
 | GET | `/farms/{id}/advisories` | → `AdvisoryRecord[]`, newest first: `{id, farm_id, question, response, abstained, created_at}` |
 
 `AdvisoryResponse` (evidence-typed):

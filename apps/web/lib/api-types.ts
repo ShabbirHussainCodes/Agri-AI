@@ -350,6 +350,8 @@ export interface components {
         };
         /** AskRequest */
         AskRequest: {
+            /** Language */
+            language?: ("hi" | "en") | null;
             /** Question */
             question: string;
         };

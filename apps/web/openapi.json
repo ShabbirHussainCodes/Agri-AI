@@ -249,6 +249,21 @@
       },
       "AskRequest": {
         "properties": {
+          "language": {
+            "anyOf": [
+              {
+                "enum": [
+                  "hi",
+                  "en"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Language"
+          },
           "question": {
             "maxLength": 1000,
             "minLength": 1,

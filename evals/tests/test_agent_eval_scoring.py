@@ -81,3 +81,13 @@ def test_errors_are_kept_not_dropped():
     summ = s.summarise(rows)
     assert summ["n_questions"] == 2 and summ["n_errors"] == 1 and summ["behaviour_accuracy"] == 1.0
     assert "| english_factual | 1 |" in s.to_markdown(summ, "t", "m")
+
+
+def test_script_share_tells_hindi_from_english_and_ignores_digits_and_punctuation():
+    from agent_eval_scoring import script_share
+
+    assert script_share("अभी सिंचाई की ज़रूरत नहीं है।") == 1.0
+    assert script_share("No irrigation is needed right now.") == 0.0
+    assert script_share("१२३ ४५। ,") is None and script_share("") is None
+    mixed = script_share("मिट्टी में 45 mm की कमी है, EG 203 रूटस्टॉक सबसे अच्छा रहा।")
+    assert mixed is not None and mixed > 0.8  # a Hindi answer that names a rootstock is still Hindi

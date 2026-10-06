@@ -150,6 +150,28 @@ def _token_lines(records: list[dict]) -> list[str]:
     return lines
 
 
+def _language_lines(records: list[dict], language: str) -> list[str]:
+    """How well the answers follow the language hint, and the answers themselves, for a human to read
+    (Hindi quality is a human judgement, CLAUDE.md section 6; this script only counts script)."""
+    answered = [r for r in records if r.get("response") and not r["response"]["abstained"]]
+    lines = [f"## Language hint: `{language}`", ""]
+
+    def follows(text: str) -> bool:
+        share = scoring.script_share(text)
+        return share is not None and (share >= 0.5 if language == "hi" else share <= 0.1)
+
+    for field in ("recommendation", "model_inference"):
+        ok = sum(1 for r in answered if follows(r["response"].get(field) or ""))
+        lines.append(f"- Answered responses whose `{field}` is in the requested language "
+                     f"({'Devanagari share >= 50%' if language == 'hi' else 'Devanagari share <= 10%'}): **{ok} / {len(answered)}**")
+    lines += ["", "Answers to read (answered questions only):", ""]
+    for r in answered:
+        lines.append(f"- `{r['question']['id']}` ({r['question']['language']}): {r['question']['question']}")
+        lines.append(f"  - recommendation: {r['response']['recommendation']}")
+        lines.append(f"  - reasoning: {r['response']['model_inference']}")
+    return lines
+
+
 def _load_done(path: Path) -> dict[str, dict]:
     done = {}
     if path.exists():
@@ -161,7 +183,7 @@ def _load_done(path: Path) -> dict[str, dict]:
     return done
 
 
-async def _ask(client, headers, farm_id, question: dict, *, max_retries: int, backoff: float):
+async def _ask(client, headers, farm_id, question: dict, *, max_retries: int, backoff: float, language: str | None = None):
     _state["inject"] = question.get("injected_context") or None
     error = None
     # Recorded so the provider's first-attempt failure rate is measured:
@@ -171,7 +193,7 @@ async def _ask(client, headers, farm_id, question: dict, *, max_retries: int, ba
     for attempt in range(max_retries + 1):
         _state["capture"] = None
         _state["usage"] = _fresh_usage()
-        resp = await client.post(f"/farms/{farm_id}/ask", headers=headers, json={"question": question["question"]})
+        resp = await client.post(f"/farms/{farm_id}/ask", headers=headers, json={"question": question["question"], **({"language": language} if language else {})})
         if resp.status_code == 200:
             cap = _state["capture"] or {}
             usage = {**_state["usage"], "attempts": attempt + 1, "first_error": first_error}
@@ -193,6 +215,8 @@ async def main() -> int:
     ap.add_argument("--max-retries", type=int, default=4)
     ap.add_argument("--backoff", type=float, default=20.0, help="first retry wait; doubles each retry")
     ap.add_argument("--resume", type=Path, help="continue an earlier *-agent.jsonl run")
+    ap.add_argument("--language", choices=["hi", "en"],
+                    help="send this UI language with every question (POST /ask `language`); omit for the default behaviour")
     args = ap.parse_args()
 
     questions = [json.loads(l) for l in (REPO_ROOT / "evals" / "questions.jsonl").read_text(encoding="utf-8").splitlines() if l.strip()]
@@ -229,11 +253,13 @@ async def main() -> int:
                     if q["id"] in done:
                         continue
                     response, draft, passages, error, usage = await _ask(
-                        client, headers, farm_id, q, max_retries=args.max_retries, backoff=args.backoff
+                        client, headers, farm_id, q, max_retries=args.max_retries, backoff=args.backoff,
+                        language=args.language,
                     )
                     row = scoring.score_row(q, response, draft, passages, error)
                     rec = {"question": q, "response": response, "draft": draft, "passages": passages,
-                           "row": row, "usage": usage, "rag_context_chunks": settings.rag_context_chunks}
+                           "row": row, "usage": usage, "rag_context_chunks": settings.rag_context_chunks,
+                           "language_hint": args.language}
                     out.write(json.dumps(rec, ensure_ascii=False) + "\n")
                     out.flush()
                     done[q["id"]] = rec
@@ -267,6 +293,8 @@ async def main() -> int:
     run_at = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
     md = scoring.to_markdown(summary, run_at, settings.groq_chat_model)
     md = md.rstrip("\n") + "\n\n" + "\n".join(_token_lines(list(latest.values()))) + "\n"
+    if args.language:
+        md += "\n" + "\n".join(_language_lines(list(latest.values()), args.language)) + "\n"
     results = REPO_ROOT / "evals" / "results"
     results.mkdir(exist_ok=True)
     if not args.limit and not args.only:

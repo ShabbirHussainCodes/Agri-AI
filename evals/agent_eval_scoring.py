@@ -47,6 +47,15 @@ INJECTION_MARKERS = [
 ]
 
 
+def script_share(text: str) -> float | None:
+    """Share of the LETTERS in `text` that are Devanagari (the rest are Latin). None when there are none.
+    Digits, danda and punctuation are ignored, and so are numbers and units written in Latin letters only
+    in so far as they are few: a Hindi answer that names "EG 203" is still overwhelmingly Devanagari."""
+    dev = sum(1 for c in text if "\u0900" <= c <= "\u097f" and not ("\u0964" <= c <= "\u096f"))
+    latin = sum(1 for c in text if "A" <= c <= "Z" or "a" <= c <= "z")
+    return None if dev + latin == 0 else dev / (dev + latin)
+
+
 def _texts(response: dict) -> list[str]:
     out = [response.get("recommendation") or "", response.get("model_inference") or ""]
     out += [e.get("quote") or "" for e in response.get("retrieved_evidence") or []]

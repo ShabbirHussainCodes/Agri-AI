@@ -155,3 +155,25 @@ async def test_the_web_origin_may_call_the_api_and_others_may_not():
     assert "access-control-allow-credentials" not in ok.headers  # the JWT is a header, never a cookie
     bad = await preflight("https://evil.example")
     assert "access-control-allow-origin" not in bad.headers
+
+
+async def test_the_ui_language_reaches_the_agent_and_defaults_to_nothing(wired, monkeypatch):
+    seen = []
+
+    async def spy(*a, **kw):
+        seen.append(kw.get("language", "MISSING"))
+        return answer()
+
+    monkeypatch.setattr(ask_router, "run_agent", spy)
+    use(FakeConn())
+    async with httpx.AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as c:
+        for body in ({"question": "q"}, {"question": "q", "language": "hi"}, {"question": "q", "language": "en"}):
+            assert (await c.post(f"/farms/{FARM_ID}/ask", json=body)).status_code == 200
+    assert seen == [None, "hi", "en"]
+
+
+async def test_an_unsupported_language_is_a_422_and_costs_no_tokens(wired):
+    use(FakeConn())
+    async with httpx.AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as c:
+        r = await c.post(f"/farms/{FARM_ID}/ask", json={"question": "q", "language": "fr"})
+    assert r.status_code == 422 and wired["agent"] == 0

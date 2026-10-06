@@ -2,6 +2,8 @@
 
 import { useState, type FormEvent } from "react";
 import { api, ApiError } from "@/lib/api";
+import { askBody } from "@/lib/askBody";
+import { SEND_UI_LANGUAGE } from "@/lib/config";
 import { useI18n } from "@/lib/i18n";
 import { pickLanguage } from "@/lib/text";
 import type { AdvisoryResponse } from "@/lib/types";
@@ -25,7 +27,7 @@ export function AskBox({ farmId, token, onAnswered }: { farmId: string; token: s
     setError(null);
     setAnswer(null);
     try {
-      const r = await api<AdvisoryResponse>(`/farms/${farmId}/ask`, { method: "POST", body: { question: q }, token });
+      const r = await api<AdvisoryResponse>(`/farms/${farmId}/ask`, { method: "POST", body: askBody(q, lang, SEND_UI_LANGUAGE), token });
       setAnswer(r);
       setQuestion("");
       onAnswered();

@@ -1,3 +1,4 @@
+from typing import Literal
 from uuid import UUID
 
 from fastapi import APIRouter, Depends
@@ -47,6 +48,8 @@ def get_llm_provider() -> LLMProvider:
 class AskRequest(BaseModel):
     # A bound on what one request can cost: the question goes into a prompt.
     question: str = Field(min_length=1, max_length=1000)
+    # The language the farmer reads the app in. Optional: without it the answer follows the question's language.
+    language: Literal["hi", "en"] | None = None
 
 
 @router.post("/farms/{farm_id}/ask", response_model=AdvisoryResponse)
@@ -79,6 +82,7 @@ async def ask(
         farm_id,
         body.question,
         model=settings.groq_chat_model,
+        language=body.language,
     )
     # Kept so the timeline can show it. A failed run raises above and is not kept
     # (nor counted: it never reaches this line).

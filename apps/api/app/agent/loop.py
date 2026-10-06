@@ -152,6 +152,23 @@ TURN_B_IRRIGATION_RULE = """
 TURN_B_LABEL_RULE = """
 - A lookup_agrochemical result says the system will show the farmer a label card with the dose and waiting period. Never write a dose, rate, dilution, percentage or waiting period yourself, and do not abstain just because the farmer asked for one: say the card has the details and that the label on the product pack is the legal source. You may name the molecule."""
 
+# Appended to Turn B's prompt ONLY when the caller states a language (the web app's UI language). With none, the
+# base rule ("the same language the farmer used") is untouched, so the recorded Phase 4 baselines still describe
+# the default behaviour. Digits are asked for as 0-9 so the number checks read them the same way, and quotes stay
+# exactly as in the (English) passage because code validates every quote against it verbatim.
+TURN_B_LANGUAGE_RULES = {
+    "hi": (
+        "\n- Language (this overrides the language rule above): write `recommendation` and `model_inference` in "
+        "Hindi (Devanagari script), whatever language the question is in. Write numbers with the digits 0-9. "
+        "Keep every citation `quote` exactly as it appears in the passage; never translate or change a quote."
+    ),
+    "en": (
+        "\n- Language (this overrides the language rule above): write `recommendation` and `model_inference` in "
+        "English, whatever language the question is in. Keep every citation `quote` exactly as it appears in the "
+        "passage; never translate or change a quote."
+    ),
+}
+
 TOOLS = [weather.TOOL_SPEC, irrigation.TOOL_SPEC]
 
 
@@ -215,7 +232,12 @@ async def run_agent(
     *,
     model: str,
     embedder: Embedder | None = None,
+    language: str | None = None,
 ) -> AdvisoryResponse:
+    """`language`: "hi" or "en" asks Turn B to write the answer in that language (the UI language);
+    None keeps the default (the language of the question)."""
+    if language is not None and language not in TURN_B_LANGUAGE_RULES:
+        raise ValueError(f"unsupported language {language!r}")
     # Deterministic, not LLM-gated (agent-design.md "Deterministic vs
     # LLM"): every farm-specific question needs this, so there is no
     # real decision for the model to make about whether to fetch it. A
@@ -333,6 +355,7 @@ async def run_agent(
             TURN_B_SYSTEM_PROMPT
             + (TURN_B_IRRIGATION_RULE if water_balance is not None else "")
             + (TURN_B_LABEL_RULE if label_cards else "")
+            + TURN_B_LANGUAGE_RULES.get(language or "", "")
         )
         turn_b_messages = [
             {"role": "system", "content": turn_b_prompt},

@@ -23,6 +23,7 @@ export default defineConfig({
       NEXT_PUBLIC_API_BASE_URL: "http://api.test",
       NEXT_PUBLIC_SUPABASE_URL: "http://127.0.0.1:54321",
       NEXT_PUBLIC_SUPABASE_ANON_KEY: "test-anon-key",
+      NEXT_PUBLIC_SEND_UI_LANGUAGE: "true",
       NEXT_TELEMETRY_DISABLED: "1",
     },
   },

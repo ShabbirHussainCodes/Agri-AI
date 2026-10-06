@@ -6,4 +6,9 @@ export const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
 // The service-role key must NEVER appear here.
 export const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? "";
 
+// Off by default. When "true", the question is sent with the UI language so the model writes its answer in it.
+// Turned on only after the Hindi answers were measured (docs/ai/ui-language-hint.md); a build-time switch so that
+// merging the code does not change what farmers get.
+export const SEND_UI_LANGUAGE = process.env.NEXT_PUBLIC_SEND_UI_LANGUAGE === "true";
+
 export const KISAN_CALL_CENTRE = "1800-180-1551";
