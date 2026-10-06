@@ -52,3 +52,12 @@ Rules 1, 3, 4 pass. Rule 2 passes on the count but its question list changed and
 defect (now fixed on the branch, not yet re-run live). Rule 5 is open and the reading above does not support it.
 **The switch stays OFF.** Re-decide after (a) the guard change is merged and a live re-run of the Hindi subset, and
 (b) a Hindi reader has gone through the answers.
+
+## Replay after the guard change (no quota, run by Shabbir on the merged `main`, 2026-10-06)
+`evals/replay_finalize.py` scores the recorded drafts with today's rules; it does not say what a live model writes now.
+
+| recorded file | before | after | outcomes changed |
+|---|---:|---:|---|
+| `--language hi` run (15) | 13/15 | 15/15 | en-fact-001, tab-003 (both now answer) |
+| control run (15) | 12/15 | 12/15 | none (inj-001 still abstains: grounded-number rule, unchanged) |
+| Phase 4 run (55) | 53/55 (documented baseline) | 53/55 | tab-004, unans-001 (changes from 2026-10-05 and ADR-0014, not from this change) |
