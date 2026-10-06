@@ -132,11 +132,20 @@ _SENTENCE_SPLIT = re.compile(r"(?<=[.!?।])\s+|\n+")
 # layer 1 (_BASE and the household-measure rule), and a chemical conversation
 # checks every sentence regardless of this list. What is no longer caught is
 # listed as gap-004 in evals/chemical_guard_cases.jsonl.
+#
+# The bare Hindi stem "मिला" is NOT here either (removed 2026-10-06). It matched every form of
+# the verb, so a Hindi answer about a trial ("EG 203 को IPDM के साथ मिलाकर", "T4 में ... मिलाया
+# गया") became an application sentence and its trial labels (203, 4) became "ungrounded doses":
+# en-fact-001 and tab-003 were withheld in the `--language hi` run (the grounded-number rule counts
+# no corpus numbers). Only the instruction forms stay (मिलाएं, मिलाओ, मिलाना, मिला दें ...).
+# Removing the stem altogether leaked "१० लीटर पानी में २० मिली मिलाएँ।"
+# (tests/test_dose_guard_hindi_digits.py), which is why the instruction forms are listed.
+# What is no longer caught is recorded as gap-005 in evals/chemical_guard_cases.jsonl.
 _APPLICATION_VOCAB = re.compile(
     r"\b(?:spray(?:ed|ing|s)?|sprayer|apply|applied|applying|application|drench(?:ed|ing)?|dose|dosage"
     r"|dilute[d]?|mix|mixing|pesticides?|fungicides?|insecticides?|herbicides?|chhidkav|dawai|dawa"
     r"|daalo|dalo|daalein|milao|ghol)\b"
-    r"|छिड़काव|छिड़क|डाल|मिला|घोल|दवा|दवाई|कीटनाशक|फफूंदनाशक|फफूँदनाशक|खरपतवारनाशक|मात्रा",
+    r"|छिड़काव|छिड़क|डाल|मिलाएं|मिलाएँ|मिलायें|मिलाओ|मिलाइए|मिलाना|मिला\s+दें|मिला\s+दो|घोल|दवा|दवाई|कीटनाशक|फफूंदनाशक|फफूँदनाशक|खरपतवारनाशक|मात्रा",
     re.I,
 )
 

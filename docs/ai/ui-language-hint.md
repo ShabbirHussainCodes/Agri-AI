@@ -62,3 +62,8 @@ needs no change either way.
 - An English UI with a Hindi question now gets an English answer once the switch is on (that is the point), which
   the hint does not make better or worse in correctness.
 - The `en` direction was not measured; run the same subset with `--language en` before relying on it.
+
+## Result (2026-10-06)
+Measured once each: `evals/results/ui-language-2026-10-06.md`. Verdict: **switch stays OFF.** Rules 1, 3, 4 passed;
+the Hindi run exposed a false positive of the dose guard on Hindi trial text (fixed on a branch, offline-measured,
+not re-run live) and the printed answers contain wrong technical Hindi words, so rule 5 is not met.
