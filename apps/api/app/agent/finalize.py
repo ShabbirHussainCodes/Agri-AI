@@ -56,6 +56,7 @@ INVALID_CITATION = "invalid_citation"
 NO_VALID_CITATION = "no_valid_citation"
 CROP_NOT_COVERED = "crop_not_covered"
 
+GENERATION_FAILED = "answer_generation_failed"  # the model's output was rejected twice (loop.py)
 CANNOT_ASSESS = "cannot_assess"  # fallback if a cannot_assess result somehow has no reason
 # Refusals for safety, which no irrigation message may replace.
 _SAFETY_REFUSALS = {"injection_attempt", interim_dose_guard.SAFE_ABSTAIN_REASON, chemical_guard.BANNED_MOLECULE}
@@ -84,6 +85,36 @@ INJECTION_MESSAGE = (
     "for safety it is not answering. Please ask your farming question again, or ask your "
     "Krishi Vigyan Kendra (KVK) or the Kisan Call Centre (1800-180-1551)."
 )
+
+
+# Shown when the model's output was unusable twice in a row (ADR-0017 follow-up, 2026-10-06). Not a
+# blame message and not an error screen: the farmer is told no advice is given and what to do. Hindi
+# wording has had no native-speaker review (CLAUDE.md section 6).
+GENERATION_FAILED_MESSAGE = (
+    "AgriAI अभी इस सवाल का जवाब तैयार नहीं कर पाया, इसलिए कोई सलाह नहीं दे रहा। कृपया थोड़ी देर बाद "
+    "दोबारा पूछें, या अपने कृषि विज्ञान केंद्र (KVK) या किसान कॉल सेंटर (1800-180-1551) से पूछें।\n\n"
+    "AgriAI could not prepare an answer to this question just now, so it is not giving advice. "
+    "Please ask again in a little while, or ask your Krishi Vigyan Kendra (KVK) or the Kisan Call "
+    "Centre (1800-180-1551)."
+)
+
+
+def generation_failed_response(
+    farm_data: FarmContextData, live_data: WeatherData | None, water_balance: WaterBalanceResult | None
+) -> AdvisoryResponse:
+    """An honest abstention for a model that could not produce a usable answer, written entirely by
+    code. A water balance code already computed may still be shown (it is code's own number, not the
+    model's); nothing else is: no evidence, no label card, no note."""
+    return AdvisoryResponse(
+        structured_data=farm_data,
+        live_data=live_data,
+        water_balance=water_balance,
+        model_inference=f"Answer withheld by code: {GENERATION_FAILED}.",
+        recommendation=GENERATION_FAILED_MESSAGE,
+        abstained=True,
+        abstained_because=GENERATION_FAILED,
+        citations_valid=True,
+    )
 
 
 def no_document_note(has_weather: bool) -> str:

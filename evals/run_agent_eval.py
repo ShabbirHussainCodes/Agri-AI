@@ -61,7 +61,7 @@ from app.core.config import settings  # noqa: E402
 settings.ask_limit_per_user_per_day = 0
 settings.ask_limit_global_per_day = 0
 from app.main import app  # noqa: E402
-from app.providers.base import LLMProvider  # noqa: E402
+from app.providers.base import LLMProvider, ProviderOutputInvalid  # noqa: E402
 from app.routers.ask import get_llm_provider  # noqa: E402
 from tests.conftest import signup_test_user  # noqa: E402
 
@@ -101,7 +101,14 @@ class _CountingProvider(LLMProvider):
         self.inner = inner
 
     async def chat(self, messages, **kwargs):
-        result = await self.inner.chat(messages, **kwargs)
+        try:
+            result = await self.inner.chat(messages, **kwargs)
+        except ProviderOutputInvalid:
+            # /ask retries these once (loop.py), so the farmer would not have seen an error;
+            # counted here so the provider's real reject rate stays visible in the report.
+            if _state["usage"] is not None:
+                _state["usage"]["provider_rejects"] += 1
+            raise
         u = _state["usage"]
         if u is not None:
             u["calls"] += 1
@@ -115,7 +122,8 @@ class _CountingProvider(LLMProvider):
 
 
 def _fresh_usage() -> dict:
-    return {"calls": 0, "unreported_calls": 0, "prompt_tokens": 0, "completion_tokens": 0, "total_tokens": 0}
+    return {"calls": 0, "unreported_calls": 0, "provider_rejects": 0,
+            "prompt_tokens": 0, "completion_tokens": 0, "total_tokens": 0}
 
 
 def _token_lines(records: list[dict]) -> list[str]:
@@ -125,9 +133,12 @@ def _token_lines(records: list[dict]) -> list[str]:
     tracked = [r for r in records if r.get("usage") and "attempts" in r["usage"]]
     if tracked:
         retried = [r["question"]["id"] for r in tracked if r["usage"]["attempts"] > 1]
-        lines.append(f"- Questions that failed on the first attempt (a farmer would have seen an error; "
-                     f"/ask does not retry): **{len(retried)} / {len(tracked)}**"
-                     + (f" ({', '.join(retried)})" if retried else ""))
+        lines.append(f"- Questions that failed over HTTP on the first attempt (a farmer would have seen an error): "
+                     f"**{len(retried)} / {len(tracked)}**" + (f" ({', '.join(retried)})" if retried else ""))
+        rejected = [r["question"]["id"] for r in tracked if r["usage"].get("provider_rejects")]
+        lines.append(f"- Questions where the provider rejected the model's output at least once (/ask retries once, "
+                     f"then abstains with `answer_generation_failed`): **{len(rejected)} / {len(tracked)}**"
+                     + (f" ({', '.join(rejected)})" if rejected else ""))
     if totals:
         mean = sum(totals) / len(totals)
         median = totals[len(totals) // 2] if len(totals) % 2 else (totals[len(totals) // 2 - 1] + totals[len(totals) // 2]) / 2

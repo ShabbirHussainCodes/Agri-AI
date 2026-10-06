@@ -39,7 +39,7 @@ from uuid import UUID
 
 import asyncpg
 
-from app.agent.finalize import finalize_advisory
+from app.agent.finalize import finalize_advisory, generation_failed_response
 from app.agent.tools import agrochemical, farm_context, irrigation, weather
 from app.agronomy.crop_water import CropTableError
 from app.agronomy.messages import IRRIGATION_UNAVAILABLE
@@ -48,7 +48,7 @@ from app.safety.agrochemical_lookup import AgrochemTableError, LabelEntry
 from app.core.clock import farm_today
 from app.core.config import settings
 from app.core.errors import AgentError
-from app.providers.base import LLMProvider
+from app.providers.base import ChatResult, LLMProvider, ProviderOutputInvalid
 from app.retrieval.context import build_passage_block
 from app.retrieval.embedder import get_query_embedder
 from app.retrieval.hybrid import Embedder, retrieve
@@ -65,6 +65,43 @@ NO_SIMILARITY_GATE = -1.0
 MAX_TOOL_ROUNDS = 3
 
 logger = logging.getLogger("agriai.agent")
+
+# A model output the provider or the schema rejects is retried ONCE (same prompt, the model is not
+# deterministic), then answered honestly by code. Measured before this existed: 120b had 0 first-attempt
+# failures in 30 questions, 20b failed 3 of 15 (CLAUDE.md section 11), so a retry is cheap insurance
+# and costs tokens only when it fires. Quota, authentication and network errors are NOT retried here.
+MAX_ATTEMPTS = 2
+
+
+class GenerationFailed(Exception):
+    """Every attempt produced an unusable model output. Caught in run_agent and turned into an
+    abstention written by code (finalize.generation_failed_response)."""
+
+
+async def _chat_retrying(provider: LLMProvider, messages: list[dict[str, Any]], **kwargs: Any) -> ChatResult:
+    """provider.chat, retried once when the provider rejects the model's output (Turn A)."""
+    for attempt in range(1, MAX_ATTEMPTS + 1):
+        try:
+            return await provider.chat(messages, **kwargs)
+        except ProviderOutputInvalid as exc:
+            logger.warning("model output rejected by the provider (%s), attempt %d of %d", exc, attempt, MAX_ATTEMPTS)
+    raise GenerationFailed
+
+
+async def _draft_retrying(provider: LLMProvider, messages: list[dict[str, Any]], *, model: str) -> DraftAdvisory:
+    """Turn B: one structured answer, retried once when the provider rejects it, when it comes back
+    empty, or when it does not parse as a DraftAdvisory (pydantic's and json's errors are ValueErrors)."""
+    for attempt in range(1, MAX_ATTEMPTS + 1):
+        try:
+            final = await provider.chat(messages, model=model, response_schema=DraftAdvisory.model_json_schema())
+            if final.content is None:
+                raise ValueError("no structured answer")
+            return DraftAdvisory.model_validate(json.loads(final.content))
+        except (ProviderOutputInvalid, ValueError) as exc:
+            # Only the reason code or the exception's type: its text can quote the model's output.
+            reason = str(exc) if isinstance(exc, ProviderOutputInvalid) else type(exc).__name__
+            logger.warning("unusable model answer (%s), attempt %d of %d", reason, attempt, MAX_ATTEMPTS)
+    raise GenerationFailed
 
 # Turn A: evidence gathering only. get_farm_context is NOT offered as a
 # tool here -- it is fetched deterministically in run_agent() before this
@@ -244,7 +281,7 @@ async def run_agent(
 
     try:
         for _ in range(MAX_TOOL_ROUNDS):
-            result = await provider.chat(messages, model=model, tools=tools)
+            result = await _chat_retrying(provider, messages, model=model, tools=tools)
 
             if not result.tool_calls:
                 break
@@ -303,16 +340,7 @@ async def run_agent(
             {"role": "user", "content": passage_block},
         ]
 
-        final = await provider.chat(
-            turn_b_messages,
-            model=model,
-            response_schema=DraftAdvisory.model_json_schema(),
-        )
-
-        if final.content is None:
-            raise RuntimeError("Model did not return a final structured answer")
-
-        draft = DraftAdvisory.model_validate(json.loads(final.content))
+        draft = await _draft_retrying(provider, turn_b_messages, model=model)
         return finalize_advisory(
             draft,
             farm_data=farm_data,
@@ -327,6 +355,11 @@ async def run_agent(
 
     except AgentError:
         raise
+    except GenerationFailed:
+        # Not an error screen: the farmer gets an honest, code-written "no answer", and the run is
+        # saved and counted against the daily cap like any answer (its tokens were spent).
+        logger.error("no usable model answer after %d attempts", MAX_ATTEMPTS)
+        return generation_failed_response(farm_data, live_data, water_balance)
     except Exception as exc:  # noqa: BLE001
         # Provider failure, malformed generation, schema-validation
         # failure -- whatever it is, the farmer must see an honest error,

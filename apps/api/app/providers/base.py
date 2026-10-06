@@ -9,6 +9,13 @@ from dataclasses import dataclass, field
 from typing import Any
 
 
+class ProviderOutputInvalid(Exception):
+    """The provider reported that the MODEL's output was unusable: a structured answer it could not
+    validate, a malformed tool call. It is not a transport, quota or authentication failure: asking
+    again can work, so app/agent/loop.py retries it once and then answers honestly. The message holds
+    only the reason code, never the model's text (that can contain farm data)."""
+
+
 @dataclass
 class ToolCall:
     id: str

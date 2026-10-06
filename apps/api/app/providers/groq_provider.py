@@ -9,9 +9,30 @@ API, which Groq's SDK mirrors.
 import json
 from typing import Any
 
-from groq import AsyncGroq
+from groq import AsyncGroq, BadRequestError
 
-from app.providers.base import ChatResult, LLMProvider, TokenUsage, ToolCall
+from app.providers.base import ChatResult, LLMProvider, ProviderOutputInvalid, TokenUsage, ToolCall
+
+# Groq 400 error codes that mean "the model wrote something unusable", as opposed to "your request is wrong".
+# json_validate_failed was measured (20b failed 3 of 15 questions, 2026-09-30); tool_use_failed is the same
+# kind of failure on Turn A and is named here from Groq's error vocabulary, not from a measured failure.
+_OUTPUT_REJECTED = ("json_validate_failed", "tool_use_failed")
+
+
+def _rejected_code(exc: BadRequestError) -> str | None:
+    """The reason code if this 400 is a rejected model output, else None. Reads the SDK's `code`, then the
+    body (with or without the {"error": ...} wrapper), then the message text, because the SDK's exact
+    shape for this is not something to rely on from memory."""
+    candidates: list[object] = [getattr(exc, "code", None)]
+    body = getattr(exc, "body", None)
+    if isinstance(body, dict):
+        inner = body.get("error")
+        candidates += [body.get("code"), inner.get("code") if isinstance(inner, dict) else None]
+    for c in candidates:
+        if isinstance(c, str) and c in _OUTPUT_REJECTED:
+            return c
+    text = str(exc)
+    return next((code for code in _OUTPUT_REJECTED if code in text), None)
 
 
 def _make_strict(schema: dict[str, Any]) -> dict[str, Any]:
@@ -78,7 +99,13 @@ class GroqProvider(LLMProvider):
                 },
             }
 
-        completion = await self._client.chat.completions.create(**kwargs)
+        try:
+            completion = await self._client.chat.completions.create(**kwargs)
+        except BadRequestError as exc:
+            code = _rejected_code(exc)
+            if code is None:
+                raise
+            raise ProviderOutputInvalid(code) from exc
         message = completion.choices[0].message
         usage = _usage(completion)
 
@@ -86,15 +113,22 @@ class GroqProvider(LLMProvider):
             return ChatResult(
                 usage=usage,
                 tool_calls=[
-                    ToolCall(
-                        id=tc.id,
-                        name=tc.function.name,
-                        arguments=json.loads(tc.function.arguments),
-                    )
+                    ToolCall(id=tc.id, name=tc.function.name, arguments=_tool_arguments(tc))
                     for tc in message.tool_calls
                 ]
             )
         return ChatResult(content=message.content, usage=usage)
+
+
+def _tool_arguments(tool_call: Any) -> dict[str, Any]:
+    """A tool call whose arguments are not valid JSON is a bad model output, not a server fault."""
+    try:
+        arguments = json.loads(tool_call.function.arguments)
+    except (TypeError, ValueError) as exc:
+        raise ProviderOutputInvalid("tool_arguments_not_json") from exc
+    if not isinstance(arguments, dict):
+        raise ProviderOutputInvalid("tool_arguments_not_an_object")
+    return arguments
 
 
 def _usage(completion: Any) -> TokenUsage | None:
