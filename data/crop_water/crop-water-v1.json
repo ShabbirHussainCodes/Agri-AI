@@ -5,18 +5,28 @@
   "crops": [
     {
       "name_en": "Wheat",
-      "status": "unverified",
-      "verified_by": null,
-      "verified_on": null,
-      "kc_ini": null,
-      "kc_mid": null,
-      "kc_end": null,
-      "stage_days": null,
-      "stage_length_basis": null,
-      "root_depth_m": null,
-      "p": null,
-      "sources": {},
-      "notes": "Unfilled. See data/crop_water/README.md for what to read and which rows to avoid."
+      "status": "verified",
+      "verified_by": "Shabbir Hussain",
+      "verified_on": "2026-10-06",
+      "kc_ini": 0.3,
+      "kc_mid": 1.15,
+      "kc_end": 0.4,
+      "stage_days": {
+        "initial": 15,
+        "development": 25,
+        "mid": 50,
+        "late": 30
+      },
+      "stage_length_basis": "FAO-56 Table 11, row 'Barley/Oats/Wheat', planting November, region Central India (total 120 days)",
+      "root_depth_m": 1.0,
+      "p": 0.55,
+      "sources": {
+        "kc": "FAO-56 Table 12, group 'i. Cereals' header (Kc ini 0.3) and row 'Spring Wheat' (Kc mid 1.15, Kc end 0.25-0.4, footnote 10); read 2026-10-06 from https://www.fao.org/4/x0490e/x0490e0b.htm",
+        "stage_days": "FAO-56 Table 11, row 'Barley/Oats/Wheat', November, Central India: 15/25/50/30, total 120; read 2026-10-06 from https://www.fao.org/4/x0490e/x0490e0b.htm",
+        "root_depth_m": "FAO-56 Table 22, row 'Spring Wheat', maximum root depth 1.0-1.5 m; read 2026-10-06 from https://www.fao.org/4/x0490e/x0490e0e.htm",
+        "p": "FAO-56 Table 22, row 'Spring Wheat', depletion fraction p 0.55 (for ETc about 5 mm/day); read 2026-10-06 from https://www.fao.org/4/x0490e/x0490e0e.htm"
+      },
+      "notes": "Values transcribed from the FAO-56 HTML pages on 2026-10-06. Judgements, none confirmed with a KVK or agronomist: (1) Kc row is 'Spring Wheat', not 'Winter Wheat', to stay consistent with the 120-day Table 11 row (Table 11 winter wheat rows are 180-335 days). The Spring Wheat Kc ini cell is blank, so the Cereals group value 0.3 is used; the 'Winter Wheat, non-frozen soils' row gives 0.7. (2) Kc end 0.4 is the upper end of 0.25-0.4: Table 12 footnote 10 says the higher value is for hand-harvested crops. (3) The Table 11 row is a combined Barley/Oats/Wheat row for Central India; a farm in north-west India may fit another row. (4) Root depth 1.0 m is the lower end of 1.0-1.5; Table 22 footnote 1 says the smaller values may be used for irrigation scheduling. Limits of v1: Kc ini is the Table 12 general value (footnote 1: it rises with frequent wetting); Kc mid and Kc end are not adjusted for climate; p is not corrected for ETc other than 5 mm/day (Table 22 footnote 2)."
     },
     {
       "name_en": "Tomato",
@@ -63,14 +73,16 @@
     },
     {
       "texture": "loamy",
-      "status": "unverified",
-      "verified_by": null,
-      "verified_on": null,
-      "fao56_class": null,
-      "theta_fc": null,
-      "theta_wp": null,
-      "sources": {},
-      "notes": "Farmer's word: domat. Unfilled."
+      "status": "verified",
+      "verified_by": "Shabbir Hussain",
+      "verified_on": "2026-10-06",
+      "fao56_class": "Loam",
+      "theta_fc": 0.25,
+      "theta_wp": 0.12,
+      "sources": {
+        "theta": "FAO-56 Table 19 'Typical soil water characteristics for different soil types', row 'Loam': theta FC 0.20-0.30, theta WP 0.07-0.17, (theta FC - theta WP) 0.13-0.18 m3/m3; read 2026-10-06 from https://www.fao.org/4/x0490e/x0490e0c.htm (Chapter 7)"
+      },
+      "notes": "Farmer's word: domat. Values transcribed from FAO-56 Table 19 on 2026-10-06. Rule (FILL-CHECKLIST-demo.md): theta_fc - theta_wp must equal the low end of the table's (theta FC - theta WP) column, 0.13, so the alert comes earlier. Pair chosen: the midpoints of the two ranges, 0.25 and 0.12, whose difference is exactly 0.13; both lie inside their own ranges. Judgement not confirmed with a KVK or agronomist: 'domat' is mapped to the USDA class Loam."
     },
     {
       "texture": "clayey",
