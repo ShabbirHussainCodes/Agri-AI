@@ -8,6 +8,8 @@ The water-balance engine uses a row **only if** its `status` is `"verified"`, wi
 
 Why not pre-fill from what a search engine returns? Tried on 2026-10-04 (the FAO and Open-Meteo hosts were blocked in the build environment, so only search snippets were available). The snippets disagreed with each other and used the wrong row for the crop: a sweet-corn row for "maize", and wheat values that did not match the winter/spring wheat rows. That is the ADR-0012 failure mode (right source, wrong row). Values go in only after a human reads the primary table.
 
+A shorter, demo-sized version (Wheat + loamy soil, optional Tomato) with the exact table, row and column per field is in `FILL-CHECKLIST-demo.md`.
+
 ## What to fill in (one browser session)
 
 Source for everything: FAO Irrigation and Drainage Paper No. 56 (Allen et al., 1998), published on fao.org. Table and chapter numbers below are from memory and search snippets, so **confirm each in the document itself**.
