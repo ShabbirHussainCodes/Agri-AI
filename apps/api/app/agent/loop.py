@@ -34,7 +34,6 @@ it in code, validating every citation and running the interim dose guard.
 """
 import json
 import logging
-from datetime import datetime, timezone
 from typing import Any
 from uuid import UUID
 
@@ -46,6 +45,7 @@ from app.agronomy.crop_water import CropTableError
 from app.agronomy.messages import IRRIGATION_UNAVAILABLE
 from app.agronomy.water_balance import WaterBalanceResult
 from app.safety.agrochemical_lookup import AgrochemTableError, LabelEntry
+from app.core.clock import farm_today
 from app.core.config import settings
 from app.core.errors import AgentError
 from app.providers.base import LLMProvider
@@ -277,7 +277,7 @@ async def run_agent(
                     # gap with irrigation advice of its own.
                     water_balance = (
                         WaterBalanceResult.cannot(
-                            IRRIGATION_UNAVAILABLE, as_of=datetime.now(timezone.utc).date()
+                            IRRIGATION_UNAVAILABLE, as_of=farm_today()
                         )
                         if "error" in tool_result
                         else WaterBalanceResult.model_validate(tool_result)

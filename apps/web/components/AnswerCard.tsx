@@ -2,6 +2,7 @@
 
 import { useI18n } from "@/lib/i18n";
 import type { MessageKey } from "@/lib/messages";
+import { useCropName } from "@/lib/crops";
 import { pickLanguage } from "@/lib/text";
 import type { AdvisoryResponse, EvidenceItem, LabelEntry, WaterBalance } from "@/lib/types";
 import { Card } from "./ui";
@@ -21,6 +22,7 @@ export function AnswerCard({ r }: { r: AdvisoryResponse }) {
   const wb = r.water_balance && r.water_balance.verdict !== "cannot_assess" ? r.water_balance : null;
   const hasLabel = r.agrochemical_label.length > 0;
   const farm = r.structured_data;
+  const cropName = useCropName(farm.crop_name);
 
   return (
     <div className="space-y-3" data-testid="answer">
@@ -30,13 +32,22 @@ export function AnswerCard({ r }: { r: AdvisoryResponse }) {
         </h2>
         <p className="whitespace-pre-line text-lg leading-relaxed text-stone-900">{pickLanguage(r.recommendation, lang)}</p>
         {hasLabel && !r.abstained && <p className="mt-2 text-base font-semibold text-green-900">{t("seeLabelCard")}</p>}
-        {farm.crop_name && (
+        {cropName && (
           <p className="mt-3 text-sm text-stone-600">
-            {farm.crop_name}
+            {cropName}
             {farm.days_since_sowing != null && ` · ${t("daysSinceSowing")} ${farm.days_since_sowing} ${t("daysUnit")}`}
           </p>
         )}
       </Card>
+
+      {/* Code-written note about what the answer does not rest on. Answers saved before the field existed
+          have no `limitations` at all, so this tests the value, not the type. */}
+      {r.limitations && !r.abstained && (
+        <Card className="bg-stone-50">
+          <h2 className="mb-1 text-sm font-bold uppercase tracking-wide text-stone-600">ℹ️ {t("limitationsTitle")}</h2>
+          <p className="whitespace-pre-line text-base text-stone-800">{pickLanguage(r.limitations, lang)}</p>
+        </Card>
+      )}
 
       {wb && <WaterBalanceCard wb={wb} />}
       {hasLabel && !r.abstained && r.agrochemical_label.map((e) => <LabelCard key={e.row_id} entry={e} />)}

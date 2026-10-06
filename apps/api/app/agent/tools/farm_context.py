@@ -18,6 +18,8 @@ from uuid import UUID
 import asyncpg
 from pydantic import BaseModel, ConfigDict
 
+from app.core.clock import farm_today
+
 
 class ActivitySummary(BaseModel):
     """`details` is a JSON string, not a nested object: Groq's strict
@@ -48,7 +50,9 @@ class FarmContextData(BaseModel):
     recent_activities: list[ActivitySummary] = []
 
 
-async def get_farm_context(conn: asyncpg.Connection, farm_id: UUID) -> FarmContextData:
+async def get_farm_context(
+    conn: asyncpg.Connection, farm_id: UUID, *, today: date | None = None
+) -> FarmContextData:
     """`conn` is the RLS-scoped connection from get_authed_conn, so this
     can only ever read a farm the caller owns -- same guarantee as every
     Phase-1 endpoint, not a new access path."""
@@ -73,7 +77,7 @@ async def get_farm_context(conn: asyncpg.Connection, farm_id: UUID) -> FarmConte
 
     days_since_sowing = None
     if crop_row and crop_row["sowing_date"]:
-        days_since_sowing = (date.today() - crop_row["sowing_date"]).days
+        days_since_sowing = ((today or farm_today()) - crop_row["sowing_date"]).days
 
     activity_rows = await conn.fetch(
         """

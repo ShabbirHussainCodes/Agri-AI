@@ -11,6 +11,8 @@ import { Shell } from "@/components/Shell";
 import { ErrorNote } from "@/components/ui";
 import { api, ApiError } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
+import { CropsProvider } from "@/lib/crops";
+import { daysSince } from "@/lib/dates";
 import { useI18n } from "@/lib/i18n";
 import type { Activity, AdvisoryRecord, Crop, Farm, FarmCrop } from "@/lib/types";
 
@@ -20,7 +22,6 @@ export default function FarmHomePage() {
   const router = useRouter();
   const { id } = useParams<{ id: string }>();
   const token = session?.access_token;
-  const [now] = useState(() => Date.now());
 
   const [farm, setFarm] = useState<Farm | null>(null);
   const [farmCrops, setFarmCrops] = useState<FarmCrop[]>([]);
@@ -67,32 +68,34 @@ export default function FarmHomePage() {
   const active = farmCrops.find((fc) => fc.status === "active") ?? null;
   const activeCrop = active ? crops.find((c) => c.id === active.crop_id) : undefined;
   const diary = useMemo(() => buildDiary(activities, advisories), [activities, advisories]);
-  const daysSince = active ? Math.max(0, Math.floor((now - new Date(active.sowing_date).getTime()) / 86_400_000)) : null;
+  const daysSinceSowing = active ? Math.max(0, daysSince(active.sowing_date)) : null;
 
   return (
-    <Shell>
-      <Link href="/" className="inline-block text-green-900 underline">
-        {t("back")}
-      </Link>
-      {error && <ErrorNote>{error}</ErrorNote>}
-      {!error && (!farm || !token) && <p>{t("loading")}</p>}
-      {farm && token && (
-        <>
-          <div>
-            <h1 className="text-2xl font-bold text-green-900">{farm.name}</h1>
-            {activeCrop && daysSince !== null && (
-              <p className="text-stone-700">
-                {lang === "hi" ? activeCrop.name_hi : activeCrop.name_en} · {t("daysSinceSowing")} {daysSince} {t("daysUnit")}
-              </p>
-            )}
-          </div>
-          <ProfilePanel farm={farm} token={token} onSaved={setFarm} />
-          <AskBox farmId={farm.id} token={token} onAnswered={() => void reloadDiary().catch(() => {})} />
-          <LogIrrigation farmCropId={active?.id ?? null} token={token} onLogged={() => void reloadDiary().catch(() => {})} />
-          <h2 className="pt-2 text-xl font-bold text-green-900">{t("farmDiary")}</h2>
-          <Diary items={diary} />
-        </>
-      )}
-    </Shell>
+    <CropsProvider crops={crops}>
+      <Shell>
+        <Link href="/" className="inline-block text-green-900 underline">
+          {t("back")}
+        </Link>
+        {error && <ErrorNote>{error}</ErrorNote>}
+        {!error && (!farm || !token) && <p>{t("loading")}</p>}
+        {farm && token && (
+          <>
+            <div>
+              <h1 className="text-2xl font-bold text-green-900">{farm.name}</h1>
+              {activeCrop && daysSinceSowing !== null && (
+                <p className="text-stone-700">
+                  {lang === "hi" ? activeCrop.name_hi : activeCrop.name_en} · {t("daysSinceSowing")} {daysSinceSowing} {t("daysUnit")}
+                </p>
+              )}
+            </div>
+            <ProfilePanel farm={farm} token={token} onSaved={setFarm} />
+            <AskBox farmId={farm.id} token={token} onAnswered={() => void reloadDiary().catch(() => {})} />
+            <LogIrrigation farmCropId={active?.id ?? null} token={token} onLogged={() => void reloadDiary().catch(() => {})} />
+            <h2 className="pt-2 text-xl font-bold text-green-900">{t("farmDiary")}</h2>
+            <Diary items={diary} />
+          </>
+        )}
+      </Shell>
+    </CropsProvider>
   );
 }

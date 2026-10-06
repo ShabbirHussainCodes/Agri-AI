@@ -22,6 +22,7 @@ import asyncpg
 
 from app.agronomy import crop_water
 from app.agronomy.water_balance import Irrigation, WaterBalanceResult, assess_irrigation
+from app.core.clock import farm_today
 from app.integrations import open_meteo
 from app.safety import crop_scope
 
@@ -77,9 +78,10 @@ async def get_irrigation_status(
     """`named_crops`: crops the farmer's question names (crop_scope). `now`
     and `fetch` exist so tests need neither a clock nor a network."""
     now = now or datetime.now(timezone.utc)
-    # Until the weather response says what the farm's local date is, UTC's
-    # date stands in for `as_of` on the early-exit results below.
-    utc_today = now.date()
+    # Until the weather response says what the farm's local date is, the
+    # farm calendar date at the configured offset (app/core/clock.py) stands in
+    # for `as_of` on the early-exit results below.
+    utc_today = farm_today(now)
 
     farm = await conn.fetchrow(
         "select lat, lon, soil_texture from public.farms where id = $1", farm_id

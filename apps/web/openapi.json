@@ -192,6 +192,11 @@
             ],
             "title": "Confidence"
           },
+          "limitations": {
+            "default": "",
+            "title": "Limitations",
+            "type": "string"
+          },
           "live_data": {
             "anyOf": [
               {

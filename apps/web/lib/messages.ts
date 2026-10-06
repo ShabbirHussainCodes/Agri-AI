@@ -118,6 +118,7 @@ export const messages = {
     hi: "ये शोध-दस्तावेज़ों के अंश हैं, AgriAI की जाँची हुई सलाह नहीं।",
     en: "These are passages from documents, not advice AgriAI has verified.",
   },
+  limitationsTitle: { hi: "इस जवाब की सीमा", en: "Limit of this answer" },
   reasoningTitle: { hi: "AI ने कैसे सोचा", en: "How the AI reasoned" },
   weatherTitle: { hi: "मौसम", en: "Weather" },
   seeLabelCard: { hi: "नीचे दवा का लेबल कार्ड देखिए।", en: "See the label card below." },

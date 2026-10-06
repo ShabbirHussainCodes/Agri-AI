@@ -75,5 +75,9 @@ class Settings(BaseSettings):
     ask_limit_per_user_per_day: int = 10
     ask_limit_global_per_day: int = 35
 
+    # The farm's wall-calendar offset from UTC, in minutes (app/core/clock.py). India: +05:30, no
+    # daylight saving. Used for "days since sowing", so it must not follow the server's own clock.
+    local_utc_offset_minutes: int = 330
+
 
 settings = Settings()

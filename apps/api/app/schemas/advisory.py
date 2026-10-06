@@ -78,6 +78,10 @@ class AdvisoryResponse(BaseModel):
     # Set by code, never by the model: True when every citation the model
     # made was checked and verified against the passage it named.
     citations_valid: bool
+    # Code-authored note (Hindi paragraph, blank line, English paragraph) about what this answer does
+    # NOT rest on. Empty for almost every answer. Default "" so an advisory saved before the field existed
+    # still parses. Never written by the model.
+    limitations: str = ""
 
     @field_validator("recommendation", "model_inference")
     @classmethod

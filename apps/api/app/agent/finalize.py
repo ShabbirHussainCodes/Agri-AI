@@ -86,6 +86,24 @@ INJECTION_MESSAGE = (
 )
 
 
+def no_document_note(has_weather: bool) -> str:
+    """Code-authored limitation for an answer that names a crop but rests on no document (found in
+    the first live run, 2026-10-05: "when should wheat be sown?" was answered from the farm record
+    alone, correctly, but nothing told the farmer that no verified source backed any crop advice).
+    Worded as what happened, not as a claim about the whole corpus: no document was used for THIS
+    answer. Hindi wording has had no native-speaker review (CLAUDE.md section 6)."""
+    basis_hi = "आपके खेत के रिकॉर्ड और मौसम के आँकड़ों" if has_weather else "आपके खेत के रिकॉर्ड"
+    basis_en = "your farm's record and weather data" if has_weather else "your farm's record"
+    return (
+        f"इस जवाब में किसी जाँचे हुए दस्तावेज़ का इस्तेमाल नहीं हुआ। यह सिर्फ़ {basis_hi} पर आधारित है। "
+        "फ़सल से जुड़ी जानकारी (जैसे बुवाई का समय, किस्म या खाद) के लिए अपने कृषि विज्ञान केंद्र (KVK) "
+        "या किसान कॉल सेंटर (1800-180-1551) से पूछें।\n\n"
+        f"No verified document was used for this answer. It rests only on {basis_en}. "
+        "For crop information such as sowing time, variety or fertiliser, ask your Krishi Vigyan "
+        "Kendra (KVK) or the Kisan Call Centre (1800-180-1551)."
+    )
+
+
 def abstain_message_for(reason: str | None) -> str:
     """The code-authored text shown when there is no model text to show."""
     if reason == interim_dose_guard.SAFE_ABSTAIN_REASON:
@@ -238,6 +256,13 @@ def finalize_advisory(
     elif not model_inference.strip():
         model_inference = "The model gave no reasoning for this answer."
 
+    # A crop-specific question answered without any document: say so, in code's words. Not for an
+    # abstention (it already says there is no answer), not for a computed irrigation answer (its
+    # basis is the water balance, shown as such), not when a verified label card carries the answer.
+    limitations = ""
+    if abstain_reason is None and named_crops and water_balance is None and not shown_evidence and not labels:
+        limitations = no_document_note(has_weather=live_data is not None)
+
     response = AdvisoryResponse(
         structured_data=farm_data,
         live_data=live_data,
@@ -250,6 +275,7 @@ def finalize_advisory(
         abstained=abstain_reason is not None,
         abstained_because=abstain_reason,
         citations_valid=citations_valid,
+        limitations=limitations,
     )
 
     chemical_context = any(
@@ -299,6 +325,7 @@ def _apply_interim_dose_guard(
             "model_inference": "Withheld by the interim dose guard (CLAUDE.md rule 1).",
             "retrieved_evidence": [],
             "agrochemical_label": [],
+            "limitations": "",
             "abstained": True,
             "abstained_because": interim_dose_guard.SAFE_ABSTAIN_REASON,
         })

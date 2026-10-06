@@ -92,8 +92,9 @@ class Fetcher:
 
 
 async def run(conn, table_path, fetcher=None, **kw):
+    kw.setdefault("now", NOW)
     return await get_irrigation_status(
-        conn, "farm-1", table_path=table_path, fetch=fetcher or Fetcher(weather()), now=NOW, **kw
+        conn, "farm-1", table_path=table_path, fetch=fetcher or Fetcher(weather()), **kw
     )
 
 
@@ -121,6 +122,13 @@ async def test_today_is_the_farms_local_date_not_the_servers(table_path):
 async def test_no_location(conn, table_path):
     r = await run(conn, table_path)
     assert (r.verdict, r.reason) == ("cannot_assess", irrigation.NO_LOCATION)
+
+async def test_early_exit_date_is_the_farm_calendar_not_utc(table_path):
+    # 20:24 UTC on 4 Oct is 01:54 IST on 5 Oct: the no-location answer must carry the farm's date.
+    late_utc = datetime(2026, 10, 4, 20, 24, tzinfo=timezone.utc)
+    r = await run(FakeConn(farm(lat=None, lon=None), crop()), table_path, now=late_utc)
+    assert (r.verdict, r.reason) == ("cannot_assess", irrigation.NO_LOCATION)
+    assert r.as_of == date(2026, 10, 5)
 
 
 async def test_no_active_crop(table_path):

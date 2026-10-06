@@ -67,6 +67,7 @@ def main() -> int:
     re_expected = []
 
     changed, scoped_ids, table = [], [], []
+    noted = []  # answers that would carry the "no document was used" note (limitations)
     old_ok = new_ok = n = 0
     old_blank = new_blank = 0
     for rec in rows:
@@ -103,6 +104,8 @@ def main() -> int:
                 question_text=q["question"],  # Phase 6: the banned-molecule and chemical-context rules read it
             )
             new_abstained, new_reason = new.abstained, new.abstained_because
+            if new.limitations:
+                noted.append(q["id"])
             new_recommendation = new.recommendation
         new_blank += not new_recommendation.strip()
 
@@ -118,6 +121,8 @@ def main() -> int:
     print(f"Blank recommendation shown to the farmer: recorded {old_blank} -> replayed {new_blank}")
     print(f"Expectation changed since the run was recorded (scored by today's): {', '.join(re_expected) or 'none'}")
     print(f"Outcome changed by the new rules: {', '.join(changed) or 'none'}")
+    print(f"Answers that would carry the no-document note ({len(noted)}; replay has no irrigation result, so an irrigation answer shows up here "
+          f"although live it would not): {','.join(noted) or 'none'}")
     print(f"Passage block would change under crop scoping (verify live with --only): "
           f"{','.join(scoped_ids) or 'none'}\n")
     print("| id | expected | crops named | abstained (recorded) | abstained (replayed) | replayed reason |")

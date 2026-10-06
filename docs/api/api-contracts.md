@@ -49,11 +49,14 @@ Handled by Supabase Auth on the client; the backend only **verifies** the JWT (J
   confidence: number | null,
   abstained: boolean,
   abstained_because: string | null,
-  citations_valid: boolean
+  citations_valid: boolean,
+  limitations: string                    // code-authored bilingual note, "" for almost every answer (see below)
 }
 ```
 
 Since Phase 4 (ADR-0013) this object is assembled by code, not written by the model: the model writes a `DraftAdvisory` (reasoning, recommendation, `{passage, quote}` citations); code copies the farm record, weather and every piece of source metadata, validates each quote against the passage it names, and decides abstention (`abstained_because`: the model's own reason, or `insufficient_evidence` · `empty_answer` · `invalid_citation` · `no_valid_citation` · `crop_not_covered` (ADR-0014) · `no_verified_dose_source` · `banned_molecule` (ADR-0016)).
+
+**Limitations (2026-10-06).** `limitations` is a code-written note (Hindi paragraph, blank line, English paragraph; never the model's) about what an answer does *not* rest on. It is set only when the question names a crop, the answer is not an abstention, no `water_balance` and no label card are present, and no document evidence is shown: the answer then rests on the farm record (and weather) alone, and the note says that no verified document was used and points to a KVK. It is `""` otherwise. Advisories saved before the field existed have no `limitations` key; clients must treat a missing value as empty. The Hindi wording has had no native-speaker review. Days-since-sowing in `structured_data` counts on the farm's calendar (`AGRIAI_LOCAL_UTC_OFFSET_MINUTES`, default 330), not on the server's UTC date.
 
 **Chemicals (Phase 6, ADR-0016).** A pesticide dose or waiting period reaches the farmer only inside `agrochemical_label`: a list of cards (`row_id`, `molecule`, `formulation`, `crop`, `pest`, `dose_formulation` + `dose_formulation_unit` (`g` or `ml`) per hectare, optional `dose_ai_g_per_ha` and `dilution_l_per_ha`, `waiting_period_days`, `label_date`, `source_ref`, `table_version`, and a bilingual `text`) that code copied from a verified table row. The model never writes those numbers, so `recommendation` never contains a dose. A card says it summarises CIB&RC "Major Uses" and that the label on the product pack is the legal source. It appears only on an answer. If the farmer's question, the model's text or a shown quote names a molecule on the denylist, the answer abstains with `abstained_because: banned_molecule` and a code-authored message (verified entries may name the legal status and source; unverified ones never claim one). `recommendation` and `model_inference` are never blank: when there is no model text to show, code supplies a bilingual (Hindi + English) message for the abstention reason.
 

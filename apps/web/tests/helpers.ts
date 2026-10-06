@@ -29,13 +29,13 @@ export function farm(over: Record<string, unknown> = {}) {
   };
 }
 
-export function farmCrop() {
+export function farmCrop(sowing = "2026-09-01") {
   return {
     id: FARM_CROP_ID,
     farm_id: FARM_ID,
     crop_id: CROP_ID,
     variety: null,
-    sowing_date: "2026-09-01",
+    sowing_date: sowing,
     expected_harvest: null,
     status: "active",
     created_at: "2026-09-01T00:00:00Z",

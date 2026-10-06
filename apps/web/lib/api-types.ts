@@ -330,6 +330,11 @@ export interface components {
             citations_valid: boolean;
             /** Confidence */
             confidence?: number | null;
+            /**
+             * Limitations
+             * @default
+             */
+            limitations: string;
             live_data?: components["schemas"]["WeatherData"] | null;
             /** Model Inference */
             model_inference: string;

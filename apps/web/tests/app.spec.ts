@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { answer, FARM_ID, farm, loginAs, mockApi, newState } from "./helpers";
+import { answer, farm, farmCrop, FARM_ID, loginAs, mockApi, newState } from "./helpers";
 
 const SHOTS = "test-results/screens";
 
@@ -186,3 +186,80 @@ test("no horizontal scroll at phone width on the farm home", async ({ page }) =>
   const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
   expect(overflow).toBeLessThanOrEqual(0);
 });
+
+test.describe("days since sowing counts calendar days on the phone's date", () => {
+  test.use({ timezoneId: "Asia/Kolkata" });
+
+  // The saved advisory from the first live run was created at 2026-10-04 20:24:51 UTC = 01:54 IST on
+  // 5 Oct. A timestamp difference said 35 days for a 30 Aug sowing; the calendar says 36.
+  test("01:54 IST on 5 Oct is day 36 for a 30 Aug sowing", async ({ page }) => {
+    await page.clock.install({ time: new Date("2026-10-04T20:24:51Z") });
+    await loginAs(page);
+    await mockApi(page, newState({ farmCrops: [farmCrop("2026-08-30")] }));
+    await page.goto(`/farms/${FARM_ID}`);
+    await expect(page.getByText("बुवाई को 36 दिन हुए")).toBeVisible();
+  });
+
+  test("sowing day itself is day 0", async ({ page }) => {
+    await page.clock.install({ time: new Date("2026-10-04T20:24:51Z") });
+    await loginAs(page);
+    await mockApi(page, newState({ farmCrops: [farmCrop("2026-10-05")] }));
+    await page.goto(`/farms/${FARM_ID}`);
+    await expect(page.getByText("बुवाई को 0 दिन हुए")).toBeVisible();
+  });
+});
+
+test("the answer card names the crop in the chosen language, also for an answer saved earlier", async ({ page }) => {
+  await loginAs(page);
+  const saved = {
+    id: "77777777-7777-4777-8777-777777777777", farm_id: FARM_ID, question: "पुराना सवाल",
+    response: answer(), abstained: false, created_at: "2026-10-04T20:24:51Z",
+  };
+  await mockApi(page, newState({ advisories: [saved] }));
+  await page.goto(`/farms/${FARM_ID}`);
+  await page.getByRole("button", { name: "जवाब देखें" }).click();
+  const card = page.getByTestId("answer");
+  await expect(card).toContainText("गेहूं · बुवाई को 30 दिन हुए");
+  await expect(card).not.toContainText("Wheat");
+  await page.getByRole("button", { name: "English" }).click();
+  await expect(card).toContainText("Wheat · Sown 30 days ago");
+});
+
+const NOTE = "इस जवाब में किसी जाँचे हुए दस्तावेज़ का इस्तेमाल नहीं हुआ। यह सिर्फ़ आपके खेत के रिकॉर्ड पर आधारित है।\n\nNo verified document was used for this answer. It rests only on your farm's record.";
+
+test("a limitation note from the API is shown as its own card, in the chosen language", async ({ page }) => {
+  await loginAs(page);
+  await mockApi(page, newState({ askBody: answer({ limitations: NOTE }) }));
+  await page.goto(`/farms/${FARM_ID}`);
+  await page.getByLabel("AgriAI से पूछिए").fill("गेहूं की बुवाई कब करनी चाहिए?");
+  await page.getByRole("button", { name: "पूछें" }).click();
+  const card = page.getByTestId("answer");
+  await expect(card.getByRole("heading", { name: /इस जवाब की सीमा/ })).toBeVisible();
+  await expect(card).toContainText("किसी जाँचे हुए दस्तावेज़ का इस्तेमाल नहीं हुआ");
+  await expect(card).not.toContainText("No verified document");
+  await page.screenshot({ path: "test-results/screens/09-limitations.png", fullPage: true });
+  await page.getByRole("button", { name: "English" }).click();
+  await expect(card).toContainText("No verified document was used for this answer");
+  await expect(card).not.toContainText("जाँचे हुए दस्तावेज़");
+});
+
+test("no limitation card when the field is empty, absent (an answer saved earlier) or the answer abstains", async ({ page }) => {
+  await loginAs(page);
+  const withoutField: Record<string, unknown> = answer();
+  delete withoutField.limitations; // saved before the field existed
+  const records = [
+    ["11111111-0000-4000-8000-000000000001", answer({ limitations: "" })],
+    ["11111111-0000-4000-8000-000000000002", withoutField],
+    ["11111111-0000-4000-8000-000000000003", answer({ limitations: NOTE, abstained: true })],
+  ].map(([id, response], i) => ({
+    id, farm_id: FARM_ID, question: `सवाल ${i + 1}`, response, abstained: false, created_at: `2026-10-0${i + 1}T10:00:00Z`,
+  }));
+  await mockApi(page, newState({ advisories: records }));
+  await page.goto(`/farms/${FARM_ID}`);
+  for (const q of ["सवाल 1", "सवाल 2", "सवाल 3"]) {
+    await page.getByText(q, { exact: true }).locator("xpath=ancestor::section").getByRole("button", { name: "जवाब देखें" }).click();
+  }
+  await expect(page.getByTestId("answer")).toHaveCount(3);
+  await expect(page.getByRole("heading", { name: /इस जवाब की सीमा/ })).toHaveCount(0);
+});
+
