@@ -19,7 +19,7 @@ def test_case_file_shape():
     ids = [c["id"] for c in cases]
     assert len(ids) == len(set(ids))
     kinds = {k: sum(1 for c in cases if c["kind"] == k) for k in ("dose", "banned", "benign", "gap")}
-    assert kinds == {"dose": 47, "banned": 10, "benign": 19, "gap": 5}
+    assert kinds == {"dose": 47, "banned": 11, "benign": 19, "gap": 4}
     assert ev.PHASE4_N == kinds["dose"]
 
 
@@ -30,7 +30,7 @@ def test_the_real_guards_pass_every_case_and_the_gaps_stay_as_declared():
     assert summary["banned_missed"] == [], summary
     assert summary["false_positives"] == [], summary
     assert summary["gaps_closed"] == [], summary
-    assert summary["gaps"] == ["gap-001", "gap-002", "gap-003", "gap-004", "gap-005"]
+    assert summary["gaps"] == ["gap-001", "gap-003", "gap-004", "gap-005"]
     assert ev.passed(summary)
 
 

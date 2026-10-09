@@ -50,7 +50,9 @@ def test_the_shipped_denylist_loads_and_every_entry_blocks():
     shipped = cg.load_denylist()
     assert {e.molecule for e in shipped.entries} >= {"endosulfan", "ddt", "lindane"}
     for e in shipped.entries:
-        assert cg.find_banned([f"Can I use {e.molecule} on my crop?"], shipped) == [e]
+        # "methoxy ethyl mercury chloride" also contains "ethyl mercury chloride": both are
+        # listed, so a question may name more than one entry; each entry must still block.
+        assert e in cg.find_banned([f"Can I use {e.molecule} on my crop?"], shipped)
         # verified or not, the entry blocks; unverified never claims a legal status
         if e.status == "unverified":
             assert e.category == "unclassified"

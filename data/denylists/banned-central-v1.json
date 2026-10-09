@@ -1,56 +1,977 @@
 {
-  "list_version": "banned-central-v1",
+  "list_version": "banned-central-v2",
   "scope": "central",
-  "primary_source": "CIB&RC (ppqs.gov.in): list of pesticides banned, refused registration and restricted in India. NOT yet read by anyone on this project: every entry below is an unverified seed. See data/denylists/README.md.",
+  "primary_source": "CIB&RC 'List of pesticides which are banned, refused registration and restricted in use', updated on 31.07.2026 (ppqs.gov.in). Entries transcribed 2026-10-09; each stays unverified until a person checks it against the PDF.",
   "entries": [
     {
-      "molecule": "endosulfan",
-      "aliases": ["endosulphan", "thiodan", "एंडोसल्फान"],
-      "category": "unclassified", "status": "unverified",
-      "verified_by": null, "verified_on": null, "source_ref": null,
-      "note": "Seed from the author's recollection that it is banned in India. Unverified: blocks advice, never claims a legal status."
+      "molecule": "alachlor",
+      "aliases": [],
+      "category": "banned",
+      "status": "verified",
+      "verified_by": "Shabbir Hussain",
+      "verified_on": "2026-10-09",
+      "source_ref": "CIB&RC 'List of pesticides which are banned, refused registration and restricted in use', updated on 31.07.2026 (ppqs.gov.in), Section I.A (banned for manufacture, import and use), S. No. 1, PDF page 1",
+      "note": ""
+    },
+    {
+      "molecule": "aldicarb",
+      "aliases": [],
+      "category": "banned",
+      "status": "verified",
+      "verified_by": "Shabbir Hussain",
+      "verified_on": "2026-10-09",
+      "source_ref": "CIB&RC 'List of pesticides which are banned, refused registration and restricted in use', updated on 31.07.2026 (ppqs.gov.in), Section I.A (banned for manufacture, import and use), S. No. 2, PDF page 1",
+      "note": ""
     },
     {
       "molecule": "aldrin",
-      "aliases": ["एल्ड्रिन"],
-      "category": "unclassified", "status": "unverified",
-      "verified_by": null, "verified_on": null, "source_ref": null,
-      "note": "Seed from recollection. Unverified."
+      "aliases": [
+        "एल्ड्रिन"
+      ],
+      "category": "banned",
+      "status": "verified",
+      "verified_by": "Shabbir Hussain",
+      "verified_on": "2026-10-09",
+      "source_ref": "CIB&RC 'List of pesticides which are banned, refused registration and restricted in use', updated on 31.07.2026 (ppqs.gov.in), Section I.A (banned for manufacture, import and use), S. No. 3, PDF page 1",
+      "note": ""
     },
     {
-      "molecule": "dieldrin",
-      "aliases": ["डायल्ड्रिन"],
-      "category": "unclassified", "status": "unverified",
-      "verified_by": null, "verified_on": null, "source_ref": null,
-      "note": "Seed from recollection. Unverified."
+      "molecule": "benzene hexachloride",
+      "aliases": [],
+      "category": "banned",
+      "status": "verified",
+      "verified_by": "Shabbir Hussain",
+      "verified_on": "2026-10-09",
+      "source_ref": "CIB&RC 'List of pesticides which are banned, refused registration and restricted in use', updated on 31.07.2026 (ppqs.gov.in), Section I.A (banned for manufacture, import and use), S. No. 4, PDF page 1",
+      "note": ""
+    },
+    {
+      "molecule": "benomyl",
+      "aliases": [],
+      "category": "banned",
+      "status": "verified",
+      "verified_by": "Shabbir Hussain",
+      "verified_on": "2026-10-09",
+      "source_ref": "CIB&RC 'List of pesticides which are banned, refused registration and restricted in use', updated on 31.07.2026 (ppqs.gov.in), Section I.A (banned for manufacture, import and use), S. No. 5, PDF page 1",
+      "note": ""
+    },
+    {
+      "molecule": "calcium cyanide",
+      "aliases": [],
+      "category": "banned",
+      "status": "verified",
+      "verified_by": "Shabbir Hussain",
+      "verified_on": "2026-10-09",
+      "source_ref": "CIB&RC 'List of pesticides which are banned, refused registration and restricted in use', updated on 31.07.2026 (ppqs.gov.in), Section I.A (banned for manufacture, import and use), S. No. 6, PDF page 1",
+      "note": ""
+    },
+    {
+      "molecule": "carbaryl",
+      "aliases": [],
+      "category": "banned",
+      "status": "verified",
+      "verified_by": "Shabbir Hussain",
+      "verified_on": "2026-10-09",
+      "source_ref": "CIB&RC 'List of pesticides which are banned, refused registration and restricted in use', updated on 31.07.2026 (ppqs.gov.in), Section I.A (banned for manufacture, import and use), S. No. 7, PDF page 1",
+      "note": ""
+    },
+    {
+      "molecule": "chlorbenzilate",
+      "aliases": [],
+      "category": "banned",
+      "status": "verified",
+      "verified_by": "Shabbir Hussain",
+      "verified_on": "2026-10-09",
+      "source_ref": "CIB&RC 'List of pesticides which are banned, refused registration and restricted in use', updated on 31.07.2026 (ppqs.gov.in), Section I.A (banned for manufacture, import and use), S. No. 8, PDF page 1",
+      "note": ""
     },
     {
       "molecule": "chlordane",
-      "aliases": ["क्लोरडेन"],
-      "category": "unclassified", "status": "unverified",
-      "verified_by": null, "verified_on": null, "source_ref": null,
-      "note": "Seed from recollection. Unverified."
+      "aliases": [
+        "क्लोरडेन"
+      ],
+      "category": "banned",
+      "status": "verified",
+      "verified_by": "Shabbir Hussain",
+      "verified_on": "2026-10-09",
+      "source_ref": "CIB&RC 'List of pesticides which are banned, refused registration and restricted in use', updated on 31.07.2026 (ppqs.gov.in), Section I.A (banned for manufacture, import and use), S. No. 9, PDF page 1",
+      "note": ""
+    },
+    {
+      "molecule": "chlorofenvinphos",
+      "aliases": [],
+      "category": "banned",
+      "status": "verified",
+      "verified_by": "Shabbir Hussain",
+      "verified_on": "2026-10-09",
+      "source_ref": "CIB&RC 'List of pesticides which are banned, refused registration and restricted in use', updated on 31.07.2026 (ppqs.gov.in), Section I.A (banned for manufacture, import and use), S. No. 10, PDF page 1",
+      "note": ""
+    },
+    {
+      "molecule": "copper acetoarsenite",
+      "aliases": [],
+      "category": "banned",
+      "status": "verified",
+      "verified_by": "Shabbir Hussain",
+      "verified_on": "2026-10-09",
+      "source_ref": "CIB&RC 'List of pesticides which are banned, refused registration and restricted in use', updated on 31.07.2026 (ppqs.gov.in), Section I.A (banned for manufacture, import and use), S. No. 11, PDF page 1",
+      "note": ""
+    },
+    {
+      "molecule": "diazinon",
+      "aliases": [],
+      "category": "banned",
+      "status": "verified",
+      "verified_by": "Shabbir Hussain",
+      "verified_on": "2026-10-09",
+      "source_ref": "CIB&RC 'List of pesticides which are banned, refused registration and restricted in use', updated on 31.07.2026 (ppqs.gov.in), Section I.A (banned for manufacture, import and use), S. No. 12, PDF page 1",
+      "note": ""
+    },
+    {
+      "molecule": "dibromochloropropane",
+      "aliases": [
+        "dbcp"
+      ],
+      "category": "banned",
+      "status": "verified",
+      "verified_by": "Shabbir Hussain",
+      "verified_on": "2026-10-09",
+      "source_ref": "CIB&RC 'List of pesticides which are banned, refused registration and restricted in use', updated on 31.07.2026 (ppqs.gov.in), Section I.A (banned for manufacture, import and use), S. No. 13, PDF page 1",
+      "note": ""
+    },
+    {
+      "molecule": "dichlorvos",
+      "aliases": [
+        "dichlorovos"
+      ],
+      "category": "banned",
+      "status": "verified",
+      "verified_by": "Shabbir Hussain",
+      "verified_on": "2026-10-09",
+      "source_ref": "CIB&RC 'List of pesticides which are banned, refused registration and restricted in use', updated on 31.07.2026 (ppqs.gov.in), Section I.A (banned for manufacture, import and use), S. No. 14, PDF page 1",
+      "note": "Printed 'Dichlorovos' in I.A (S.O. 3951(E) 2018) and 'Dichlorvos' in I.B (S.O. 1196(E) 2020): one molecule, two spellings."
+    },
+    {
+      "molecule": "dicofol",
+      "aliases": [],
+      "category": "banned",
+      "status": "verified",
+      "verified_by": "Shabbir Hussain",
+      "verified_on": "2026-10-09",
+      "source_ref": "CIB&RC 'List of pesticides which are banned, refused registration and restricted in use', updated on 31.07.2026 (ppqs.gov.in), Section I.A (banned for manufacture, import and use), S. No. 15, PDF page 1",
+      "note": ""
+    },
+    {
+      "molecule": "dieldrin",
+      "aliases": [
+        "डायल्ड्रिन"
+      ],
+      "category": "banned",
+      "status": "verified",
+      "verified_by": "Shabbir Hussain",
+      "verified_on": "2026-10-09",
+      "source_ref": "CIB&RC 'List of pesticides which are banned, refused registration and restricted in use', updated on 31.07.2026 (ppqs.gov.in), Section I.A (banned for manufacture, import and use), S. No. 16, PDF page 1",
+      "note": ""
+    },
+    {
+      "molecule": "dinocap",
+      "aliases": [],
+      "category": "banned",
+      "status": "verified",
+      "verified_by": "Shabbir Hussain",
+      "verified_on": "2026-10-09",
+      "source_ref": "CIB&RC 'List of pesticides which are banned, refused registration and restricted in use', updated on 31.07.2026 (ppqs.gov.in), Section I.A (banned for manufacture, import and use), S. No. 17, PDF page 1",
+      "note": ""
+    },
+    {
+      "molecule": "endosulfan",
+      "aliases": [
+        "endosulfron",
+        "endosulphan",
+        "thiodan",
+        "एंडोसल्फान"
+      ],
+      "category": "banned",
+      "status": "verified",
+      "verified_by": "Shabbir Hussain",
+      "verified_on": "2026-10-09",
+      "source_ref": "CIB&RC 'List of pesticides which are banned, refused registration and restricted in use', updated on 31.07.2026 (ppqs.gov.in), Section I.A (banned for manufacture, import and use), S. No. 18, PDF page 1",
+      "note": "Printed as 'Endosulfron' (Supreme Court WP(C) 213 of 2011). Read as endosulfan: check."
+    },
+    {
+      "molecule": "endrin",
+      "aliases": [],
+      "category": "banned",
+      "status": "verified",
+      "verified_by": "Shabbir Hussain",
+      "verified_on": "2026-10-09",
+      "source_ref": "CIB&RC 'List of pesticides which are banned, refused registration and restricted in use', updated on 31.07.2026 (ppqs.gov.in), Section I.A (banned for manufacture, import and use), S. No. 19, PDF page 1",
+      "note": ""
+    },
+    {
+      "molecule": "ethyl mercury chloride",
+      "aliases": [],
+      "category": "banned",
+      "status": "verified",
+      "verified_by": "Shabbir Hussain",
+      "verified_on": "2026-10-09",
+      "source_ref": "CIB&RC 'List of pesticides which are banned, refused registration and restricted in use', updated on 31.07.2026 (ppqs.gov.in), Section I.A (banned for manufacture, import and use), S. No. 20, PDF page 1",
+      "note": ""
+    },
+    {
+      "molecule": "ethyl parathion",
+      "aliases": [],
+      "category": "banned",
+      "status": "verified",
+      "verified_by": "Shabbir Hussain",
+      "verified_on": "2026-10-09",
+      "source_ref": "CIB&RC 'List of pesticides which are banned, refused registration and restricted in use', updated on 31.07.2026 (ppqs.gov.in), Section I.A (banned for manufacture, import and use), S. No. 21, PDF page 1",
+      "note": ""
+    },
+    {
+      "molecule": "ethylene dibromide",
+      "aliases": [
+        "edb"
+      ],
+      "category": "banned",
+      "status": "verified",
+      "verified_by": "Shabbir Hussain",
+      "verified_on": "2026-10-09",
+      "source_ref": "CIB&RC 'List of pesticides which are banned, refused registration and restricted in use', updated on 31.07.2026 (ppqs.gov.in), Section I.A (banned for manufacture, import and use), S. No. 22, PDF page 1",
+      "note": ""
+    },
+    {
+      "molecule": "fenarimol",
+      "aliases": [],
+      "category": "banned",
+      "status": "verified",
+      "verified_by": "Shabbir Hussain",
+      "verified_on": "2026-10-09",
+      "source_ref": "CIB&RC 'List of pesticides which are banned, refused registration and restricted in use', updated on 31.07.2026 (ppqs.gov.in), Section I.A (banned for manufacture, import and use), S. No. 23, PDF page 1",
+      "note": ""
+    },
+    {
+      "molecule": "fenthion",
+      "aliases": [],
+      "category": "banned",
+      "status": "verified",
+      "verified_by": "Shabbir Hussain",
+      "verified_on": "2026-10-09",
+      "source_ref": "CIB&RC 'List of pesticides which are banned, refused registration and restricted in use', updated on 31.07.2026 (ppqs.gov.in), Section I.A (banned for manufacture, import and use), S. No. 24, PDF page 1",
+      "note": ""
     },
     {
       "molecule": "heptachlor",
-      "aliases": ["हेप्टाक्लोर"],
-      "category": "unclassified", "status": "unverified",
-      "verified_by": null, "verified_on": null, "source_ref": null,
-      "note": "Seed from recollection. Unverified."
+      "aliases": [
+        "हेप्टाक्लोर"
+      ],
+      "category": "banned",
+      "status": "verified",
+      "verified_by": "Shabbir Hussain",
+      "verified_on": "2026-10-09",
+      "source_ref": "CIB&RC 'List of pesticides which are banned, refused registration and restricted in use', updated on 31.07.2026 (ppqs.gov.in), Section I.A (banned for manufacture, import and use), S. No. 25, PDF page 1",
+      "note": ""
     },
     {
       "molecule": "lindane",
-      "aliases": ["लिंडेन"],
-      "category": "unclassified", "status": "unverified",
-      "verified_by": null, "verified_on": null, "source_ref": null,
-      "note": "Seed from recollection. Unverified."
+      "aliases": [
+        "gamma-hch",
+        "लिंडेन"
+      ],
+      "category": "banned",
+      "status": "verified",
+      "verified_by": "Shabbir Hussain",
+      "verified_on": "2026-10-09",
+      "source_ref": "CIB&RC 'List of pesticides which are banned, refused registration and restricted in use', updated on 31.07.2026 (ppqs.gov.in), Section I.A (banned for manufacture, import and use), S. No. 26, PDF page 1",
+      "note": ""
+    },
+    {
+      "molecule": "linuron",
+      "aliases": [],
+      "category": "banned",
+      "status": "verified",
+      "verified_by": "Shabbir Hussain",
+      "verified_on": "2026-10-09",
+      "source_ref": "CIB&RC 'List of pesticides which are banned, refused registration and restricted in use', updated on 31.07.2026 (ppqs.gov.in), Section I.A (banned for manufacture, import and use), S. No. 27, PDF page 1",
+      "note": ""
+    },
+    {
+      "molecule": "maleic hydrazide",
+      "aliases": [],
+      "category": "banned",
+      "status": "verified",
+      "verified_by": "Shabbir Hussain",
+      "verified_on": "2026-10-09",
+      "source_ref": "CIB&RC 'List of pesticides which are banned, refused registration and restricted in use', updated on 31.07.2026 (ppqs.gov.in), Section I.A (banned for manufacture, import and use), S. No. 28, PDF page 1",
+      "note": ""
+    },
+    {
+      "molecule": "menazon",
+      "aliases": [],
+      "category": "banned",
+      "status": "verified",
+      "verified_by": "Shabbir Hussain",
+      "verified_on": "2026-10-09",
+      "source_ref": "CIB&RC 'List of pesticides which are banned, refused registration and restricted in use', updated on 31.07.2026 (ppqs.gov.in), Section I.A (banned for manufacture, import and use), S. No. 29, PDF page 1",
+      "note": ""
+    },
+    {
+      "molecule": "methomyl",
+      "aliases": [],
+      "category": "banned",
+      "status": "verified",
+      "verified_by": "Shabbir Hussain",
+      "verified_on": "2026-10-09",
+      "source_ref": "CIB&RC 'List of pesticides which are banned, refused registration and restricted in use', updated on 31.07.2026 (ppqs.gov.in), Section I.A (banned for manufacture, import and use), S. No. 30, PDF page 1",
+      "note": ""
+    },
+    {
+      "molecule": "methoxy ethyl mercury chloride",
+      "aliases": [],
+      "category": "banned",
+      "status": "verified",
+      "verified_by": "Shabbir Hussain",
+      "verified_on": "2026-10-09",
+      "source_ref": "CIB&RC 'List of pesticides which are banned, refused registration and restricted in use', updated on 31.07.2026 (ppqs.gov.in), Section I.A (banned for manufacture, import and use), S. No. 31, PDF page 1",
+      "note": ""
+    },
+    {
+      "molecule": "methyl parathion",
+      "aliases": [],
+      "category": "banned",
+      "status": "verified",
+      "verified_by": "Shabbir Hussain",
+      "verified_on": "2026-10-09",
+      "source_ref": "CIB&RC 'List of pesticides which are banned, refused registration and restricted in use', updated on 31.07.2026 (ppqs.gov.in), Section I.A (banned for manufacture, import and use), S. No. 32, PDF page 1",
+      "note": ""
+    },
+    {
+      "molecule": "metoxuron",
+      "aliases": [],
+      "category": "banned",
+      "status": "verified",
+      "verified_by": "Shabbir Hussain",
+      "verified_on": "2026-10-09",
+      "source_ref": "CIB&RC 'List of pesticides which are banned, refused registration and restricted in use', updated on 31.07.2026 (ppqs.gov.in), Section I.A (banned for manufacture, import and use), S. No. 33, PDF page 1",
+      "note": ""
+    },
+    {
+      "molecule": "nitrofen",
+      "aliases": [],
+      "category": "banned",
+      "status": "verified",
+      "verified_by": "Shabbir Hussain",
+      "verified_on": "2026-10-09",
+      "source_ref": "CIB&RC 'List of pesticides which are banned, refused registration and restricted in use', updated on 31.07.2026 (ppqs.gov.in), Section I.A (banned for manufacture, import and use), S. No. 34, PDF page 2",
+      "note": ""
+    },
+    {
+      "molecule": "paraquat dimethyl sulphate",
+      "aliases": [],
+      "category": "banned",
+      "status": "verified",
+      "verified_by": "Shabbir Hussain",
+      "verified_on": "2026-10-09",
+      "source_ref": "CIB&RC 'List of pesticides which are banned, refused registration and restricted in use', updated on 31.07.2026 (ppqs.gov.in), Section I.A (banned for manufacture, import and use), S. No. 35, PDF page 2",
+      "note": ""
+    },
+    {
+      "molecule": "pentachloro nitrobenzene",
+      "aliases": [
+        "pcnb"
+      ],
+      "category": "banned",
+      "status": "verified",
+      "verified_by": "Shabbir Hussain",
+      "verified_on": "2026-10-09",
+      "source_ref": "CIB&RC 'List of pesticides which are banned, refused registration and restricted in use', updated on 31.07.2026 (ppqs.gov.in), Section I.A (banned for manufacture, import and use), S. No. 36, PDF page 2",
+      "note": ""
+    },
+    {
+      "molecule": "pentachlorophenol",
+      "aliases": [],
+      "category": "banned",
+      "status": "verified",
+      "verified_by": "Shabbir Hussain",
+      "verified_on": "2026-10-09",
+      "source_ref": "CIB&RC 'List of pesticides which are banned, refused registration and restricted in use', updated on 31.07.2026 (ppqs.gov.in), Section I.A (banned for manufacture, import and use), S. No. 37, PDF page 2",
+      "note": ""
+    },
+    {
+      "molecule": "phenyl mercury acetate",
+      "aliases": [],
+      "category": "banned",
+      "status": "verified",
+      "verified_by": "Shabbir Hussain",
+      "verified_on": "2026-10-09",
+      "source_ref": "CIB&RC 'List of pesticides which are banned, refused registration and restricted in use', updated on 31.07.2026 (ppqs.gov.in), Section I.A (banned for manufacture, import and use), S. No. 38, PDF page 2",
+      "note": ""
+    },
+    {
+      "molecule": "phorate",
+      "aliases": [],
+      "category": "banned",
+      "status": "verified",
+      "verified_by": "Shabbir Hussain",
+      "verified_on": "2026-10-09",
+      "source_ref": "CIB&RC 'List of pesticides which are banned, refused registration and restricted in use', updated on 31.07.2026 (ppqs.gov.in), Section I.A (banned for manufacture, import and use), S. No. 39, PDF page 2",
+      "note": "Also listed in I.B, S. No. 4 (S.O. 1196(E) 2020)."
+    },
+    {
+      "molecule": "phosphamidon",
+      "aliases": [],
+      "category": "banned",
+      "status": "verified",
+      "verified_by": "Shabbir Hussain",
+      "verified_on": "2026-10-09",
+      "source_ref": "CIB&RC 'List of pesticides which are banned, refused registration and restricted in use', updated on 31.07.2026 (ppqs.gov.in), Section I.A (banned for manufacture, import and use), S. No. 40, PDF page 2",
+      "note": ""
+    },
+    {
+      "molecule": "sodium cyanide",
+      "aliases": [],
+      "category": "banned",
+      "status": "verified",
+      "verified_by": "Shabbir Hussain",
+      "verified_on": "2026-10-09",
+      "source_ref": "CIB&RC 'List of pesticides which are banned, refused registration and restricted in use', updated on 31.07.2026 (ppqs.gov.in), Section I.A (banned for manufacture, import and use), S. No. 41, PDF page 2",
+      "note": "Banned for insecticidal purpose only (S.O. 3951(E) 2018); non-insecticidal uses continue."
+    },
+    {
+      "molecule": "sodium methane arsonate",
+      "aliases": [],
+      "category": "banned",
+      "status": "verified",
+      "verified_by": "Shabbir Hussain",
+      "verified_on": "2026-10-09",
+      "source_ref": "CIB&RC 'List of pesticides which are banned, refused registration and restricted in use', updated on 31.07.2026 (ppqs.gov.in), Section I.A (banned for manufacture, import and use), S. No. 42, PDF page 2",
+      "note": ""
+    },
+    {
+      "molecule": "tetradifon",
+      "aliases": [],
+      "category": "banned",
+      "status": "verified",
+      "verified_by": "Shabbir Hussain",
+      "verified_on": "2026-10-09",
+      "source_ref": "CIB&RC 'List of pesticides which are banned, refused registration and restricted in use', updated on 31.07.2026 (ppqs.gov.in), Section I.A (banned for manufacture, import and use), S. No. 43, PDF page 2",
+      "note": ""
+    },
+    {
+      "molecule": "thiometon",
+      "aliases": [],
+      "category": "banned",
+      "status": "verified",
+      "verified_by": "Shabbir Hussain",
+      "verified_on": "2026-10-09",
+      "source_ref": "CIB&RC 'List of pesticides which are banned, refused registration and restricted in use', updated on 31.07.2026 (ppqs.gov.in), Section I.A (banned for manufacture, import and use), S. No. 44, PDF page 2",
+      "note": ""
+    },
+    {
+      "molecule": "toxaphene",
+      "aliases": [
+        "camphechlor"
+      ],
+      "category": "banned",
+      "status": "verified",
+      "verified_by": "Shabbir Hussain",
+      "verified_on": "2026-10-09",
+      "source_ref": "CIB&RC 'List of pesticides which are banned, refused registration and restricted in use', updated on 31.07.2026 (ppqs.gov.in), Section I.A (banned for manufacture, import and use), S. No. 45, PDF page 2",
+      "note": ""
+    },
+    {
+      "molecule": "triazophos",
+      "aliases": [],
+      "category": "banned",
+      "status": "verified",
+      "verified_by": "Shabbir Hussain",
+      "verified_on": "2026-10-09",
+      "source_ref": "CIB&RC 'List of pesticides which are banned, refused registration and restricted in use', updated on 31.07.2026 (ppqs.gov.in), Section I.A (banned for manufacture, import and use), S. No. 46, PDF page 2",
+      "note": "Also listed in I.B, S. No. 5 (S.O. 1196(E) 2020)."
+    },
+    {
+      "molecule": "tridemorph",
+      "aliases": [],
+      "category": "banned",
+      "status": "verified",
+      "verified_by": "Shabbir Hussain",
+      "verified_on": "2026-10-09",
+      "source_ref": "CIB&RC 'List of pesticides which are banned, refused registration and restricted in use', updated on 31.07.2026 (ppqs.gov.in), Section I.A (banned for manufacture, import and use), S. No. 47, PDF page 2",
+      "note": ""
+    },
+    {
+      "molecule": "trichloro acetic acid",
+      "aliases": [
+        "tca"
+      ],
+      "category": "banned",
+      "status": "verified",
+      "verified_by": "Shabbir Hussain",
+      "verified_on": "2026-10-09",
+      "source_ref": "CIB&RC 'List of pesticides which are banned, refused registration and restricted in use', updated on 31.07.2026 (ppqs.gov.in), Section I.A (banned for manufacture, import and use), S. No. 48, PDF page 2",
+      "note": ""
+    },
+    {
+      "molecule": "trichlorfon",
+      "aliases": [],
+      "category": "banned",
+      "status": "verified",
+      "verified_by": "Shabbir Hussain",
+      "verified_on": "2026-10-09",
+      "source_ref": "CIB&RC 'List of pesticides which are banned, refused registration and restricted in use', updated on 31.07.2026 (ppqs.gov.in), Section I.A (banned for manufacture, import and use), S. No. 49, PDF page 2",
+      "note": ""
+    },
+    {
+      "molecule": "nicotin sulfate",
+      "aliases": [
+        "nicotine sulfate",
+        "nicotine sulphate"
+      ],
+      "category": "banned",
+      "status": "verified",
+      "verified_by": "Shabbir Hussain",
+      "verified_on": "2026-10-09",
+      "source_ref": "CIB&RC 'List of pesticides which are banned, refused registration and restricted in use', updated on 31.07.2026 (ppqs.gov.in), Section I.B (banned for use, manufacture for export continued), S. No. 3, PDF page 2",
+      "note": "Banned for use; manufacture for export continued (S.O. 325(E) 1992)."
+    },
+    {
+      "molecule": "dalapon",
+      "aliases": [],
+      "category": "unclassified",
+      "status": "unverified",
+      "verified_by": null,
+      "verified_on": null,
+      "source_ref": "CIB&RC 'List of pesticides which are banned, refused registration and restricted in use', updated on 31.07.2026 (ppqs.gov.in), Section I.C (withdrawn, S.O. 915(E) dated 15 June 2006), S. No. 1, PDF page 2",
+      "note": "Listed as WITHDRAWN (may become inoperative once data is accepted). The schema has no 'withdrawn' category, so this stays unverified/unclassified: it blocks advice but never claims a legal status."
+    },
+    {
+      "molecule": "ferbam",
+      "aliases": [],
+      "category": "unclassified",
+      "status": "unverified",
+      "verified_by": null,
+      "verified_on": null,
+      "source_ref": "CIB&RC 'List of pesticides which are banned, refused registration and restricted in use', updated on 31.07.2026 (ppqs.gov.in), Section I.C (withdrawn, S.O. 915(E) dated 15 June 2006), S. No. 2, PDF page 2",
+      "note": "Listed as WITHDRAWN (may become inoperative once data is accepted). The schema has no 'withdrawn' category, so this stays unverified/unclassified: it blocks advice but never claims a legal status."
+    },
+    {
+      "molecule": "formothion",
+      "aliases": [],
+      "category": "unclassified",
+      "status": "unverified",
+      "verified_by": null,
+      "verified_on": null,
+      "source_ref": "CIB&RC 'List of pesticides which are banned, refused registration and restricted in use', updated on 31.07.2026 (ppqs.gov.in), Section I.C (withdrawn, S.O. 915(E) dated 15 June 2006), S. No. 3, PDF page 2",
+      "note": "Listed as WITHDRAWN (may become inoperative once data is accepted). The schema has no 'withdrawn' category, so this stays unverified/unclassified: it blocks advice but never claims a legal status."
+    },
+    {
+      "molecule": "nickel chloride",
+      "aliases": [],
+      "category": "unclassified",
+      "status": "unverified",
+      "verified_by": null,
+      "verified_on": null,
+      "source_ref": "CIB&RC 'List of pesticides which are banned, refused registration and restricted in use', updated on 31.07.2026 (ppqs.gov.in), Section I.C (withdrawn, S.O. 915(E) dated 15 June 2006), S. No. 4, PDF page 2",
+      "note": "Listed as WITHDRAWN (may become inoperative once data is accepted). The schema has no 'withdrawn' category, so this stays unverified/unclassified: it blocks advice but never claims a legal status."
+    },
+    {
+      "molecule": "paradichlorobenzene",
+      "aliases": [
+        "pdcb"
+      ],
+      "category": "unclassified",
+      "status": "unverified",
+      "verified_by": null,
+      "verified_on": null,
+      "source_ref": "CIB&RC 'List of pesticides which are banned, refused registration and restricted in use', updated on 31.07.2026 (ppqs.gov.in), Section I.C (withdrawn, S.O. 915(E) dated 15 June 2006), S. No. 5, PDF page 2",
+      "note": "Listed as WITHDRAWN (may become inoperative once data is accepted). The schema has no 'withdrawn' category, so this stays unverified/unclassified: it blocks advice but never claims a legal status."
+    },
+    {
+      "molecule": "simazine",
+      "aliases": [],
+      "category": "unclassified",
+      "status": "unverified",
+      "verified_by": null,
+      "verified_on": null,
+      "source_ref": "CIB&RC 'List of pesticides which are banned, refused registration and restricted in use', updated on 31.07.2026 (ppqs.gov.in), Section I.C (withdrawn, S.O. 915(E) dated 15 June 2006), S. No. 6, PDF page 2",
+      "note": "Listed as WITHDRAWN (may become inoperative once data is accepted). The schema has no 'withdrawn' category, so this stays unverified/unclassified: it blocks advice but never claims a legal status."
+    },
+    {
+      "molecule": "sirmate",
+      "aliases": [],
+      "category": "unclassified",
+      "status": "unverified",
+      "verified_by": null,
+      "verified_on": null,
+      "source_ref": "CIB&RC 'List of pesticides which are banned, refused registration and restricted in use', updated on 31.07.2026 (ppqs.gov.in), Section I.C (withdrawn, S.O. 915(E) dated 15 June 2006), S. No. 7, PDF page 2",
+      "note": "Listed as WITHDRAWN (may become inoperative once data is accepted). The schema has no 'withdrawn' category, so this stays unverified/unclassified: it blocks advice but never claims a legal status."
+    },
+    {
+      "molecule": "warfarin",
+      "aliases": [],
+      "category": "unclassified",
+      "status": "unverified",
+      "verified_by": null,
+      "verified_on": null,
+      "source_ref": "CIB&RC 'List of pesticides which are banned, refused registration and restricted in use', updated on 31.07.2026 (ppqs.gov.in), Section I.C (withdrawn, S.O. 915(E) dated 15 June 2006), S. No. 8, PDF page 2",
+      "note": "Listed as WITHDRAWN (may become inoperative once data is accepted). The schema has no 'withdrawn' category, so this stays unverified/unclassified: it blocks advice but never claims a legal status."
+    },
+    {
+      "molecule": "2,4,5-t",
+      "aliases": [],
+      "category": "refused",
+      "status": "verified",
+      "verified_by": "Shabbir Hussain",
+      "verified_on": "2026-10-09",
+      "source_ref": "CIB&RC 'List of pesticides which are banned, refused registration and restricted in use', updated on 31.07.2026 (ppqs.gov.in), Section II (refused registration), S. No. 1, PDF page 3",
+      "note": ""
+    },
+    {
+      "molecule": "ammonium sulphamate",
+      "aliases": [
+        "ammonium sulfamate"
+      ],
+      "category": "refused",
+      "status": "verified",
+      "verified_by": "Shabbir Hussain",
+      "verified_on": "2026-10-09",
+      "source_ref": "CIB&RC 'List of pesticides which are banned, refused registration and restricted in use', updated on 31.07.2026 (ppqs.gov.in), Section II (refused registration), S. No. 2, PDF page 3",
+      "note": ""
+    },
+    {
+      "molecule": "azinphos ethyl",
+      "aliases": [],
+      "category": "refused",
+      "status": "verified",
+      "verified_by": "Shabbir Hussain",
+      "verified_on": "2026-10-09",
+      "source_ref": "CIB&RC 'List of pesticides which are banned, refused registration and restricted in use', updated on 31.07.2026 (ppqs.gov.in), Section II (refused registration), S. No. 3, PDF page 3",
+      "note": ""
+    },
+    {
+      "molecule": "azinphos methyl",
+      "aliases": [],
+      "category": "refused",
+      "status": "verified",
+      "verified_by": "Shabbir Hussain",
+      "verified_on": "2026-10-09",
+      "source_ref": "CIB&RC 'List of pesticides which are banned, refused registration and restricted in use', updated on 31.07.2026 (ppqs.gov.in), Section II (refused registration), S. No. 4, PDF page 3",
+      "note": ""
+    },
+    {
+      "molecule": "binapacryl",
+      "aliases": [],
+      "category": "refused",
+      "status": "verified",
+      "verified_by": "Shabbir Hussain",
+      "verified_on": "2026-10-09",
+      "source_ref": "CIB&RC 'List of pesticides which are banned, refused registration and restricted in use', updated on 31.07.2026 (ppqs.gov.in), Section II (refused registration), S. No. 5, PDF page 3",
+      "note": ""
+    },
+    {
+      "molecule": "calcium arsenate",
+      "aliases": [],
+      "category": "refused",
+      "status": "verified",
+      "verified_by": "Shabbir Hussain",
+      "verified_on": "2026-10-09",
+      "source_ref": "CIB&RC 'List of pesticides which are banned, refused registration and restricted in use', updated on 31.07.2026 (ppqs.gov.in), Section II (refused registration), S. No. 6, PDF page 3",
+      "note": ""
+    },
+    {
+      "molecule": "carbophenothion",
+      "aliases": [],
+      "category": "refused",
+      "status": "verified",
+      "verified_by": "Shabbir Hussain",
+      "verified_on": "2026-10-09",
+      "source_ref": "CIB&RC 'List of pesticides which are banned, refused registration and restricted in use', updated on 31.07.2026 (ppqs.gov.in), Section II (refused registration), S. No. 7, PDF page 3",
+      "note": ""
+    },
+    {
+      "molecule": "chinomethionate",
+      "aliases": [
+        "morestan"
+      ],
+      "category": "refused",
+      "status": "verified",
+      "verified_by": "Shabbir Hussain",
+      "verified_on": "2026-10-09",
+      "source_ref": "CIB&RC 'List of pesticides which are banned, refused registration and restricted in use', updated on 31.07.2026 (ppqs.gov.in), Section II (refused registration), S. No. 8, PDF page 3",
+      "note": ""
+    },
+    {
+      "molecule": "dicrotophos",
+      "aliases": [],
+      "category": "refused",
+      "status": "verified",
+      "verified_by": "Shabbir Hussain",
+      "verified_on": "2026-10-09",
+      "source_ref": "CIB&RC 'List of pesticides which are banned, refused registration and restricted in use', updated on 31.07.2026 (ppqs.gov.in), Section II (refused registration), S. No. 9, PDF page 3",
+      "note": ""
+    },
+    {
+      "molecule": "epn",
+      "aliases": [],
+      "category": "refused",
+      "status": "verified",
+      "verified_by": "Shabbir Hussain",
+      "verified_on": "2026-10-09",
+      "source_ref": "CIB&RC 'List of pesticides which are banned, refused registration and restricted in use', updated on 31.07.2026 (ppqs.gov.in), Section II (refused registration), S. No. 10, PDF page 3",
+      "note": ""
+    },
+    {
+      "molecule": "fentin acetate",
+      "aliases": [],
+      "category": "refused",
+      "status": "verified",
+      "verified_by": "Shabbir Hussain",
+      "verified_on": "2026-10-09",
+      "source_ref": "CIB&RC 'List of pesticides which are banned, refused registration and restricted in use', updated on 31.07.2026 (ppqs.gov.in), Section II (refused registration), S. No. 11, PDF page 3",
+      "note": ""
+    },
+    {
+      "molecule": "fentin hydroxide",
+      "aliases": [],
+      "category": "refused",
+      "status": "verified",
+      "verified_by": "Shabbir Hussain",
+      "verified_on": "2026-10-09",
+      "source_ref": "CIB&RC 'List of pesticides which are banned, refused registration and restricted in use', updated on 31.07.2026 (ppqs.gov.in), Section II (refused registration), S. No. 12, PDF page 3",
+      "note": ""
+    },
+    {
+      "molecule": "lead arsenate",
+      "aliases": [],
+      "category": "refused",
+      "status": "verified",
+      "verified_by": "Shabbir Hussain",
+      "verified_on": "2026-10-09",
+      "source_ref": "CIB&RC 'List of pesticides which are banned, refused registration and restricted in use', updated on 31.07.2026 (ppqs.gov.in), Section II (refused registration), S. No. 13, PDF page 3",
+      "note": ""
+    },
+    {
+      "molecule": "leptophos",
+      "aliases": [
+        "phosvel"
+      ],
+      "category": "refused",
+      "status": "verified",
+      "verified_by": "Shabbir Hussain",
+      "verified_on": "2026-10-09",
+      "source_ref": "CIB&RC 'List of pesticides which are banned, refused registration and restricted in use', updated on 31.07.2026 (ppqs.gov.in), Section II (refused registration), S. No. 14, PDF page 3",
+      "note": ""
+    },
+    {
+      "molecule": "mephosfolan",
+      "aliases": [],
+      "category": "refused",
+      "status": "verified",
+      "verified_by": "Shabbir Hussain",
+      "verified_on": "2026-10-09",
+      "source_ref": "CIB&RC 'List of pesticides which are banned, refused registration and restricted in use', updated on 31.07.2026 (ppqs.gov.in), Section II (refused registration), S. No. 15, PDF page 3",
+      "note": ""
+    },
+    {
+      "molecule": "mevinphos",
+      "aliases": [
+        "phosdrin"
+      ],
+      "category": "refused",
+      "status": "verified",
+      "verified_by": "Shabbir Hussain",
+      "verified_on": "2026-10-09",
+      "source_ref": "CIB&RC 'List of pesticides which are banned, refused registration and restricted in use', updated on 31.07.2026 (ppqs.gov.in), Section II (refused registration), S. No. 16, PDF page 3",
+      "note": ""
+    },
+    {
+      "molecule": "disulfoton",
+      "aliases": [
+        "thiodemeton"
+      ],
+      "category": "refused",
+      "status": "verified",
+      "verified_by": "Shabbir Hussain",
+      "verified_on": "2026-10-09",
+      "source_ref": "CIB&RC 'List of pesticides which are banned, refused registration and restricted in use', updated on 31.07.2026 (ppqs.gov.in), Section II (refused registration), S. No. 17, PDF page 3",
+      "note": ""
+    },
+    {
+      "molecule": "vamidothion",
+      "aliases": [],
+      "category": "refused",
+      "status": "verified",
+      "verified_by": "Shabbir Hussain",
+      "verified_on": "2026-10-09",
+      "source_ref": "CIB&RC 'List of pesticides which are banned, refused registration and restricted in use', updated on 31.07.2026 (ppqs.gov.in), Section II (refused registration), S. No. 18, PDF page 3",
+      "note": ""
+    },
+    {
+      "molecule": "aluminium phosphide",
+      "aliases": [
+        "aluminum phosphide"
+      ],
+      "category": "restricted",
+      "status": "verified",
+      "verified_by": "Shabbir Hussain",
+      "verified_on": "2026-10-09",
+      "source_ref": "CIB&RC 'List of pesticides which are banned, refused registration and restricted in use', updated on 31.07.2026 (ppqs.gov.in), Section III (restricted for use in the country), S. No. 1, PDF page 4",
+      "note": "Restricted, not banned: blocked as a whole by design (ADR-0016, decided 2026-10-09). Pest control only by Govt./approved operators under expert supervision, except Aluminium Phosphide 15% 12 g tablet and 6% tablet; 10- and 20-tablet tube packs of 3 g banned."
+    },
+    {
+      "molecule": "captafol",
+      "aliases": [],
+      "category": "restricted",
+      "status": "verified",
+      "verified_by": "Shabbir Hussain",
+      "verified_on": "2026-10-09",
+      "source_ref": "CIB&RC 'List of pesticides which are banned, refused registration and restricted in use', updated on 31.07.2026 (ppqs.gov.in), Section III (restricted for use in the country), S. No. 2, PDF page 4",
+      "note": "Restricted, not banned: blocked as a whole by design (ADR-0016, decided 2026-10-09). Foliar spray banned; seed dresser only. Captafol 80% powder (DS) banned for use in India, manufacture for export only (also I.B, S. No. 1)."
+    },
+    {
+      "molecule": "carbofuran",
+      "aliases": [],
+      "category": "restricted",
+      "status": "verified",
+      "verified_by": "Shabbir Hussain",
+      "verified_on": "2026-10-09",
+      "source_ref": "CIB&RC 'List of pesticides which are banned, refused registration and restricted in use', updated on 31.07.2026 (ppqs.gov.in), Section III (restricted for use in the country), S. No. 3, PDF page 4",
+      "note": "Restricted, not banned: blocked as a whole by design (ADR-0016, decided 2026-10-09). All formulations except Carbofuran 3% CG to be stopped (S.O. 4294(E) 2023)."
+    },
+    {
+      "molecule": "chlorpyriphos",
+      "aliases": [
+        "chlorpyrifos"
+      ],
+      "category": "restricted",
+      "status": "verified",
+      "verified_by": "Shabbir Hussain",
+      "verified_on": "2026-10-09",
+      "source_ref": "CIB&RC 'List of pesticides which are banned, refused registration and restricted in use', updated on 31.07.2026 (ppqs.gov.in), Section III (restricted for use in the country), S. No. 4, PDF page 4",
+      "note": "Restricted, not banned: blocked as a whole by design (ADR-0016, decided 2026-10-09). Banned for use in Ber, Citrus and Tobacco (S.O. 4294(E) 2023). Alias 'chlorpyrifos' is the spelling used in the Major Uses tables."
+    },
+    {
+      "molecule": "cypermethrin",
+      "aliases": [],
+      "category": "restricted",
+      "status": "verified",
+      "verified_by": "Shabbir Hussain",
+      "verified_on": "2026-10-09",
+      "source_ref": "CIB&RC 'List of pesticides which are banned, refused registration and restricted in use', updated on 31.07.2026 (ppqs.gov.in), Section III (restricted for use in the country), S. No. 5, PDF page 4",
+      "note": "Restricted, not banned: blocked as a whole by design (ADR-0016, decided 2026-10-09). Cypermethrin 3% Smoke Generator only through pest control operators, not the general public."
+    },
+    {
+      "molecule": "dazomet",
+      "aliases": [],
+      "category": "restricted",
+      "status": "verified",
+      "verified_by": "Shabbir Hussain",
+      "verified_on": "2026-10-09",
+      "source_ref": "CIB&RC 'List of pesticides which are banned, refused registration and restricted in use', updated on 31.07.2026 (ppqs.gov.in), Section III (restricted for use in the country), S. No. 6, PDF page 4",
+      "note": "Restricted, not banned: blocked as a whole by design (ADR-0016, decided 2026-10-09). Not permitted on Tea (S.O. 3006(E) 2008)."
     },
     {
       "molecule": "ddt",
-      "aliases": ["डीडीटी"],
-      "category": "unclassified", "status": "unverified",
-      "verified_by": null, "verified_on": null, "source_ref": null,
-      "note": "Seed from recollection that agricultural use is not permitted (restricted to public-health vector control). Unverified: the category is left unclassified until read from the official list."
+      "aliases": [
+        "dichloro diphenyl trichloroethane",
+        "डीडीटी"
+      ],
+      "category": "restricted",
+      "status": "verified",
+      "verified_by": "Shabbir Hussain",
+      "verified_on": "2026-10-09",
+      "source_ref": "CIB&RC 'List of pesticides which are banned, refused registration and restricted in use', updated on 31.07.2026 (ppqs.gov.in), Section III (restricted for use in the country), S. No. 7, PDF page 5",
+      "note": "Restricted, not banned: blocked as a whole by design (ADR-0016, decided 2026-10-09). Use in agriculture withdrawn; public-health use capped (S.O. 295(E) 2006, S.O. 378(E) 1989)."
+    },
+    {
+      "molecule": "dimethoate",
+      "aliases": [],
+      "category": "restricted",
+      "status": "verified",
+      "verified_by": "Shabbir Hussain",
+      "verified_on": "2026-10-09",
+      "source_ref": "CIB&RC 'List of pesticides which are banned, refused registration and restricted in use', updated on 31.07.2026 (ppqs.gov.in), Section III (restricted for use in the country), S. No. 8, PDF page 5",
+      "note": "Restricted, not banned: blocked as a whole by design (ADR-0016, decided 2026-10-09). Banned on fruits and vegetables consumed raw (S.O. 4294(E) 2023)."
+    },
+    {
+      "molecule": "fenitrothion",
+      "aliases": [],
+      "category": "restricted",
+      "status": "verified",
+      "verified_by": "Shabbir Hussain",
+      "verified_on": "2026-10-09",
+      "source_ref": "CIB&RC 'List of pesticides which are banned, refused registration and restricted in use', updated on 31.07.2026 (ppqs.gov.in), Section III (restricted for use in the country), S. No. 9, PDF page 5",
+      "note": "Restricted, not banned: blocked as a whole by design (ADR-0016, decided 2026-10-09). Banned in agriculture except locust control in scheduled desert area and public health (S.O. 706(E) 2007)."
+    },
+    {
+      "molecule": "malathion",
+      "aliases": [],
+      "category": "restricted",
+      "status": "verified",
+      "verified_by": "Shabbir Hussain",
+      "verified_on": "2026-10-09",
+      "source_ref": "CIB&RC 'List of pesticides which are banned, refused registration and restricted in use', updated on 31.07.2026 (ppqs.gov.in), Section III (restricted for use in the country), S. No. 10, PDF page 5",
+      "note": "Restricted, not banned: blocked as a whole by design (ADR-0016, decided 2026-10-09). Banned on Sorghum, Pea, Soybean, Castor, Sunflower, Bhindi, Brinjal, Cauliflower, Radish, Turnip, Tomato, Apple, Mango and Grape (S.O. 4294(E) 2023)."
+    },
+    {
+      "molecule": "mancozeb",
+      "aliases": [],
+      "category": "restricted",
+      "status": "verified",
+      "verified_by": "Shabbir Hussain",
+      "verified_on": "2026-10-09",
+      "source_ref": "CIB&RC 'List of pesticides which are banned, refused registration and restricted in use', updated on 31.07.2026 (ppqs.gov.in), Section III (restricted for use in the country), S. No. 11, PDF page 5",
+      "note": "Restricted, not banned: blocked as a whole by design (ADR-0016, decided 2026-10-09). Banned on Guava, Jowar and Tapioca (S.O. 4294(E) 2023)."
+    },
+    {
+      "molecule": "methyl bromide",
+      "aliases": [],
+      "category": "restricted",
+      "status": "verified",
+      "verified_by": "Shabbir Hussain",
+      "verified_on": "2026-10-09",
+      "source_ref": "CIB&RC 'List of pesticides which are banned, refused registration and restricted in use', updated on 31.07.2026 (ppqs.gov.in), Section III (restricted for use in the country), S. No. 12, PDF page 5",
+      "note": "Restricted, not banned: blocked as a whole by design (ADR-0016, decided 2026-10-09). Only by Govt./approved pest control operators under expert supervision."
+    },
+    {
+      "molecule": "monocrotophos",
+      "aliases": [],
+      "category": "restricted",
+      "status": "verified",
+      "verified_by": "Shabbir Hussain",
+      "verified_on": "2026-10-09",
+      "source_ref": "CIB&RC 'List of pesticides which are banned, refused registration and restricted in use', updated on 31.07.2026 (ppqs.gov.in), Section III (restricted for use in the country), S. No. 13, PDF page 6",
+      "note": "Restricted, not banned: blocked as a whole by design (ADR-0016, decided 2026-10-09). Banned on vegetables (S.O. 1482(E) 2005); 36% SL being discontinued (S.O. 4294(E) 2023)."
+    },
+    {
+      "molecule": "oxyfluorfen",
+      "aliases": [],
+      "category": "restricted",
+      "status": "verified",
+      "verified_by": "Shabbir Hussain",
+      "verified_on": "2026-10-09",
+      "source_ref": "CIB&RC 'List of pesticides which are banned, refused registration and restricted in use', updated on 31.07.2026 (ppqs.gov.in), Section III (restricted for use in the country), S. No. 14, PDF page 6",
+      "note": "Restricted, not banned: blocked as a whole by design (ADR-0016, decided 2026-10-09). Banned on Potato and Groundnut (S.O. 4294(E) 2023)."
+    },
+    {
+      "molecule": "quinalphos",
+      "aliases": [],
+      "category": "restricted",
+      "status": "verified",
+      "verified_by": "Shabbir Hussain",
+      "verified_on": "2026-10-09",
+      "source_ref": "CIB&RC 'List of pesticides which are banned, refused registration and restricted in use', updated on 31.07.2026 (ppqs.gov.in), Section III (restricted for use in the country), S. No. 15, PDF page 6",
+      "note": "Restricted, not banned: blocked as a whole by design (ADR-0016, decided 2026-10-09). Banned on Jute, Cardamom and Sorghum (S.O. 4294(E) 2023)."
+    },
+    {
+      "molecule": "trifluralin",
+      "aliases": [],
+      "category": "restricted",
+      "status": "verified",
+      "verified_by": "Shabbir Hussain",
+      "verified_on": "2026-10-09",
+      "source_ref": "CIB&RC 'List of pesticides which are banned, refused registration and restricted in use', updated on 31.07.2026 (ppqs.gov.in), Section III (restricted for use in the country), S. No. 16, PDF page 6",
+      "note": "Restricted, not banned: blocked as a whole by design (ADR-0016, decided 2026-10-09). All uses except in wheat prohibited from 8 Aug 2018 (S.O. 3951(E) 2018)."
     }
   ]
 }
