@@ -9,7 +9,9 @@ Order matters, and each step can only make the answer MORE cautious:
   2. Validate every citation against the passages actually shown.
   3. Decide abstention from EVIDENCE (ADR-0013), not from a similarity score:
        - the model chose to abstain                       -> abstain
-       - evidence_basis == "none"                          -> abstain
+       - evidence_basis == "none" and no label card       -> abstain
+         (a verified label card found by code IS evidence: the schema has no
+         basis for it, so a real model answering from a card says "none")
        - any citation failed validation                    -> abstain
        - basis is "retrieved_passages" but no valid cite   -> abstain
        - the question names a crop and a cited passage's
@@ -188,7 +190,11 @@ def finalize_advisory(
     abstain_reason: str | None = None
     if draft.abstained:
         abstain_reason = draft.abstained_because or MODEL_ABSTAINED
-    elif draft.evidence_basis == "none":
+    elif draft.evidence_basis == "none" and not labels:
+        # A verified label card (ADR-0016) is evidence code found and code shows.
+        # EvidenceBasis has no value for it, so the live model answering from a
+        # card set "none" and the answer was withheld (live, 2026-10-10). The
+        # model's text is still checked below by the dose and banned guards.
         abstain_reason = INSUFFICIENT_EVIDENCE
     elif not draft.recommendation.strip():
         # An "answer" with no text is not an answer.

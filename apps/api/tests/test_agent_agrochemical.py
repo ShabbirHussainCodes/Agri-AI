@@ -25,8 +25,8 @@ TABLE = {"table_version": "synthetic-v1", "primary_source": "synthetic", "rows":
 
 
 class Model(LLMProvider):
-    def __init__(self, mode="card", args=None, calls_tool=True):
-        self.mode, self.calls_tool = mode, calls_tool
+    def __init__(self, mode="card", args=None, calls_tool=True, basis="farm_and_weather_data"):
+        self.mode, self.calls_tool, self.basis = mode, calls_tool, basis
         self.args = args or {"crop": "tomato", "pest": "early blight"}
         self.calls = []
 
@@ -44,7 +44,7 @@ class Model(LLMProvider):
         }.get(self.mode, "")
         abstain = self.mode == "abstain"
         return ChatResult(content=json.dumps({
-            "evidence_basis": "none" if abstain else "farm_and_weather_data", "citations": [],
+            "evidence_basis": "none" if abstain else self.basis, "citations": [],
             "model_inference": "", "recommendation": "" if abstain else text, "confidence": 0.5,
             "abstained": abstain, "abstained_because": "no_verified_dose_source" if abstain else None,
             "irrigation_verdict": "not_applicable",
@@ -197,3 +197,25 @@ def test_tool_arguments_are_validated(args, reason):
     from app.safety import agrochemical_lookup as al
     out = agrochemical.run_lookup(args, table=al.AgrochemTable.model_validate(TABLE), denylist=chemical_guard.load_denylist())
     assert out.payload["reason"] == reason and out.entries == []
+
+
+async def test_a_card_answer_with_evidence_basis_none_is_still_an_answer(world):
+    # Live, 2026-10-10: the real model answered from a card with evidence_basis "none"
+    # (no schema value fits a label card) and finalize withheld it as insufficient_evidence.
+    r = await ask(Model("card", basis="none"))
+    assert not r.abstained and r.abstained_because is None
+    [card] = r.agrochemical_label
+    assert card.waiting_period_days == 7 and "label card" in r.recommendation
+
+
+async def test_evidence_basis_none_without_a_card_still_abstains(world):
+    # The relaxation is only for a card: no verified row found means nothing to stand on.
+    r = await ask(Model("card", args={"crop": "tomato", "pest": "late blight"}, basis="none"))
+    assert r.abstained and r.abstained_because == "insufficient_evidence" and r.agrochemical_label == []
+
+
+@pytest.mark.parametrize("mode", ["writes_dose", "sneaky", "banned"])
+async def test_a_card_with_basis_none_does_not_let_a_dose_or_a_banned_molecule_through(world, mode):
+    r = await ask(Model(mode, basis="none"))
+    assert r.abstained and r.agrochemical_label == []
+    assert "750" not in r.recommendation
