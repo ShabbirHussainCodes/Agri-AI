@@ -23,10 +23,21 @@ def table(*rows) -> al.AgrochemTable:
     return al.AgrochemTable.model_validate({"table_version": "synthetic-v1", "primary_source": "test", "rows": list(rows)})
 
 
-def test_the_shipped_table_loads_and_ships_no_rows():
+def test_the_shipped_table_loads_and_returns_only_its_verified_rows():
     shipped = al.load_table()
-    assert shipped.rows == []
-    assert al.lookup(shipped, EMPTY_DENYLIST, crop="tomato", pest="early blight") == ([], al.NO_VERIFIED_ENTRY)
+    for row in shipped.rows:
+        found, _ = al.lookup(shipped, EMPTY_DENYLIST, crop=row.crop, pest=row.pest, molecule=row.molecule)
+        assert (row in found) == (row.status == "verified"), row.id
+        for alias in row.pest_aliases:  # every alias reaches the same row
+            assert (row in al.lookup(shipped, EMPTY_DENYLIST, crop=row.crop, pest=alias)[0]) == (row.status == "verified"), (row.id, alias)
+
+
+def test_no_shipped_row_names_a_molecule_on_the_shipped_denylist():
+    from app.safety import chemical_guard
+
+    denylist = chemical_guard.load_denylist()
+    for row in al.load_table().rows:
+        assert not chemical_guard.find_banned([row.molecule, *row.molecule_aliases, row.formulation or ""], denylist), row.id
 
 
 @pytest.mark.parametrize(

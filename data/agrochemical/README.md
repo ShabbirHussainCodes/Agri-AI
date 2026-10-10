@@ -2,9 +2,27 @@
 
 Verified label rows: the **only** way a pesticide dose or waiting period reaches a farmer (CLAUDE.md rule 1, ADR-0016). Read **only** by deterministic code (`apps/api/app/safety/agrochemical_lookup.py`). The LLM never reads or writes this, and never sees the numbers in it: the farmer gets a structured **label card** that code copies from a row.
 
-## Status: no rows
+## Status (2026-10-10): 11 rows, wheat and tomato
 
-The file ships empty on purpose. Until a person adds verified rows every dose question answers "no verified label entry" and the system abstains (`no_verified_dose_source`). That is the safe state, not a bug.
+Transcribed from CIB&RC "Major Uses of Pesticides", Fungicides and Herbicides, **upto 31.03.2026** (PDFs in `_raw/`, gitignored), and checked against the page images. Checked against the PDFs by Shabbir Hussain on 2026-10-10. Any crop, pest or molecule not in these rows still answers "no verified label entry" and abstains (`no_verified_dose_source`).
+
+| Crop | Pest | Products |
+|---|---|---|
+| tomato | early blight, late blight | Azoxystrobin 23% SC, Captan 75% WP |
+| wheat | karnal bunt, brown rust, stem rust, yellow rust | Propiconazole 25% EC |
+| wheat | phalaris minor | Clodinafop-propargyl 15% WP, Sulfosulfuron 75% WG |
+| wheat | chenopodium album | Metsulfuron Methyl 20% WP |
+
+How the rows were chosen (so the next person can repeat it):
+
+- Only rows with **one printed formulation dose**, a **printed unit** (g or ml) and a **numeric waiting period**. Ranges ("450-600"), "%" doses and "-" waiting periods were skipped, because the table holds one number and nothing is converted or picked from a range.
+- **No insecticide rows yet.** The Insecticides volume prints the unit only in the column header ("gm/ml"), not per row, so g versus ml would be a guess. Tomato fruit borer and wheat aphid therefore still abstain.
+- No molecule on the denylist (restricted molecules such as Mancozeb are blocked as a whole, see `data/denylists/README.md`).
+- Where the printed dilution is a range or carries a surfactant note, `dilution_l_per_ha` is left empty and the printed text is in `notes`.
+- A row printed as "Early & Late blight" is split into two rows with the same values.
+- Propiconazole 25% EC prints its formulation dose as "500gm" although an EC is a liquid; copied as printed.
+- `pest_aliases` marked in `notes` (Hindi names such as अगेती झुलसा, पीला रतुआ, बथुआ, गुल्ली डंडा) were added for matching and are not printed in the PDF. A wrong alias can only show the right card for the wrong word, never change a number, but each was still checked.
+- The PDF says it is compiled "for guidance and not for legal purposes": the card already tells the farmer that the label on the pack is the legal source.
 
 Do **not** fill it from search snippets, from memory, from the research trial in the corpus, or from a secondary summary (for example a university page): the same row-mixing that made the FAO-56 snippets unusable (ADR-0015) is far more dangerous here. A row is entered from the **primary document**, one row at a time, by a person who then reads it back against the page.
 
