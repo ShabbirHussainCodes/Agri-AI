@@ -166,6 +166,7 @@ export const messages = {
   scanFeedbackThanks: { hi: "धन्यवाद, आपकी राय दर्ज हो गई।", en: "Thank you, your answer is saved." },
   scanDelete: { hi: "यह जाँच और फोटो हटाएँ", en: "Delete this check and photo" },
   scanDeleteSure: { hi: "पक्का हटाएँ?", en: "Delete for sure?" },
+  scanDeleteYes: { hi: "हाँ, हटाएँ", en: "Yes, delete" },
   scanLabel: { hi: "फोटो की जाँच", en: "Photo check" },
   scanOutcomeDiagnosis: { hi: "अनुमान मिला", en: "Estimate given" },
   scanOutcomeAbstained: { hi: "बीमारी नहीं बताई", en: "No disease named" },

@@ -355,6 +355,7 @@ Hindi naam galat ho to kisan ek bimari ko doosri samajh sakta hai. Do naam (`अ
 | `scanFeedbackThanks` | धन्यवाद, आपकी राय दर्ज हो गई। | Thank you, your answer is saved. | |
 | `scanDelete` | यह जाँच और फोटो हटाएँ | Delete this check and photo | |
 | `scanDeleteSure` | पक्का हटाएँ? | Delete for sure? | |
+| `scanDeleteYes` | हाँ, हटाएँ | Yes, delete | |
 | `scanLabel` | फोटो की जाँच | Photo check | |
 | `scanOutcomeDiagnosis` | अनुमान मिला | Estimate given | |
 | `scanOutcomeAbstained` | बीमारी नहीं बताई | No disease named | |

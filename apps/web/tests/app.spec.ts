@@ -440,7 +440,7 @@ test("photo check: feedback is sent once, deleting removes the check, and the di
 
   await card.getByRole("button", { name: "यह जाँच और फोटो हटाएँ" }).click();
   await expect(card.getByText("पक्का हटाएँ?")).toBeVisible();
-  await card.getByRole("button", { name: "दर्ज करें" }).click(); // "Delete for sure?" confirms with the generic confirm label
+  await card.getByRole("button", { name: "हाँ, हटाएँ" }).click();
   await expect(card).toHaveCount(0);
   expect(state.requests.some((r) => r.method === "DELETE" && r.path === `/scans/${SCAN_ID}`)).toBe(true);
   await expect(page.getByRole("list", { name: "खेत की डायरी" })).toHaveCount(0);

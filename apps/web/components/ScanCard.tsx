@@ -182,7 +182,7 @@ function Actions({
       {confirm ? (
         <div className="flex items-center gap-2">
           <span className="font-semibold">{t("scanDeleteSure")}</span>
-          <Button disabled={busy} onClick={() => void remove()}>{t("record")}</Button>
+          <Button disabled={busy} onClick={() => void remove()}>{t("scanDeleteYes")}</Button>
           <Button variant="quiet" onClick={() => setConfirm(false)}>{t("cancel")}</Button>
         </div>
       ) : (
