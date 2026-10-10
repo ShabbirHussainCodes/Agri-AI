@@ -167,9 +167,9 @@ _HELP_HI = "ज़्यादा जानकारी के लिए कृ�
 _HELP_EN = "For more help, ask your Krishi Vigyan Kendra (KVK) or the Kisan Call Centre (1800-180-1551)."
 
 _VERIFIED_HI = {
-    "banned": "भारत में प्रतिबंधित है",
-    "restricted": "भारत में सीमित उपयोग वाली दवा है (इसके इस्तेमाल के नियम हैं)",
-    "refused": "भारत में इसका पंजीकरण मना किया गया है",
+    "banned": "पर भारत में पाबंदी है",
+    "restricted": "के इस्तेमाल पर भारत में कुछ पाबंदियाँ हैं",
+    "refused": "को भारत में बेचने की मंज़ूरी नहीं मिली",
 }
 _VERIFIED_EN = {
     "banned": "is banned in India",
@@ -190,7 +190,7 @@ def banned_message(entries: list[DenylistEntry]) -> str:
             lines_en.append(f"{e.molecule} {_VERIFIED_EN[e.category]} ({src}).")
     if unverified:
         names = ", ".join(unverified)
-        lines_hi.append(f"AgriAI {names} पर सलाह नहीं दे सकता। दवा खरीदने से पहले पैकेट का लेबल और उसका पंजीकरण ज़रूर जाँचें।")
+        lines_hi.append(f"AgriAI {names} पर सलाह नहीं दे सकता। दवा खरीदने से पहले पैकेट का लेबल और उसका रजिस्ट्रेशन नंबर ज़रूर जाँचें।")
         lines_en.append(f"AgriAI cannot advise on {names}. Before buying any pesticide, check its label and registration.")
     lines_hi.append("इसलिए AgriAI इस दवा की कोई सलाह नहीं दे रहा।")
     lines_en.append("So AgriAI is not giving advice on it.")

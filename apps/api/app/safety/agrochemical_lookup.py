@@ -194,7 +194,7 @@ def entry_from_row(row: AgrochemRow, table_version: str) -> LabelEntry:
         f"Waiting period: {row.waiting_period_days} days. Source: {row.source_ref} (label date {row.label_date}, "
         f"table {table_version}). This summarises CIB&RC \"Major Uses\"; always follow the label on the product pack.\n"
         f"{row.formulation}, {row.crop}, {row.pest}: {_g(row.dose_formulation)} {unit_hi} प्रति हेक्टेयर{extra_hi}। "
-        f"प्रतीक्षा अवधि: {row.waiting_period_days} दिन। स्रोत: {row.source_ref} (लेबल की तारीख {row.label_date}, "
+        f"छिड़काव के बाद फसल तोड़ने से पहले {row.waiting_period_days} दिन रुकें। स्रोत: {row.source_ref} (लेबल की तारीख {row.label_date}, "
         f"तालिका {table_version})। यह CIB&RC \"Major Uses\" का सार है; हमेशा दवा के पैकेट पर छपे लेबल का पालन करें।"
     )
     return LabelEntry(

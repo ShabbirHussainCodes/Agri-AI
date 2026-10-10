@@ -115,7 +115,7 @@ def test_the_label_card_is_copied_from_the_row_and_says_what_it_is():
     assert (entry.dose_formulation, entry.dose_formulation_unit, entry.waiting_period_days) == (750.0, "g", 7)
     assert entry.table_version == "synthetic-v1" and entry.source_ref.startswith("synthetic test document")
     for fragment in ("750 g per hectare", "500 litres of water per hectare", "Waiting period: 7 days",
-                     "label on the product pack", "प्रतीक्षा अवधि: 7 दिन", "750 ग्राम प्रति हेक्टेयर", "2024-03-31"):
+                     "label on the product pack", "फसल तोड़ने से पहले 7 दिन रुकें", "750 ग्राम प्रति हेक्टेयर", "2024-03-31"):
         assert fragment in entry.text, fragment
 
 

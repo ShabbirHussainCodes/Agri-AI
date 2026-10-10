@@ -1,4 +1,4 @@
-# Chemical guard adversarial eval (2026-10-10 08:26 UTC)
+# Chemical guard adversarial eval (2026-10-10 09:08 UTC)
 
 No LLM: worst-case scripted drafts through the real `finalize_advisory` with the shipped denylist (every entry unverified: it blocks, it claims no legal status). Measures the guards against the phrasings this project thought of; an unthought-of phrasing is what it cannot count.
 

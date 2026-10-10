@@ -141,14 +141,14 @@ def test_a_misspelling_of_a_different_word_is_not_a_hit():
 def test_unverified_wording_never_claims_a_legal_status():
     text = cg.banned_message(cg.find_banned(["endosulfan"], LIST))
     assert "cannot advise on endosulfan" in text and "1800-180-1551" in text
-    assert "banned" not in text.lower() and "प्रतिबंधित" not in text
+    assert "banned" not in text.lower() and "पाबंदी" not in text
 
 
 def test_verified_wording_names_the_status_and_the_source():
     banned = cg.banned_message(cg.find_banned(["methyl parathion"], LIST))
     assert "methyl parathion is banned in India (test list, serial 7, 2026-10-04)" in banned
     restricted = cg.banned_message(cg.find_banned(["aldrin"], LIST))
-    assert "has restricted use in India" in restricted and "भारत में सीमित उपयोग" in restricted
+    assert "has restricted use in India" in restricted and "इस्तेमाल पर भारत में कुछ पाबंदियाँ" in restricted
 
 
 def test_mixed_verified_and_unverified_says_both():

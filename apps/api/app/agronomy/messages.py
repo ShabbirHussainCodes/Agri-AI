@@ -34,19 +34,19 @@ IRRIGATION_UNAVAILABLE = "irrigation_unavailable"
 _HELP_HI = "ज़्यादा जानकारी के लिए कृषि विज्ञान केंद्र (KVK) या किसान कॉल सेंटर (1800-180-1551) से पूछें।"
 _HELP_EN = "For more help, ask your Krishi Vigyan Kendra (KVK) or the Kisan Call Centre (1800-180-1551)."
 
-_ESTIMATE_HI = "यह मौसम के आँकड़ों और एक मानक गणना से निकाला गया अनुमान है, आपके खेत की सीधी जाँच नहीं।"
+_ESTIMATE_HI = "यह मौसम के आँकड़ों और एक तय फ़ॉर्मूले से निकाला गया अनुमान है, आपके खेत की सीधी जाँच नहीं।"
 _ESTIMATE_EN = "This is an estimate from weather data and a standard calculation, not a direct check of your field."
 
 _WEATHER_HI = "मौसम का पूरा डेटा अभी नहीं मिल पाया, इसलिए सिंचाई का हिसाब नहीं लग सका। थोड़ी देर बाद फिर पूछें।"
 _WEATHER_EN = "The weather data could not be fully retrieved, so irrigation could not be calculated. Please ask again a little later."
 
-_UNVERIFIED_HI = "इस फसल या मिट्टी के लिए ज़रूरी संदर्भ आँकड़े अभी जाँचे नहीं गए हैं, इसलिए AgriAI सिंचाई की सलाह नहीं दे रहा।"
+_UNVERIFIED_HI = "इस फसल या मिट्टी की ज़रूरी जानकारी अभी जाँची नहीं गई है, इसलिए AgriAI सिंचाई की सलाह नहीं दे रहा।"
 _UNVERIFIED_EN = "The reference figures for this crop or soil have not been checked yet, so AgriAI is not giving irrigation advice."
 
 # reason -> (Hindi, English)
 _CANNOT: dict[str, tuple[str, str]] = {
     NO_LOCATION: (
-        "आपके खेत की जगह (अक्षांश और देशांतर) दर्ज नहीं है, इसलिए मौसम के आधार पर सिंचाई का हिसाब नहीं लग सकता। खेत की जानकारी में जगह जोड़ें।",
+        "आपके खेत की GPS लोकेशन दर्ज नहीं है, इसलिए मौसम के आधार पर सिंचाई का हिसाब नहीं लग सकता। खेत की जानकारी में लोकेशन जोड़ें।",
         "Your farm's location is not saved, so the weather-based irrigation calculation cannot be done. Add the location to your farm details.",
     ),
     NO_ACTIVE_CROP: (
