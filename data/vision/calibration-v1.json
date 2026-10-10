@@ -1,0 +1,129 @@
+{
+ "version": "calibration-v1",
+ "status": "calibrated",
+ "model": {
+  "repo": "rodynaemad/plant-disease-dinov2-small",
+  "revision": "06ebf5e308e100fd000d738c42b059ebb5f58a16",
+  "file": "onnx/model_with_features_quantized.onnx",
+  "sha256": "907fe4ed9d5f3fa6f6f6a9321a4564766e5136a2f316a2b23c930c3bfa13d72b",
+  "head": "head-v1.json",
+  "head_sha256": "9ff091d4e70497aa68d650afb9b2bd489c69fe27f18a5a43a41610a8d537df7f"
+ },
+ "temperature": 0.9,
+ "ood": {
+  "score": "energy",
+  "threshold": 6.609884037042839,
+  "centroids": null
+ },
+ "min_probability": 0.5,
+ "bands": [
+  {
+   "name": "high",
+   "min_probability": 0.9,
+   "observed_accuracy": 0.9389,
+   "n": 180
+  },
+  {
+   "name": "medium",
+   "min_probability": 0.7,
+   "observed_accuracy": 0.7952,
+   "n": 83
+  },
+  {
+   "name": "low",
+   "min_probability": 0.5,
+   "observed_accuracy": 0.5893,
+   "n": 56
+  }
+ ],
+ "crops": {
+  "apple": {
+   "enabled": false,
+   "n_calibration": 47,
+   "selective_accuracy": 0.8085,
+   "reason": "not a crop AgriAI has (app/safety/crop_scope.py)"
+  },
+  "bell_pepper": {
+   "enabled": false,
+   "n_calibration": 8,
+   "selective_accuracy": 0.625,
+   "reason": "not a crop AgriAI has (app/safety/crop_scope.py)"
+  },
+  "blueberry": {
+   "enabled": false,
+   "n_calibration": 13,
+   "selective_accuracy": 1.0,
+   "reason": "not a crop AgriAI has (app/safety/crop_scope.py)"
+  },
+  "cherry": {
+   "enabled": false,
+   "n_calibration": 7,
+   "selective_accuracy": 0.7143,
+   "reason": "not a crop AgriAI has (app/safety/crop_scope.py)"
+  },
+  "citrus": {
+   "enabled": false,
+   "n_calibration": 0,
+   "selective_accuracy": null,
+   "reason": "only 0 calibration photos accepted (need 25); 0 available"
+  },
+  "grape": {
+   "enabled": false,
+   "n_calibration": 20,
+   "selective_accuracy": 1.0,
+   "reason": "not a crop AgriAI has (app/safety/crop_scope.py)"
+  },
+  "maize": {
+   "enabled": true,
+   "n_calibration": 85,
+   "selective_accuracy": 0.8,
+   "reason": "85 accepted calibration photos, accuracy 0.80"
+  },
+  "peach": {
+   "enabled": false,
+   "n_calibration": 18,
+   "selective_accuracy": 0.9444,
+   "reason": "not a crop AgriAI has (app/safety/crop_scope.py)"
+  },
+  "potato": {
+   "enabled": false,
+   "n_calibration": 7,
+   "selective_accuracy": 0.4286,
+   "reason": "only 7 calibration photos accepted (need 25); 61 available"
+  },
+  "raspberry": {
+   "enabled": false,
+   "n_calibration": 20,
+   "selective_accuracy": 1.0,
+   "reason": "not a crop AgriAI has (app/safety/crop_scope.py)"
+  },
+  "soybean": {
+   "enabled": false,
+   "n_calibration": 5,
+   "selective_accuracy": 1.0,
+   "reason": "only 5 calibration photos accepted (need 25); 17 available"
+  },
+  "squash": {
+   "enabled": false,
+   "n_calibration": 29,
+   "selective_accuracy": 1.0,
+   "reason": "not a crop AgriAI has (app/safety/crop_scope.py)"
+  },
+  "strawberry": {
+   "enabled": false,
+   "n_calibration": 22,
+   "selective_accuracy": 1.0,
+   "reason": "not a crop AgriAI has (app/safety/crop_scope.py)"
+  },
+  "tomato": {
+   "enabled": false,
+   "n_calibration": 38,
+   "selective_accuracy": 0.6053,
+   "reason": "accepted-photo accuracy 0.61 below 0.80"
+  }
+ },
+ "calibrated_on": "PlantDoc train photos (CC-BY-4.0; web-scraped photos): a linear head trained on 1630 of them, and 699 others held out for accuracy and confidence, with rice, bean and object photos as out-of-distribution examples. Not Indian smallholder photos.",
+ "generated_by": "evals/vision/vcalibrate.py",
+ "date": "2026-10-10",
+ "report": "evals/results/vision-2026-10-10.md"
+}

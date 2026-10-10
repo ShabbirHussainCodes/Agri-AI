@@ -1,6 +1,7 @@
 import { expect, test } from "@playwright/test";
 import { askBody } from "../lib/askBody";
-import { answer, farm, farmCrop, FARM_ID, loginAs, mockApi, newState } from "./helpers";
+import { deflateSync } from "node:zlib";
+import { answer, farm, farmCrop, FARM_ID, jpegSize, loginAs, mockApi, newState, scanAbstained, scanDiagnosis, SCAN_ID, scanRejected } from "./helpers";
 
 const SHOTS = "test-results/screens";
 
@@ -281,3 +282,195 @@ test("without the switch the body is just the question", () => {
   expect(askBody("q", "hi", true)).toEqual({ question: "q", language: "hi" });
 });
 
+
+// ----------------------------------------------------------------------------------------------------------
+// Phase 7: the photo check (ADR-0018)
+
+/** A real PNG of the given size (a gradient, so it compresses): big enough that the client must shrink it. */
+function png(width: number, height: number): Buffer {
+  const crc = (buf: Buffer) => {
+    let c = ~0;
+    for (const byte of buf) {
+      c ^= byte;
+      for (let k = 0; k < 8; k++) c = (c >>> 1) ^ (0xedb88320 & -(c & 1));
+    }
+    return ~c >>> 0;
+  };
+  const chunk = (type: string, data: Buffer) => {
+    const body = Buffer.concat([Buffer.from(type), data]);
+    const out = Buffer.alloc(8 + data.length + 4);
+    out.writeUInt32BE(data.length, 0);
+    body.copy(out, 4);
+    out.writeUInt32BE(crc(body), 8 + data.length);
+    return out;
+  };
+  const ihdr = Buffer.alloc(13);
+  ihdr.writeUInt32BE(width, 0);
+  ihdr.writeUInt32BE(height, 4);
+  ihdr.set([8, 2, 0, 0, 0], 8);
+  const rows = Buffer.alloc((width * 3 + 1) * height);
+  for (let y = 0; y < height; y++) {
+    rows[y * (width * 3 + 1)] = 0;
+    for (let x = 0; x < width; x++) {
+      const o = y * (width * 3 + 1) + 1 + x * 3;
+      rows[o] = 40 + (x % 120);
+      rows[o + 1] = 110 + (y % 100);
+      rows[o + 2] = 40;
+    }
+  }
+  return Buffer.concat([Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]), chunk("IHDR", ihdr), chunk("IDAT", deflateSync(rows)), chunk("IEND", Buffer.alloc(0))]);
+}
+
+async function choosePhoto(page: import("@playwright/test").Page, file = png(2400, 1800)) {
+  await page.getByTestId("scan-gallery").setInputFiles({ name: "leaf.png", mimeType: "image/png", buffer: file });
+  await page.getByRole("button", { name: "फोटो जाँचें" }).click();
+}
+
+test("photo check: the photo is shrunk and re-encoded on the phone, sent with the UI language, and the result keeps its parts apart", async ({ page }) => {
+  await loginAs(page);
+  const state = newState();
+  await mockApi(page, state);
+  await page.goto(`/farms/${FARM_ID}`);
+  await choosePhoto(page);
+
+  const card = page.getByTestId("scan-result");
+  await expect(card).toContainText("टमाटर का अगेती झुलसा");
+  // the upload
+  const [upload] = state.uploads;
+  const image = upload.find((p) => p.name === "image")!;
+  expect(image.contentType).toBe("image/jpeg");
+  const size = jpegSize(image.data)!;
+  expect(Math.max(size.width, size.height)).toBeLessThanOrEqual(1280);
+  expect(Math.max(size.width, size.height)).toBeGreaterThan(1000); // shrunk, not destroyed
+  expect(image.data.length).toBeLessThan(png(2400, 1800).length);
+  expect(upload.find((p) => p.name === "language")?.data.toString()).toBe("hi");
+  expect(state.requests.find((r) => r.path.endsWith("/scans") && r.method === "POST")?.auth).toBe("Bearer test-token");
+
+  // the result: the agreed estimate, the second check, a BAND (not a percentage), the alternatives
+  await expect(card.getByText("दूसरी, अलग जाँच भी यही कहती है")).toBeVisible();
+  await expect(card.getByText("ऊँचा", { exact: true })).toBeVisible();
+  await expect(card.getByText(/120 फोटो में से 91% बार सही निकले/)).toBeVisible();
+  await expect(card.getByText(/और भी हो सकता है: .*पछेती झुलसा/)).toBeVisible();
+  const text = await card.innerText();
+  expect(text).not.toMatch(/93[.,]?7|94\s?%|0\.93/); // the classifier's own probability is never shown as "confidence"
+  // what the AI saw / what the label says / the recommendation are separate cards
+  await expect(card.getByText("फोटो में AI ने क्या देखा")).toBeVisible();
+  await expect(card.getByText("Brown rings on the older leaves.")).toBeVisible();
+  await expect(card.getByRole("heading", { name: /दवा का लेबल कार्ड/ })).toBeVisible();
+  await expect(card.getByText("फोटो से लगता है कि यह अगेती झुलसा हो सकता है।")).toBeVisible();
+  await expect(card.getByText(/किसी विशेषज्ञ की पुष्टि नहीं/)).toBeVisible();
+  await page.screenshot({ path: `${SHOTS}/07-scan-diagnosis.png`, fullPage: true });
+
+  // the language toggle switches the whole card
+  await page.getByRole("button", { name: "English" }).click();
+  await expect(card).toContainText("Tomato early blight");
+  await expect(card.getByText(/not an expert's confirmation/)).toBeVisible();
+  const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
+  expect(overflow).toBeLessThanOrEqual(0);
+});
+
+test("photo check: a refused photo is a calm card with no candidates, no label card and no feedback buttons", async ({ page }) => {
+  await loginAs(page);
+  await mockApi(page, newState({ scanBody: scanAbstained() }));
+  await page.goto(`/farms/${FARM_ID}`);
+  await choosePhoto(page, png(800, 600));
+  const card = page.getByTestId("scan-result");
+  await expect(card.getByText("AgriAI बीमारी नहीं बता रहा")).toBeVisible();
+  await expect(card.getByText(/दो अलग जाँचें इस फोटो पर एक जैसा जवाब नहीं दे रहीं/)).toBeVisible();
+  await expect(card.getByRole("heading", { name: /दवा का लेबल कार्ड/ })).toHaveCount(0);
+  await expect(card.getByText("और भी हो सकता है")).toHaveCount(0);
+  await expect(card.getByText("क्या यह अनुमान सही लगा?")).toHaveCount(0);
+  await page.screenshot({ path: `${SHOTS}/08-scan-abstained.png`, fullPage: true });
+});
+
+test("photo check: a blurry photo says take it again, and nothing is added to the diary", async ({ page }) => {
+  await loginAs(page);
+  const state = newState({ scanBody: scanRejected() });
+  await mockApi(page, state);
+  await page.goto(`/farms/${FARM_ID}`);
+  await choosePhoto(page, png(800, 600));
+  const card = page.getByTestId("scan-result");
+  await expect(card.getByText("दोबारा फोटो लीजिए")).toBeVisible();
+  await expect(card.getByText("फोन को स्थिर पकड़ें")).toBeVisible();
+  await expect(page.getByRole("list", { name: "खेत की डायरी" })).toHaveCount(0);
+  await page.getByRole("button", { name: "दूसरी फोटो" }).click();
+  await expect(card).toHaveCount(0);
+  await page.getByRole("button", { name: "English" }).click();
+  await expect(page.getByRole("button", { name: "📷 Take a photo" })).toBeVisible();
+});
+
+test("photo check: the daily limit and a rejected file show the API's own bilingual message; a dead server shows a network message", async ({ page }) => {
+  await loginAs(page);
+  const state = newState({
+    scanStatus: 429,
+    scanBody: { error: { code: "scan_limit_reached", scope: "user", message: "आज के लिए आपकी फोटो-जाँच की सीमा पूरी हो गई है।\n\nYou have used today's photo checks." } },
+  });
+  await mockApi(page, state);
+  await page.goto(`/farms/${FARM_ID}`);
+  await choosePhoto(page, png(300, 300));
+  await expect(page.locator("p[role=alert]")).toHaveText("आज के लिए आपकी फोटो-जाँच की सीमा पूरी हो गई है।");
+
+  state.scanStatus = 415;
+  state.scanBody = { error: { code: "unsupported_image_type", message: "यह फोटो का प्रकार काम नहीं करता।\n\nThis kind of file cannot be used." } };
+  await page.getByRole("button", { name: "फोटो जाँचें" }).click();
+  await expect(page.locator("p[role=alert]")).toHaveText("यह फोटो का प्रकार काम नहीं करता।");
+
+  await page.route("http://api.test/**/scans", (route) => (route.request().method() === "POST" ? route.abort() : route.fallback()));
+  await page.getByRole("button", { name: "फोटो जाँचें" }).click();
+  await expect(page.locator("p[role=alert]")).toContainText("सर्वर तक नहीं पहुँच पाए");
+});
+
+test("photo check: feedback is sent once, deleting removes the check, and the diary shows a saved check", async ({ page }) => {
+  await loginAs(page);
+  const state = newState();
+  await mockApi(page, state);
+  await page.goto(`/farms/${FARM_ID}`);
+  await choosePhoto(page, png(800, 600));
+  const card = page.getByTestId("scan-result");
+  await expect(card).toContainText("टमाटर का अगेती झुलसा");
+
+  // the check is in the diary, newest first
+  const diary = page.getByRole("list", { name: "खेत की डायरी" });
+  await expect(diary).toContainText("फोटो की जाँच");
+
+  await card.getByRole("button", { name: "नहीं, गलत" }).click();
+  await expect(card.getByText("धन्यवाद, आपकी राय दर्ज हो गई।")).toBeVisible();
+  expect(state.requests.find((r) => r.path === `/scans/${SCAN_ID}/feedback`)?.body).toEqual({ agrees: false });
+  await expect(card.getByRole("button", { name: "नहीं, गलत" })).toHaveCount(0);
+
+  await card.getByRole("button", { name: "यह जाँच और फोटो हटाएँ" }).click();
+  await expect(card.getByText("पक्का हटाएँ?")).toBeVisible();
+  await card.getByRole("button", { name: "दर्ज करें" }).click(); // "Delete for sure?" confirms with the generic confirm label
+  await expect(card).toHaveCount(0);
+  expect(state.requests.some((r) => r.method === "DELETE" && r.path === `/scans/${SCAN_ID}`)).toBe(true);
+  await expect(page.getByRole("list", { name: "खेत की डायरी" })).toHaveCount(0);
+});
+
+test("photo check: a saved check opens from the diary after a reload, in the chosen language", async ({ page }) => {
+  await loginAs(page);
+  const saved = scanDiagnosis();
+  await mockApi(
+    page,
+    newState({ scans: [{ id: SCAN_ID, farm_id: FARM_ID, image_path: `${FARM_ID}/${SCAN_ID}.jpg`, outcome: "diagnosis", abstained_because: null, response: saved, farmer_feedback: { agrees: true }, created_at: "2026-10-10T08:00:00Z" }] }),
+  );
+  await page.goto(`/farms/${FARM_ID}`);
+  const diary = page.getByRole("list", { name: "खेत की डायरी" });
+  await expect(diary).toContainText("फोटो की जाँच");
+  await expect(diary).toContainText("टमाटर का अगेती झुलसा");
+  await diary.getByRole("button", { name: "जवाब देखें" }).click();
+  const card = diary.getByTestId("scan-result");
+  await expect(card.getByText("दूसरी, अलग जाँच भी यही कहती है")).toBeVisible();
+  await expect(card.getByText("धन्यवाद, आपकी राय दर्ज हो गई।")).toBeVisible(); // feedback already given
+  await page.getByRole("button", { name: "English" }).click();
+  await expect(page.getByRole("list", { name: "Farm diary" })).toContainText("Tomato early blight");
+});
+
+test("a scan saved by an older build (fields missing) still opens without crashing", async ({ page }) => {
+  await loginAs(page);
+  const old = { outcome: "abstained", abstained_because: "low_confidence", message: "AgriAI इस फोटो पर पक्का नहीं है।\n\nAgriAI is not sure.", quality: { passed: true, reasons: [] }, versions: {} };
+  await mockApi(page, newState({ scans: [{ id: SCAN_ID, farm_id: FARM_ID, image_path: null, outcome: "abstained", abstained_because: "low_confidence", response: old, farmer_feedback: null, created_at: "2026-10-09T08:00:00Z" }] }));
+  await page.goto(`/farms/${FARM_ID}`);
+  const diary = page.getByRole("list", { name: "खेत की डायरी" });
+  await diary.getByRole("button", { name: "जवाब देखें" }).click();
+  await expect(diary.getByText("AgriAI इस फोटो पर पक्का नहीं है।")).toBeVisible();
+});

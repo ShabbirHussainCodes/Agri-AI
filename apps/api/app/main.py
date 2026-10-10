@@ -8,6 +8,7 @@ from app.routers import farms as farms_router
 from app.routers import farm_crops as farm_crops_router
 from app.routers import crops as crops_router
 from app.routers import ask as ask_router
+from app.routers import scans as scans_router
 from app.core.errors import AgentError, agent_error_handler, postgres_error_handler
 import asyncpg
 
@@ -17,7 +18,7 @@ app = FastAPI(title="AgriAI API", version="0.1.0", lifespan=lifespan)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[settings.web_base_url, *settings.cors_extra_origins],
-    allow_methods=["GET", "POST", "PATCH", "OPTIONS"],
+    allow_methods=["GET", "POST", "PATCH", "DELETE", "OPTIONS"],
     allow_headers=["Authorization", "Content-Type"],
     allow_credentials=False,
 )
@@ -25,6 +26,7 @@ app.include_router(farms_router.router)
 app.include_router(farm_crops_router.router)
 app.include_router(crops_router.router)
 app.include_router(ask_router.router)
+app.include_router(scans_router.router)
 app.add_exception_handler(asyncpg.PostgresError, postgres_error_handler)
 app.add_exception_handler(AgentError, agent_error_handler)
 

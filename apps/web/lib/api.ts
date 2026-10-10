@@ -14,23 +14,30 @@ export class ApiError extends Error {
   }
 }
 
-type Options = { method?: "GET" | "POST" | "PATCH"; body?: unknown; token: string };
+type Options = {
+  method?: "GET" | "POST" | "PATCH" | "DELETE";
+  body?: unknown;
+  /** A multipart upload (a photo). The browser sets the Content-Type with its boundary; it must not be set by hand. */
+  form?: FormData;
+  token: string;
+};
 
-export async function api<T>(path: string, { method = "GET", body, token }: Options): Promise<T> {
+export async function api<T>(path: string, { method = "GET", body, form, token }: Options): Promise<T> {
   let res: Response;
   try {
     res = await fetch(`${API_BASE}${path}`, {
       method,
       headers: {
         Authorization: `Bearer ${token}`,
-        ...(body === undefined ? {} : { "Content-Type": "application/json" }),
+        ...(body === undefined || form ? {} : { "Content-Type": "application/json" }),
       },
-      body: body === undefined ? undefined : JSON.stringify(body),
+      body: form ?? (body === undefined ? undefined : JSON.stringify(body)),
     });
   } catch {
     // Offline, the server is asleep, or CORS refused it: the farmer needs one clear message.
     throw new ApiError(0, "network", "network");
   }
+  if (res.status === 204) return undefined as T;
   if (res.ok) return (await res.json()) as T;
 
   let message = res.statusText;

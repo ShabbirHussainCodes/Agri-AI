@@ -126,6 +126,24 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/farms/{farm_id}/scans": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Scans */
+        get: operations["list_scans_farms__farm_id__scans_get"];
+        put?: never;
+        /** Create Scan */
+        post: operations["create_scan_farms__farm_id__scans_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/farms/{farm_id}/timeline": {
         parameters: {
             query?: never;
@@ -178,6 +196,44 @@ export interface paths {
         get: operations["health_db_health_db_get"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/scans/{scan_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * Delete Scan
+         * @description The farmer removes a photo check and its photo. Row first (so nothing points at a deleted photo),
+         *     then the object; a failure to delete the object is logged, not shown: the row is already gone.
+         */
+        delete: operations["delete_scan_scans__scan_id__delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/scans/{scan_id}/feedback": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Scan Feedback */
+        post: operations["scan_feedback_scans__scan_id__feedback_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -355,6 +411,27 @@ export interface components {
             /** Question */
             question: string;
         };
+        /** Body_create_scan_farms__farm_id__scans_post */
+        Body_create_scan_farms__farm_id__scans_post: {
+            /** Image */
+            image: string;
+            /** Language */
+            language?: string | null;
+        };
+        /** ConfidenceBand */
+        ConfidenceBand: {
+            /** Measured On */
+            measured_on: string;
+            /** N */
+            n: number;
+            /**
+             * Name
+             * @enum {string}
+             */
+            name: "high" | "medium" | "low";
+            /** Observed Accuracy */
+            observed_accuracy: number;
+        };
         /** Crop */
         Crop: {
             /** Default Duration Days */
@@ -368,6 +445,44 @@ export interface components {
             name_en: string;
             /** Name Hi */
             name_hi: string;
+        };
+        /** DiagnosisResponse */
+        DiagnosisResponse: {
+            /** Abstained Because */
+            abstained_because?: string | null;
+            advisory?: components["schemas"]["AdvisoryResponse"] | null;
+            band?: components["schemas"]["ConfidenceBand"] | null;
+            /**
+             * Candidates
+             * @default []
+             */
+            candidates: components["schemas"]["ScanCandidate"][];
+            /** Created At */
+            created_at?: string | null;
+            /** Detail */
+            detail?: string | null;
+            /** Image Path */
+            image_path?: string | null;
+            /**
+             * Message
+             * @default
+             */
+            message: string;
+            model_saw?: components["schemas"]["ModelSaw"] | null;
+            /**
+             * Note
+             * @default
+             */
+            note: string;
+            /**
+             * Outcome
+             * @enum {string}
+             */
+            outcome: "rejected_quality" | "abstained" | "diagnosis";
+            quality: components["schemas"]["QualityInfo"];
+            /** Scan Id */
+            scan_id?: string | null;
+            versions: components["schemas"]["ModelVersions"];
         };
         /**
          * EvidenceItem
@@ -587,6 +702,122 @@ export interface components {
             text: string;
             /** Waiting Period Days */
             waiting_period_days: number;
+        };
+        /**
+         * ModelSaw
+         * @description What the second (vision-language) model reported about the photo, forced into a closed vocabulary.
+         *     `symptoms` is its one free sentence, after the dose and banned-molecule guards.
+         */
+        ModelSaw: {
+            /** Condition */
+            condition: string;
+            /** Crop */
+            crop: string;
+            /** Plant Part */
+            plant_part: string;
+            /** Symptoms */
+            symptoms: string;
+        };
+        /** ModelVersions */
+        ModelVersions: {
+            /** Calibration */
+            calibration: string;
+            /** Classifier */
+            classifier: string;
+            /** Label Map */
+            label_map: string;
+            /** Vision Model */
+            vision_model?: string | null;
+        };
+        /** QualityInfo */
+        QualityInfo: {
+            /** Height */
+            height: number;
+            /** Mean Luma */
+            mean_luma: number;
+            /** Passed */
+            passed: boolean;
+            /** Reasons */
+            reasons: string[];
+            /** Sharpness */
+            sharpness: number;
+            /** Thresholds Version */
+            thresholds_version: string;
+            /** Vegetation Fraction */
+            vegetation_fraction: number;
+            /** Width */
+            width: number;
+        };
+        /** ScanCandidate */
+        ScanCandidate: {
+            /** Condition */
+            condition: string;
+            /** Crop */
+            crop: string;
+            /** Label */
+            label: string;
+            /** Leading */
+            leading: boolean;
+            /** Name En */
+            name_en: string;
+            /** Name Hi */
+            name_hi: string;
+            /** Name Hi Status */
+            name_hi_status: string;
+            /** Probability */
+            probability: number;
+            /**
+             * Second Opinion Agrees
+             * @default false
+             */
+            second_opinion_agrees: boolean;
+        };
+        /**
+         * ScanFeedback
+         * @description The farmer's own verdict on a photo check. `confirmed_label` is a class of the label map (checked in
+         *     the router) when the farmer says the real problem was a different one.
+         */
+        ScanFeedback: {
+            /** Agrees */
+            agrees: boolean;
+            /** Confirmed Label */
+            confirmed_label?: string | null;
+        };
+        /**
+         * ScanRecord
+         * @description A saved photo check. `response` is the DiagnosisResponse exactly as the farmer received it, kept
+         *     as a plain object on purpose: that contract grows, and an old row must never fail to load.
+         */
+        ScanRecord: {
+            /** Abstained Because */
+            abstained_because: string | null;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /**
+             * Farm Id
+             * Format: uuid
+             */
+            farm_id: string;
+            /** Farmer Feedback */
+            farmer_feedback?: {
+                [key: string]: unknown;
+            } | null;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Image Path */
+            image_path: string | null;
+            /** Outcome */
+            outcome: string;
+            /** Response */
+            response: {
+                [key: string]: unknown;
+            };
         };
         /** ValidationError */
         ValidationError: {
@@ -997,6 +1228,74 @@ export interface operations {
             };
         };
     };
+    list_scans_farms__farm_id__scans_get: {
+        parameters: {
+            query?: {
+                limit?: number;
+            };
+            header?: never;
+            path: {
+                farm_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ScanRecord"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_scan_farms__farm_id__scans_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                farm_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": components["schemas"]["Body_create_scan_farms__farm_id__scans_post"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DiagnosisResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     farm_timeline_farms__farm_id__timeline_get: {
         parameters: {
             query?: never;
@@ -1064,6 +1363,70 @@ export interface operations {
                 };
                 content: {
                     "application/json": unknown;
+                };
+            };
+        };
+    };
+    delete_scan_scans__scan_id__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                scan_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    scan_feedback_scans__scan_id__feedback_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                scan_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ScanFeedback"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ScanRecord"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };

@@ -20,6 +20,12 @@ Force structured output and assert the **schema**, not the prose — the highest
 - Abstention fires on OOD images and on below-floor retrieval.
 - Banned-molecule denylist blocks a known-banned molecule even if a document recommends it.
 
+## Vision (Phase 7)
+- **No model file needed:** sanitising (EXIF, bombs, file types), the quality gate, the classifier wrapper against a fake backend (plus preprocessing parity against the model's own image processor), every branch of the decision (`app/vision/decision.py`), the vision-model parsing and its one retry, and the whole pipeline with fake models (`tests/test_vision_*.py`): a refused photo never reaches the vision provider, no dose comes from a model, the vision model's free text is guarded.
+- **Real database and real local Storage API:** `tests/test_scans_api.py`, `tests/test_storage_supabase.py` (row-level security for a second farmer on rows and on photos, the caps, deletion).
+- **Mutation checks** on the vision code (apply one small change, expect a failing test; 42 of 42 were caught when written).
+- **Evaluation** is not a test: `evals/vision/` measures accuracy on field photos under a protocol written first. Its pure parts (metrics, calibration, head training, the report) have unit tests on synthetic data (`pytest evals/tests`, run from `apps/api`).
+
 ## Determinism note
 `temperature=0` reduces but doesn't remove variance; `seed` is best-effort. Design assertions to tolerate this.
 

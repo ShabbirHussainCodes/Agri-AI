@@ -38,6 +38,7 @@ from typing import Any
 from uuid import UUID
 
 import asyncpg
+from pydantic import BaseModel
 
 from app.agent.finalize import finalize_advisory, generation_failed_response
 from app.agent.tools import agrochemical, farm_context, irrigation, weather
@@ -88,15 +89,18 @@ async def _chat_retrying(provider: LLMProvider, messages: list[dict[str, Any]], 
     raise GenerationFailed
 
 
-async def _draft_retrying(provider: LLMProvider, messages: list[dict[str, Any]], *, model: str) -> DraftAdvisory:
+async def _draft_retrying(
+    provider: LLMProvider, messages: list[dict[str, Any]], *, model: str, schema: type[BaseModel] = DraftAdvisory
+) -> Any:
     """Turn B: one structured answer, retried once when the provider rejects it, when it comes back
-    empty, or when it does not parse as a DraftAdvisory (pydantic's and json's errors are ValueErrors)."""
+    empty, or when it does not parse as `schema` (pydantic's and json's errors are ValueErrors). `schema`
+    is DraftAdvisory for /ask; the photo check (app/vision/answer.py) passes its own."""
     for attempt in range(1, MAX_ATTEMPTS + 1):
         try:
-            final = await provider.chat(messages, model=model, response_schema=DraftAdvisory.model_json_schema())
+            final = await provider.chat(messages, model=model, response_schema=schema.model_json_schema())
             if final.content is None:
                 raise ValueError("no structured answer")
-            return DraftAdvisory.model_validate(json.loads(final.content))
+            return schema.model_validate(json.loads(final.content))
         except (ProviderOutputInvalid, ValueError) as exc:
             # Only the reason code or the exception's type: its text can quote the model's output.
             reason = str(exc) if isinstance(exc, ProviderOutputInvalid) else type(exc).__name__

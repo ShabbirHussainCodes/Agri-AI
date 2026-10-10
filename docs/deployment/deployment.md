@@ -69,6 +69,13 @@ Deployed 2026-10-05 from the repo, with these facts observed:
 5. After the web URL exists: `gcloud run services update agriai-api --region asia-south1 --update-env-vars AGRIAI_WEB_BASE_URL=<web url>` (CORS allows exactly that origin).
 Not verified: Cloud Run's free-tier numbers and whether `asia-south1` is covered (the pricing page could not be read). The project runs on a Google free-trial credit; keep a budget alert and `--max-instances 1`. Observed cost so far: not checked.
 
+### 2b. Photo check (Phase 7, ADR-0018): what to add before the next deploy
+1. `supabase db push` for migration `20261010120000` (table `disease_scans`, the private bucket `crop-photos` and its policies, the cap functions). Never `db reset`.
+2. The image build fetches the classifier by itself: `python -m app.vision.fetch_model` reads `data/vision/model-manifest.json` (Hugging Face repo, exact commit, SHA-256), downloads that file and **fails the build** if the hash differs. The manifest must be committed before the build, otherwise the build stops with a clear message.
+3. Two new environment variables so the API can keep photos: `AGRIAI_SUPABASE_URL` (`https://<ref>.supabase.co`) and `AGRIAI_SUPABASE_ANON_KEY` (the publishable key, not a secret; the same value the web app already uses). Without them photos are analysed but not stored (`image_path: null`).
+4. Optional: `AGRIAI_GROQ_VISION_EXTRA_PARAMS` (a JSON object of request parameters for the vision model, empty by default), `AGRIAI_SCAN_LIMIT_PER_USER_PER_DAY` (5) and `AGRIAI_SCAN_LIMIT_GLOBAL_PER_DAY` (12).
+5. Check `/health` as before; the first photo after a cold start also loads the 24 MB model (a second or two). The vision model name is `qwen/qwen3.8-27b`; `qwen/qwen3.6-27b` (the name in ADR-0004) is no longer in Groq's model list.
+
 ### 3. Web on Vercel
 1. Import the GitHub repo, **Root Directory = `apps/web`**.
 2. Environment variables (they are inlined at build time and are public, so only these three):

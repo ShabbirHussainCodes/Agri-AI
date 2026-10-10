@@ -14,3 +14,8 @@ transformers==5.16.1
 tokenizers==0.23.2
 huggingface_hub==1.30.0
 numpy==2.5.3
+
+# Phase 7 (ADR-0018): crop-photo diagnosis. Pillow decodes, rotates by EXIF and re-encodes every upload;
+# python-multipart is what FastAPI needs to read a file upload.
+pillow==12.3.0
+python-multipart==0.0.32

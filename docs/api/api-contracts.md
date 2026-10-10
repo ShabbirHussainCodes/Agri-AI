@@ -72,12 +72,35 @@ An irrigation logged through `POST /farm-crops/{id}/activities` with `type: "irr
 |---|---|---|
 | POST | `/speech/transcribe` | multipart audio → `{transcript, language, low_confidence}`. The client always shows the editable transcript before sending it to `/ask`. |
 
-## Crop image diagnosis
+## Crop image diagnosis (Phase 7, ADR-0018)
 
 | Method | Path | Notes |
 |---|---|---|
-| POST | `/farms/{id}/scans` | multipart image → runs quality gate → classifier → VLM → RAG → safety layer. Returns `DiagnosisResponse` (top-3 + calibrated bands + "model saw" vs "label says" + sources + abstention). Rejected early with a clear "take a better photo" message if the quality gate fails. |
-| POST | `/scans/{id}/feedback` | `{confirmed_label?}` → records farmer feedback (future field dataset) |
+| POST | `/farms/{id}/scans` | `multipart/form-data`: `image` (a JPEG, PNG or WebP, at most 8 MB) and optional `language` (`hi` or `en`, asks the answer model to write in it, like `/ask`). Returns `DiagnosisResponse`. A photo that fails the quality gate is a normal **200** with `outcome: "rejected_quality"` and a retake tip: it is neither saved nor counted. Upload errors use the error envelope with a bilingual message: **400** `empty_upload`, **413** `file_too_large` / `image_too_large`, **415** `unsupported_image_type` (type read from the bytes, never from the file name or Content-Type), **422** `unreadable_image` / `invalid_language`. **429** `scan_limit_reached` `{scope: "user"\|"global"}` before any model call. A farm that is not the caller's is a 404. |
+| GET | `/farms/{id}/scans` | `ScanRecord[]`, newest first: `{id, farm_id, image_path, outcome, abstained_because, response, farmer_feedback, created_at}`. `response` is the `DiagnosisResponse` exactly as the farmer received it, kept as a plain object. |
+| POST | `/scans/{id}/feedback` | `{agrees: bool, confirmed_label?: string}`; `confirmed_label` must be one of the classifier's class strings (422 `unknown_label` otherwise). The seed of a field dataset; changes nothing about what the farmer was told. |
+| DELETE | `/scans/{id}` | 204. Removes the row and the stored photo. A scan that is not the caller's is a 404. |
+
+`DiagnosisResponse` (code-built, like `AdvisoryResponse`; `apps/api/app/schemas/scan.py`):
+```
+{
+  outcome: "rejected_quality" | "abstained" | "diagnosis",
+  abstained_because: string | null,   // quality_rejected, out_of_distribution, low_confidence, crop_not_supported,
+                                      // crop_not_validated, not_a_plant_photo, model_disagreement, crop_differs_from_farm, vision_unavailable,
+                                      // vision_not_calibrated, answer_generation_failed, or any /ask reason from the answer step
+  detail: string | null,              // a stable sub-reason, e.g. "crop_differs" for a model_disagreement
+  message: string,                    // code-written, bilingual: the retake tip or the reason no disease is named; "" for a diagnosis
+  quality: { passed, reasons[], thresholds_version, sharpness, mean_luma, vegetation_fraction, width, height },
+  candidates: [ { label, crop, condition, name_en, name_hi, name_hi_status, probability, leading, second_opinion_agrees } ],  // top-3, only for a diagnosis; the agreed one first
+  band: { name: "high"|"medium"|"low", observed_accuracy, n, measured_on } | null,   // the ONLY confidence shown
+  model_saw: { plant_part, crop, condition, symptoms } | null,   // what the vision model reported, after the dose / banned-molecule guards
+  advisory: AdvisoryResponse | null,  // a diagnosis's evidence-typed answer: recommendation, label card, cited documents, limitations
+  note: string,                       // always set on a diagnosis: an automatic check, not an expert's confirmation
+  versions: { classifier, calibration, label_map, vision_model | null },
+  scan_id, image_path, created_at     // set by the router after the row is saved
+}
+```
+`candidates[].probability` is the classifier's calibrated score for the API and the evals; the app never shows it as a percentage. The only confidence shown to a farmer is `band`, with the accuracy that band actually had on field photos in the project's own measurement (`data/vision/calibration-v1.json`, `evals/results/vision-*.md`). A dose reaches a farmer only inside `advisory.agrochemical_label`, copied by code from a verified row for the diagnosed crop and condition; the model never sees it.
 
 ## Market (modular, secondary)
 

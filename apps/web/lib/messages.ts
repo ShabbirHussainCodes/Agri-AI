@@ -132,6 +132,43 @@ export const messages = {
   question: { hi: "सवाल", en: "Question" },
   showAnswer: { hi: "जवाब देखें", en: "Show answer" },
   hideAnswer: { hi: "छिपाएँ", en: "Hide" },
+
+  // ----- photo check (Phase 7). Hindi unreviewed, like all of it.
+  scanTitle: { hi: "📷 फोटो से जाँच", en: "📷 Check a photo" },
+  scanHelp: {
+    hi: "पत्ती की एक साफ़, पास से ली गई फोटो लें। AgriAI फोटो से अनुमान लगाता है, पक्का निदान नहीं देता।",
+    en: "Take one clear, close photo of a leaf. AgriAI estimates from the photo; it does not give a certain diagnosis.",
+  },
+  takePhoto: { hi: "📷 फोटो लें", en: "📷 Take a photo" },
+  choosePhoto: { hi: "🖼️ गैलरी से चुनें", en: "🖼️ Choose from gallery" },
+  checkPhoto: { hi: "फोटो जाँचें", en: "Check this photo" },
+  checking: { hi: "AgriAI फोटो देख रहा है…", en: "AgriAI is looking at the photo…" },
+  anotherPhoto: { hi: "दूसरी फोटो", en: "Another photo" },
+  photoAlt: { hi: "आपकी भेजी फोटो", en: "Your photo" },
+  scanFailed: { hi: "फोटो की जाँच अभी नहीं हो पाई। थोड़ी देर बाद फिर कोशिश कीजिए।", en: "The photo could not be checked right now. Please try again in a little while." },
+  scanRetakeTitle: { hi: "दोबारा फोटो लीजिए", en: "Please take the photo again" },
+  scanNoNameTitle: { hi: "AgriAI बीमारी नहीं बता रहा", en: "AgriAI is not naming a disease" },
+  scanLikelyTitle: { hi: "फोटो से अनुमान", en: "Estimate from the photo" },
+  scanSecondCheck: { hi: "दूसरी, अलग जाँच भी यही कहती है", en: "A second, separate check says the same" },
+  scanOthers: { hi: "और भी हो सकता है", en: "It could also be" },
+  scanConfidence: { hi: "सबूत कितना मज़बूत", en: "How strong the evidence is" },
+  bandHigh: { hi: "ऊँचा", en: "High" },
+  bandMedium: { hi: "मध्यम", en: "Medium" },
+  bandLow: { hi: "कम", en: "Low" },
+  bandMeasured: {
+    hi: "हमारे परीक्षण में, इस स्तर के जवाब {n} फोटो में से {pct}% बार सही निकले ({source})। आपकी फोटो पर यह अलग हो सकता है।",
+    en: "In our tests, answers at this level were right {pct}% of the time on {n} photos ({source}). On your photo it may differ.",
+  },
+  scanSawTitle: { hi: "फोटो में AI ने क्या देखा", en: "What the AI saw in the photo" },
+  scanFeedbackAsk: { hi: "क्या यह अनुमान सही लगा?", en: "Did this estimate look right?" },
+  scanFeedbackYes: { hi: "हाँ, सही", en: "Yes, right" },
+  scanFeedbackNo: { hi: "नहीं, गलत", en: "No, wrong" },
+  scanFeedbackThanks: { hi: "धन्यवाद, आपकी राय दर्ज हो गई।", en: "Thank you, your answer is saved." },
+  scanDelete: { hi: "यह जाँच और फोटो हटाएँ", en: "Delete this check and photo" },
+  scanDeleteSure: { hi: "पक्का हटाएँ?", en: "Delete for sure?" },
+  scanLabel: { hi: "फोटो की जाँच", en: "Photo check" },
+  scanOutcomeDiagnosis: { hi: "अनुमान मिला", en: "Estimate given" },
+  scanOutcomeAbstained: { hi: "बीमारी नहीं बताई", en: "No disease named" },
 } as const;
 
 export type MessageKey = keyof typeof messages;

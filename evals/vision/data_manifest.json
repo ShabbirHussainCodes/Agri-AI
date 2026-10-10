@@ -1,0 +1,56 @@
+{
+ "beans": {
+  "files": {
+   "data/test-00000-of-00001.parquet": {
+    "bytes": 17706070,
+    "images": 128,
+    "sha256": "534a6b0648f585d69b7ec0ad7a7540720d60c8db8106dc6d0508296316f6cb27"
+   },
+   "data/validation-00000-of-00001.parquet": {
+    "bytes": 18499710,
+    "images": 133,
+    "sha256": "33f774593d8b31585457b70c224744e9409ffdee4e91a11822b1ebfe8242928f"
+   }
+  },
+  "licence": "MIT",
+  "revision": "27aa014ce09b193e1a6f58112d4a66e0eddb69c5",
+  "source": "https://huggingface.co/datasets/AI-Lab-Makerere/beans"
+ },
+ "imagenette": {
+  "files": {
+   "320px/test-00000-of-00001.parquet": {
+    "bytes": 51569687,
+    "images": 1963,
+    "sha256": "f82f4dbccfeb72d218204064f5c6e3033ce7c7e6210ddc19d227fd2ef835d724"
+   },
+   "320px/validation-00000-of-00001.parquet": {
+    "bytes": 51005461,
+    "images": 1962,
+    "sha256": "55e10aa091f5ec2439d38547418e4a647d44143f0304b5b28066a75643859807"
+   }
+  },
+  "licence": "Apache-2.0",
+  "revision": "384ce263311e41a1604fa0bf17cf00f7046fbc98",
+  "source": "https://huggingface.co/datasets/leandrodevai/imagenette-320px-resplit"
+ },
+ "plantdoc": {
+  "archive_bytes": 984592720,
+  "archive_sha256": "94e2b99a500a63efbd48923ed48588fbb01f9b1db66a2d3b5c24eed6466da20f",
+  "commit": "5467f6012d78d1c446145d5f582da6096f852ae8",
+  "files_extracted": 2581,
+  "licence": "CC-BY-4.0",
+  "source": "https://github.com/pratikkayal/PlantDoc-Dataset"
+ },
+ "rice": {
+  "files": {
+   "data/train-00000-of-00001.parquet": {
+    "bytes": 90205016,
+    "images": 773,
+    "sha256": "136517989ca4dfafb5e14a6358dac01cc4c9406cfd672c779e2d0bc326007e13"
+   }
+  },
+  "licence": "CC-BY-4.0",
+  "revision": "5c95947033c83bba8a5944abff5b235e924596b0",
+  "source": "https://huggingface.co/datasets/Project-AgML/rice_leaf_disease_classification_bd"
+ }
+}

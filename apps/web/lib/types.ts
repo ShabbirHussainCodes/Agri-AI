@@ -15,5 +15,8 @@ export type AdvisoryRecord = S["AdvisoryRecord"];
 export type WaterBalance = S["WaterBalanceResult"];
 export type LabelEntry = S["LabelEntry"];
 export type EvidenceItem = S["EvidenceItem"];
+export type DiagnosisResponse = S["DiagnosisResponse"];
+export type ScanCandidate = S["ScanCandidate"];
+export type ScanRecord = S["ScanRecord"];
 
 export type SoilTexture = "sandy" | "loamy" | "clayey";

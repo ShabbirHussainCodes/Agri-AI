@@ -62,3 +62,7 @@ evals/.venv-ragas/
 tests/cassettes/*.tmp
 .langfuse/
 agriai-phase0.tgz
+
+# Phase 7 evaluation data (large, third-party licences, re-fetched by evals/vision/vfetch.py)
+evals/vision/_data/
+evals/vision/_runs/

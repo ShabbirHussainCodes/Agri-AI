@@ -79,5 +79,24 @@ class Settings(BaseSettings):
     # daylight saving. Used for "days since sowing", so it must not follow the server's own clock.
     local_utc_offset_minutes: int = 330
 
+    # Phase 7 (ADR-0018): crop-photo diagnosis. The ONNX classifier file; unset = <embed_cache_dir>/vision/
+    # plant-disease-dinov2-small-int8.onnx. The file must be the exact one data/vision/calibration-v1.json was
+    # measured for (its sha256 is checked at load), otherwise no photo is ever diagnosed.
+    vision_model_file: Path | None = None
+    # Groq's vision model. ADR-0004 named qwen/qwen3.6-27b; it is no longer in Groq's model list
+    # (models.list, 2026-10-10), the docs name qwen/qwen3.8-27b.
+    groq_vision_model: str = "qwen/qwen3.8-27b"
+    # Extra request parameters the vision model needs (JSON object), e.g. a reasoning setting. Empty = none.
+    groq_vision_extra_params: dict = {}
+    # Photo checks cost a vision call plus an answer call, so they are capped like /ask. The global cap is
+    # shared with /ask: both draw on the same gpt-oss-120b free-tier budget (see services/advisories.py).
+    scan_limit_per_user_per_day: int = 5
+    scan_limit_global_per_day: int = 12
+    # Where scan photos are kept (ADR-0008): Supabase Storage through the caller's own JWT, so the bucket's
+    # row-level policy applies. Empty url = photos are analysed but not stored.
+    supabase_url: str = ""
+    supabase_anon_key: str = ""
+    crop_photos_bucket: str = "crop-photos"
+
 
 settings = Settings()

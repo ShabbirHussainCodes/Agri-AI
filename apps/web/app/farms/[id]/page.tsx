@@ -6,6 +6,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { AskBox } from "@/components/AskBox";
 import { buildDiary, Diary } from "@/components/Diary";
 import { LogIrrigation } from "@/components/LogIrrigation";
+import { ScanBox } from "@/components/ScanBox";
 import { ProfilePanel } from "@/components/ProfilePanel";
 import { Shell } from "@/components/Shell";
 import { ErrorNote } from "@/components/ui";
@@ -14,7 +15,7 @@ import { useAuth } from "@/lib/auth";
 import { CropsProvider } from "@/lib/crops";
 import { daysSince } from "@/lib/dates";
 import { useI18n } from "@/lib/i18n";
-import type { Activity, AdvisoryRecord, Crop, Farm, FarmCrop } from "@/lib/types";
+import type { Activity, AdvisoryRecord, Crop, Farm, FarmCrop, ScanRecord } from "@/lib/types";
 
 export default function FarmHomePage() {
   const { t, lang } = useI18n();
@@ -28,6 +29,7 @@ export default function FarmHomePage() {
   const [crops, setCrops] = useState<Crop[]>([]);
   const [activities, setActivities] = useState<Activity[]>([]);
   const [advisories, setAdvisories] = useState<AdvisoryRecord[]>([]);
+  const [scans, setScans] = useState<ScanRecord[]>([]);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -36,15 +38,20 @@ export default function FarmHomePage() {
 
   const fetchDiary = useCallback(
     (tok: string) =>
-      Promise.all([api<Activity[]>(`/farms/${id}/timeline`, { token: tok }), api<AdvisoryRecord[]>(`/farms/${id}/advisories`, { token: tok })]),
+      Promise.all([
+        api<Activity[]>(`/farms/${id}/timeline`, { token: tok }),
+        api<AdvisoryRecord[]>(`/farms/${id}/advisories`, { token: tok }),
+        api<ScanRecord[]>(`/farms/${id}/scans`, { token: tok }),
+      ]),
     [id],
   );
 
   const reloadDiary = useCallback(async () => {
     if (!token) return;
-    const [acts, advs] = await fetchDiary(token);
+    const [acts, advs, scs] = await fetchDiary(token);
     setActivities(acts);
     setAdvisories(advs);
+    setScans(scs);
   }, [token, fetchDiary]);
 
   useEffect(() => {
@@ -55,19 +62,20 @@ export default function FarmHomePage() {
       api<Crop[]>("/crops", { token }),
       fetchDiary(token),
     ])
-      .then(([f, fc, c, [acts, advs]]) => {
+      .then(([f, fc, c, [acts, advs, scs]]) => {
         setFarm(f);
         setFarmCrops(fc);
         setCrops(c);
         setActivities(acts);
         setAdvisories(advs);
+        setScans(scs);
       })
       .catch((e) => setError(e instanceof ApiError && e.status === 404 ? e.message : t("networkFailed")));
   }, [id, token, fetchDiary, t]);
 
   const active = farmCrops.find((fc) => fc.status === "active") ?? null;
   const activeCrop = active ? crops.find((c) => c.id === active.crop_id) : undefined;
-  const diary = useMemo(() => buildDiary(activities, advisories), [activities, advisories]);
+  const diary = useMemo(() => buildDiary(activities, advisories, scans), [activities, advisories, scans]);
   const daysSinceSowing = active ? Math.max(0, daysSince(active.sowing_date)) : null;
 
   return (
@@ -90,9 +98,10 @@ export default function FarmHomePage() {
             </div>
             <ProfilePanel farm={farm} token={token} onSaved={setFarm} />
             <AskBox farmId={farm.id} token={token} onAnswered={() => void reloadDiary().catch(() => {})} />
+            <ScanBox farmId={farm.id} token={token} onScanned={() => void reloadDiary().catch(() => {})} />
             <LogIrrigation farmCropId={active?.id ?? null} token={token} onLogged={() => void reloadDiary().catch(() => {})} />
             <h2 className="pt-2 text-xl font-bold text-green-900">{t("farmDiary")}</h2>
-            <Diary items={diary} />
+            <Diary items={diary} token={token} onChanged={() => void reloadDiary().catch(() => {})} />
           </>
         )}
       </Shell>

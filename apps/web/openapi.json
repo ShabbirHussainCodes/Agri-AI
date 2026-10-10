@@ -277,6 +277,67 @@
         "title": "AskRequest",
         "type": "object"
       },
+      "Body_create_scan_farms__farm_id__scans_post": {
+        "properties": {
+          "image": {
+            "contentMediaType": "application/octet-stream",
+            "title": "Image",
+            "type": "string"
+          },
+          "language": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Language"
+          }
+        },
+        "required": [
+          "image"
+        ],
+        "title": "Body_create_scan_farms__farm_id__scans_post",
+        "type": "object"
+      },
+      "ConfidenceBand": {
+        "additionalProperties": false,
+        "properties": {
+          "measured_on": {
+            "title": "Measured On",
+            "type": "string"
+          },
+          "n": {
+            "title": "N",
+            "type": "integer"
+          },
+          "name": {
+            "enum": [
+              "high",
+              "medium",
+              "low"
+            ],
+            "title": "Name",
+            "type": "string"
+          },
+          "observed_accuracy": {
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Observed Accuracy",
+            "type": "number"
+          }
+        },
+        "required": [
+          "name",
+          "observed_accuracy",
+          "n",
+          "measured_on"
+        ],
+        "title": "ConfidenceBand",
+        "type": "object"
+      },
       "Crop": {
         "properties": {
           "default_duration_days": {
@@ -311,6 +372,138 @@
           "default_duration_days"
         ],
         "title": "Crop",
+        "type": "object"
+      },
+      "DiagnosisResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "abstained_because": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Abstained Because"
+          },
+          "advisory": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/AdvisoryResponse"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "band": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ConfidenceBand"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "candidates": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/ScanCandidate"
+            },
+            "title": "Candidates",
+            "type": "array"
+          },
+          "created_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created At"
+          },
+          "detail": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Detail"
+          },
+          "image_path": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Image Path"
+          },
+          "message": {
+            "default": "",
+            "title": "Message",
+            "type": "string"
+          },
+          "model_saw": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ModelSaw"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "note": {
+            "default": "",
+            "title": "Note",
+            "type": "string"
+          },
+          "outcome": {
+            "enum": [
+              "rejected_quality",
+              "abstained",
+              "diagnosis"
+            ],
+            "title": "Outcome",
+            "type": "string"
+          },
+          "quality": {
+            "$ref": "#/components/schemas/QualityInfo"
+          },
+          "scan_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Scan Id"
+          },
+          "versions": {
+            "$ref": "#/components/schemas/ModelVersions"
+          }
+        },
+        "required": [
+          "outcome",
+          "quality",
+          "versions"
+        ],
+        "title": "DiagnosisResponse",
         "type": "object"
       },
       "EvidenceItem": {
@@ -990,6 +1183,279 @@
           "text"
         ],
         "title": "LabelEntry",
+        "type": "object"
+      },
+      "ModelSaw": {
+        "additionalProperties": false,
+        "description": "What the second (vision-language) model reported about the photo, forced into a closed vocabulary.\n`symptoms` is its one free sentence, after the dose and banned-molecule guards.",
+        "properties": {
+          "condition": {
+            "title": "Condition",
+            "type": "string"
+          },
+          "crop": {
+            "title": "Crop",
+            "type": "string"
+          },
+          "plant_part": {
+            "title": "Plant Part",
+            "type": "string"
+          },
+          "symptoms": {
+            "title": "Symptoms",
+            "type": "string"
+          }
+        },
+        "required": [
+          "plant_part",
+          "crop",
+          "condition",
+          "symptoms"
+        ],
+        "title": "ModelSaw",
+        "type": "object"
+      },
+      "ModelVersions": {
+        "additionalProperties": false,
+        "properties": {
+          "calibration": {
+            "title": "Calibration",
+            "type": "string"
+          },
+          "classifier": {
+            "title": "Classifier",
+            "type": "string"
+          },
+          "label_map": {
+            "title": "Label Map",
+            "type": "string"
+          },
+          "vision_model": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Vision Model"
+          }
+        },
+        "required": [
+          "classifier",
+          "calibration",
+          "label_map"
+        ],
+        "title": "ModelVersions",
+        "type": "object"
+      },
+      "QualityInfo": {
+        "additionalProperties": false,
+        "properties": {
+          "height": {
+            "title": "Height",
+            "type": "integer"
+          },
+          "mean_luma": {
+            "title": "Mean Luma",
+            "type": "number"
+          },
+          "passed": {
+            "title": "Passed",
+            "type": "boolean"
+          },
+          "reasons": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Reasons",
+            "type": "array"
+          },
+          "sharpness": {
+            "title": "Sharpness",
+            "type": "number"
+          },
+          "thresholds_version": {
+            "title": "Thresholds Version",
+            "type": "string"
+          },
+          "vegetation_fraction": {
+            "title": "Vegetation Fraction",
+            "type": "number"
+          },
+          "width": {
+            "title": "Width",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "passed",
+          "reasons",
+          "thresholds_version",
+          "sharpness",
+          "mean_luma",
+          "vegetation_fraction",
+          "width",
+          "height"
+        ],
+        "title": "QualityInfo",
+        "type": "object"
+      },
+      "ScanCandidate": {
+        "additionalProperties": false,
+        "properties": {
+          "condition": {
+            "title": "Condition",
+            "type": "string"
+          },
+          "crop": {
+            "title": "Crop",
+            "type": "string"
+          },
+          "label": {
+            "title": "Label",
+            "type": "string"
+          },
+          "leading": {
+            "title": "Leading",
+            "type": "boolean"
+          },
+          "name_en": {
+            "title": "Name En",
+            "type": "string"
+          },
+          "name_hi": {
+            "title": "Name Hi",
+            "type": "string"
+          },
+          "name_hi_status": {
+            "title": "Name Hi Status",
+            "type": "string"
+          },
+          "probability": {
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Probability",
+            "type": "number"
+          },
+          "second_opinion_agrees": {
+            "default": false,
+            "title": "Second Opinion Agrees",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "label",
+          "crop",
+          "condition",
+          "name_en",
+          "name_hi",
+          "name_hi_status",
+          "probability",
+          "leading"
+        ],
+        "title": "ScanCandidate",
+        "type": "object"
+      },
+      "ScanFeedback": {
+        "description": "The farmer's own verdict on a photo check. `confirmed_label` is a class of the label map (checked in\nthe router) when the farmer says the real problem was a different one.",
+        "properties": {
+          "agrees": {
+            "title": "Agrees",
+            "type": "boolean"
+          },
+          "confirmed_label": {
+            "anyOf": [
+              {
+                "maxLength": 120,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Confirmed Label"
+          }
+        },
+        "required": [
+          "agrees"
+        ],
+        "title": "ScanFeedback",
+        "type": "object"
+      },
+      "ScanRecord": {
+        "description": "A saved photo check. `response` is the DiagnosisResponse exactly as the farmer received it, kept\nas a plain object on purpose: that contract grows, and an old row must never fail to load.",
+        "properties": {
+          "abstained_because": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Abstained Because"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "farm_id": {
+            "format": "uuid",
+            "title": "Farm Id",
+            "type": "string"
+          },
+          "farmer_feedback": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Farmer Feedback"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "image_path": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Image Path"
+          },
+          "outcome": {
+            "title": "Outcome",
+            "type": "string"
+          },
+          "response": {
+            "additionalProperties": true,
+            "title": "Response",
+            "type": "object"
+          }
+        },
+        "required": [
+          "id",
+          "farm_id",
+          "image_path",
+          "outcome",
+          "abstained_because",
+          "response",
+          "created_at"
+        ],
+        "title": "ScanRecord",
         "type": "object"
       },
       "ValidationError": {
@@ -1812,6 +2278,124 @@
         ]
       }
     },
+    "/farms/{farm_id}/scans": {
+      "get": {
+        "operationId": "list_scans_farms__farm_id__scans_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "farm_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Farm Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "title": "Limit",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ScanRecord"
+                  },
+                  "title": "Response List Scans Farms  Farm Id  Scans Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "List Scans",
+        "tags": [
+          "scans"
+        ]
+      },
+      "post": {
+        "operationId": "create_scan_farms__farm_id__scans_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "farm_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Farm Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_create_scan_farms__farm_id__scans_post"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DiagnosisResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Create Scan",
+        "tags": [
+          "scans"
+        ]
+      }
+    },
     "/farms/{farm_id}/timeline": {
       "get": {
         "operationId": "farm_timeline_farms__farm_id__timeline_get",
@@ -1896,6 +2480,106 @@
           }
         },
         "summary": "Health Db"
+      }
+    },
+    "/scans/{scan_id}": {
+      "delete": {
+        "description": "The farmer removes a photo check and its photo. Row first (so nothing points at a deleted photo),\nthen the object; a failure to delete the object is logged, not shown: the row is already gone.",
+        "operationId": "delete_scan_scans__scan_id__delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "scan_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Scan Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Delete Scan",
+        "tags": [
+          "scans"
+        ]
+      }
+    },
+    "/scans/{scan_id}/feedback": {
+      "post": {
+        "operationId": "scan_feedback_scans__scan_id__feedback_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "scan_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Scan Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ScanFeedback"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScanRecord"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Scan Feedback",
+        "tags": [
+          "scans"
+        ]
       }
     },
     "/whoami": {

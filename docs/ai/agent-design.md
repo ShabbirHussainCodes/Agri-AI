@@ -35,7 +35,7 @@ return safety_layer(answer)                       # deterministic, runs last
 | `search_knowledge` | read | `query, crop, state, stage, language` | ranked chunks + source + year + page |
 | `lookup_agrochemical` | read | `crop, pest, [molecule]` | offered only to chemical questions (ADR-0016). Returns to the model **no numbers**: only whether a verified label entry exists (`found` + molecule/crop/pest, or `not_found`). Code puts the dose, dilution and **waiting period** in the response's `agrochemical_label` card |
 | `get_market_price` | read | `commodity, district, days` | modal-price series + arrivals + percentile band |
-| `analyze_crop_image` | read | `image_id, farm_id` | top-3 candidates + OOD score + quality flags |
+| `analyze_crop_image` | — | — | **Not an agent tool.** A photo is a separate pipeline with its own endpoint (`POST /farms/{id}/scans`, `app/vision/`, ADR-0018): its deterministic stages decide before any model writes a word, and only then does the same answer step and safety stack as `/ask` run. The agent loop never sees a photo |
 | `log_activity` | **write** | `farm_id, type, date, details` | `activity_id` |
 | `create_reminder` | **write** | `farm_id, when, message` | `reminder_id` |
 

@@ -1,0 +1,387 @@
+{
+ "version": "label-map-v1",
+ "model": "rodynaemad/plant-disease-dinov2-small",
+ "note": "Identity data for the 38 PlantVillage classes of the classifier, in the model's own index order (config.json id2label). Which crops may be diagnosed is a MEASURED decision kept in calibration-v1.json, not here. name_hi is display text with no native-speaker review (CLAUDE.md section 6).",
+ "labels": [
+  {
+   "index": 0,
+   "label": "Apple___Apple_scab",
+   "crop": "apple",
+   "condition": "scab",
+   "name_en": "Apple scab",
+   "name_hi": "सेब का स्कैब रोग",
+   "name_hi_status": "unreviewed",
+   "pest_for_label_lookup": null
+  },
+  {
+   "index": 1,
+   "label": "Apple___Black_rot",
+   "crop": "apple",
+   "condition": "black_rot",
+   "name_en": "Apple black rot",
+   "name_hi": "सेब का ब्लैक रॉट",
+   "name_hi_status": "unreviewed",
+   "pest_for_label_lookup": null
+  },
+  {
+   "index": 2,
+   "label": "Apple___Cedar_apple_rust",
+   "crop": "apple",
+   "condition": "cedar_apple_rust",
+   "name_en": "Apple cedar rust",
+   "name_hi": "सेब का सीडर रतुआ",
+   "name_hi_status": "unreviewed",
+   "pest_for_label_lookup": null
+  },
+  {
+   "index": 3,
+   "label": "Apple___healthy",
+   "crop": "apple",
+   "condition": "healthy",
+   "name_en": "Healthy apple leaf",
+   "name_hi": "स्वस्थ सेब की पत्ती",
+   "name_hi_status": "unreviewed",
+   "pest_for_label_lookup": null
+  },
+  {
+   "index": 4,
+   "label": "Blueberry___healthy",
+   "crop": "blueberry",
+   "condition": "healthy",
+   "name_en": "Healthy blueberry leaf",
+   "name_hi": "स्वस्थ ब्लूबेरी की पत्ती",
+   "name_hi_status": "unreviewed",
+   "pest_for_label_lookup": null
+  },
+  {
+   "index": 5,
+   "label": "Cherry_(including_sour)___Powdery_mildew",
+   "crop": "cherry",
+   "condition": "powdery_mildew",
+   "name_en": "Cherry powdery mildew",
+   "name_hi": "चेरी का चूर्णिल आसिता रोग",
+   "name_hi_status": "unreviewed",
+   "pest_for_label_lookup": null
+  },
+  {
+   "index": 6,
+   "label": "Cherry_(including_sour)___healthy",
+   "crop": "cherry",
+   "condition": "healthy",
+   "name_en": "Healthy cherry leaf",
+   "name_hi": "स्वस्थ चेरी की पत्ती",
+   "name_hi_status": "unreviewed",
+   "pest_for_label_lookup": null
+  },
+  {
+   "index": 7,
+   "label": "Corn_(maize)___Cercospora_leaf_spot Gray_leaf_spot",
+   "crop": "maize",
+   "condition": "gray_leaf_spot",
+   "name_en": "Maize gray leaf spot",
+   "name_hi": "मक्का का धूसर पत्ती धब्बा रोग",
+   "name_hi_status": "unreviewed",
+   "pest_for_label_lookup": null
+  },
+  {
+   "index": 8,
+   "label": "Corn_(maize)___Common_rust_",
+   "crop": "maize",
+   "condition": "common_rust",
+   "name_en": "Maize common rust",
+   "name_hi": "मक्का का सामान्य रतुआ",
+   "name_hi_status": "unreviewed",
+   "pest_for_label_lookup": null
+  },
+  {
+   "index": 9,
+   "label": "Corn_(maize)___Northern_Leaf_Blight",
+   "crop": "maize",
+   "condition": "northern_leaf_blight",
+   "name_en": "Maize northern leaf blight",
+   "name_hi": "मक्का का उत्तरी पर्ण झुलसा",
+   "name_hi_status": "unreviewed",
+   "pest_for_label_lookup": null
+  },
+  {
+   "index": 10,
+   "label": "Corn_(maize)___healthy",
+   "crop": "maize",
+   "condition": "healthy",
+   "name_en": "Healthy maize leaf",
+   "name_hi": "स्वस्थ मक्का की पत्ती",
+   "name_hi_status": "unreviewed",
+   "pest_for_label_lookup": null
+  },
+  {
+   "index": 11,
+   "label": "Grape___Black_rot",
+   "crop": "grape",
+   "condition": "black_rot",
+   "name_en": "Grape black rot",
+   "name_hi": "अंगूर का ब्लैक रॉट",
+   "name_hi_status": "unreviewed",
+   "pest_for_label_lookup": null
+  },
+  {
+   "index": 12,
+   "label": "Grape___Esca_(Black_Measles)",
+   "crop": "grape",
+   "condition": "esca",
+   "name_en": "Grape esca (black measles)",
+   "name_hi": "अंगूर का एस्का (ब्लैक मीज़ल्स)",
+   "name_hi_status": "unreviewed",
+   "pest_for_label_lookup": null
+  },
+  {
+   "index": 13,
+   "label": "Grape___Leaf_blight_(Isariopsis_Leaf_Spot)",
+   "crop": "grape",
+   "condition": "leaf_blight",
+   "name_en": "Grape leaf blight",
+   "name_hi": "अंगूर का पर्ण झुलसा",
+   "name_hi_status": "unreviewed",
+   "pest_for_label_lookup": null
+  },
+  {
+   "index": 14,
+   "label": "Grape___healthy",
+   "crop": "grape",
+   "condition": "healthy",
+   "name_en": "Healthy grape leaf",
+   "name_hi": "स्वस्थ अंगूर की पत्ती",
+   "name_hi_status": "unreviewed",
+   "pest_for_label_lookup": null
+  },
+  {
+   "index": 15,
+   "label": "Orange___Haunglongbing_(Citrus_greening)",
+   "crop": "citrus",
+   "condition": "huanglongbing",
+   "name_en": "Citrus greening (HLB)",
+   "name_hi": "नींबू वर्गीय फलों का ग्रीनिंग रोग (HLB)",
+   "name_hi_status": "unreviewed",
+   "pest_for_label_lookup": null
+  },
+  {
+   "index": 16,
+   "label": "Peach___Bacterial_spot",
+   "crop": "peach",
+   "condition": "bacterial_spot",
+   "name_en": "Peach bacterial spot",
+   "name_hi": "आड़ू का जीवाणु धब्बा रोग",
+   "name_hi_status": "unreviewed",
+   "pest_for_label_lookup": null
+  },
+  {
+   "index": 17,
+   "label": "Peach___healthy",
+   "crop": "peach",
+   "condition": "healthy",
+   "name_en": "Healthy peach leaf",
+   "name_hi": "स्वस्थ आड़ू की पत्ती",
+   "name_hi_status": "unreviewed",
+   "pest_for_label_lookup": null
+  },
+  {
+   "index": 18,
+   "label": "Pepper,_bell___Bacterial_spot",
+   "crop": "bell_pepper",
+   "condition": "bacterial_spot",
+   "name_en": "Bell pepper bacterial spot",
+   "name_hi": "शिमला मिर्च का जीवाणु धब्बा रोग",
+   "name_hi_status": "unreviewed",
+   "pest_for_label_lookup": null
+  },
+  {
+   "index": 19,
+   "label": "Pepper,_bell___healthy",
+   "crop": "bell_pepper",
+   "condition": "healthy",
+   "name_en": "Healthy bell pepper leaf",
+   "name_hi": "स्वस्थ शिमला मिर्च की पत्ती",
+   "name_hi_status": "unreviewed",
+   "pest_for_label_lookup": null
+  },
+  {
+   "index": 20,
+   "label": "Potato___Early_blight",
+   "crop": "potato",
+   "condition": "early_blight",
+   "name_en": "Potato early blight",
+   "name_hi": "आलू का अगेती झुलसा",
+   "name_hi_status": "unreviewed",
+   "pest_for_label_lookup": "early blight"
+  },
+  {
+   "index": 21,
+   "label": "Potato___Late_blight",
+   "crop": "potato",
+   "condition": "late_blight",
+   "name_en": "Potato late blight",
+   "name_hi": "आलू का पछेती झुलसा",
+   "name_hi_status": "unreviewed",
+   "pest_for_label_lookup": "late blight"
+  },
+  {
+   "index": 22,
+   "label": "Potato___healthy",
+   "crop": "potato",
+   "condition": "healthy",
+   "name_en": "Healthy potato leaf",
+   "name_hi": "स्वस्थ आलू की पत्ती",
+   "name_hi_status": "unreviewed",
+   "pest_for_label_lookup": null
+  },
+  {
+   "index": 23,
+   "label": "Raspberry___healthy",
+   "crop": "raspberry",
+   "condition": "healthy",
+   "name_en": "Healthy raspberry leaf",
+   "name_hi": "स्वस्थ रसभरी की पत्ती",
+   "name_hi_status": "unreviewed",
+   "pest_for_label_lookup": null
+  },
+  {
+   "index": 24,
+   "label": "Soybean___healthy",
+   "crop": "soybean",
+   "condition": "healthy",
+   "name_en": "Healthy soybean leaf",
+   "name_hi": "स्वस्थ सोयाबीन की पत्ती",
+   "name_hi_status": "unreviewed",
+   "pest_for_label_lookup": null
+  },
+  {
+   "index": 25,
+   "label": "Squash___Powdery_mildew",
+   "crop": "squash",
+   "condition": "powdery_mildew",
+   "name_en": "Squash powdery mildew",
+   "name_hi": "कद्दू वर्गीय फसल का चूर्णिल आसिता रोग",
+   "name_hi_status": "unreviewed",
+   "pest_for_label_lookup": null
+  },
+  {
+   "index": 26,
+   "label": "Strawberry___Leaf_scorch",
+   "crop": "strawberry",
+   "condition": "leaf_scorch",
+   "name_en": "Strawberry leaf scorch",
+   "name_hi": "स्ट्रॉबेरी का पर्ण झुलसा",
+   "name_hi_status": "unreviewed",
+   "pest_for_label_lookup": null
+  },
+  {
+   "index": 27,
+   "label": "Strawberry___healthy",
+   "crop": "strawberry",
+   "condition": "healthy",
+   "name_en": "Healthy strawberry leaf",
+   "name_hi": "स्वस्थ स्ट्रॉबेरी की पत्ती",
+   "name_hi_status": "unreviewed",
+   "pest_for_label_lookup": null
+  },
+  {
+   "index": 28,
+   "label": "Tomato___Bacterial_spot",
+   "crop": "tomato",
+   "condition": "bacterial_spot",
+   "name_en": "Tomato bacterial spot",
+   "name_hi": "टमाटर का जीवाणु धब्बा रोग",
+   "name_hi_status": "unreviewed",
+   "pest_for_label_lookup": null
+  },
+  {
+   "index": 29,
+   "label": "Tomato___Early_blight",
+   "crop": "tomato",
+   "condition": "early_blight",
+   "name_en": "Tomato early blight",
+   "name_hi": "टमाटर का अगेती झुलसा",
+   "name_hi_status": "unreviewed",
+   "pest_for_label_lookup": "early blight"
+  },
+  {
+   "index": 30,
+   "label": "Tomato___Late_blight",
+   "crop": "tomato",
+   "condition": "late_blight",
+   "name_en": "Tomato late blight",
+   "name_hi": "टमाटर का पछेती झुलसा",
+   "name_hi_status": "unreviewed",
+   "pest_for_label_lookup": "late blight"
+  },
+  {
+   "index": 31,
+   "label": "Tomato___Leaf_Mold",
+   "crop": "tomato",
+   "condition": "leaf_mold",
+   "name_en": "Tomato leaf mold",
+   "name_hi": "टमाटर का पर्ण फफूंद (लीफ मोल्ड)",
+   "name_hi_status": "unreviewed",
+   "pest_for_label_lookup": null
+  },
+  {
+   "index": 32,
+   "label": "Tomato___Septoria_leaf_spot",
+   "crop": "tomato",
+   "condition": "septoria_leaf_spot",
+   "name_en": "Tomato Septoria leaf spot",
+   "name_hi": "टमाटर का सेप्टोरिया पत्ती धब्बा रोग",
+   "name_hi_status": "unreviewed",
+   "pest_for_label_lookup": null
+  },
+  {
+   "index": 33,
+   "label": "Tomato___Spider_mites Two-spotted_spider_mite",
+   "crop": "tomato",
+   "condition": "spider_mites",
+   "name_en": "Tomato spider mites",
+   "name_hi": "टमाटर में मकड़ी कीट (स्पाइडर माइट)",
+   "name_hi_status": "unreviewed",
+   "pest_for_label_lookup": null
+  },
+  {
+   "index": 34,
+   "label": "Tomato___Target_Spot",
+   "crop": "tomato",
+   "condition": "target_spot",
+   "name_en": "Tomato target spot",
+   "name_hi": "टमाटर का टारगेट स्पॉट रोग",
+   "name_hi_status": "unreviewed",
+   "pest_for_label_lookup": null
+  },
+  {
+   "index": 35,
+   "label": "Tomato___Tomato_Yellow_Leaf_Curl_Virus",
+   "crop": "tomato",
+   "condition": "yellow_leaf_curl_virus",
+   "name_en": "Tomato yellow leaf curl virus",
+   "name_hi": "टमाटर का पीला पत्ती मरोड़ विषाणु",
+   "name_hi_status": "unreviewed",
+   "pest_for_label_lookup": null
+  },
+  {
+   "index": 36,
+   "label": "Tomato___Tomato_mosaic_virus",
+   "crop": "tomato",
+   "condition": "mosaic_virus",
+   "name_en": "Tomato mosaic virus",
+   "name_hi": "टमाटर का मोज़ेक विषाणु रोग",
+   "name_hi_status": "unreviewed",
+   "pest_for_label_lookup": null
+  },
+  {
+   "index": 37,
+   "label": "Tomato___healthy",
+   "crop": "tomato",
+   "condition": "healthy",
+   "name_en": "Healthy tomato leaf",
+   "name_hi": "स्वस्थ टमाटर की पत्ती",
+   "name_hi_status": "unreviewed",
+   "pest_for_label_lookup": null
+  }
+ ]
+}

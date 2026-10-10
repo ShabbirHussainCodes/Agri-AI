@@ -30,7 +30,8 @@ Hindi + English only for MVP. Language is a profile setting and a per-request hi
 ```
 app/            routes (App Router): / (login or farm list), /farms/new, /farms/[id] (diary + ask)
 components/     Shell, AuthForm, SoilPicker, LocationField, AskBox, AnswerCard (evidence cards),
-                Diary, LogIrrigation, ProfilePanel, ui primitives
+                ScanBox (camera / gallery, shrinks the photo, uploads), ScanCard (top-3, band, what the AI saw,
+                refusals), Diary, LogIrrigation, ProfilePanel, ui primitives
 lib/            api client, generated API types, i18n catalogue (hi/en), auth context
 public/         icons (a service worker does not exist yet)
 tests/          Playwright e2e against a stubbed API
@@ -38,6 +39,6 @@ tests/          Playwright e2e against a stubbed API
 
 **Status (ADR-0017, 2026-10-05):** v0 is built: login, onboarding, farm diary, ask with evidence-typed
 answers, "I irrigated today", profile edit. Mostly client components calling FastAPI directly with the
-Supabase JWT; types generated from `openapi.json`. **Not built:** voice, scan, mandi, push, offline
+Supabase JWT; types generated from `openapi.json`. **Phase 7 (ADR-0018):** photo check: a camera button (`capture="environment"`) and a gallery button, the photo shrunk to 1280 px and re-encoded as JPEG on the phone (EXIF is dropped by the canvas), the result as separate cards (the agreed estimate with top-3 and a *band*, never a percentage; what the AI saw; the advice, label card and documents; the "automatic check, not an expert" note), a calm card for every refusal, feedback and delete, and scans in the farm diary with a signed-URL thumbnail. **Not built:** voice, mandi, push, offline
 shell/service worker (the PWA principles above are the target, not the current state). Whether the
 manifest makes a phone offer "install" is not verified.

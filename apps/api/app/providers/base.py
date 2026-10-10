@@ -64,3 +64,20 @@ class LLMProvider(ABC):
         tools: list[dict[str, Any]] | None = None,
         response_schema: dict[str, Any] | None = None,
     ) -> ChatResult: ...
+
+
+@dataclass
+class VisionResult:
+    """One vision call: the model's raw text (JSON mode) and the tokens it cost."""
+
+    content: str | None = None
+    usage: TokenUsage | None = None
+
+
+class VisionProvider(ABC):
+    """Looks at ONE photo and answers a prompt (ADR-0018). Kept separate from LLMProvider because the
+    request carries an image and the answer is untrusted text about it. The photo is sent only to a
+    provider that does not train on inputs (ADR-0004, CLAUDE.md section 5)."""
+
+    @abstractmethod
+    async def describe(self, image_jpeg: bytes, *, prompt: str, model: str) -> VisionResult: ...

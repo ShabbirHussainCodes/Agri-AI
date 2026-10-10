@@ -32,9 +32,12 @@ class AuthContext:
     not our own re-interpretation of it.
     """
 
-    def __init__(self, user_id: str, claims: dict):
+    def __init__(self, user_id: str, claims: dict, token: str = ""):
         self.user_id = user_id
         self.claims = claims
+        # The caller's own (already verified) access token. Passed on, never stored or logged, to services
+        # that must act AS the user so row-level policy applies (Supabase Storage, ADR-0008, ADR-0018).
+        self.token = token
 
 
 async def get_current_user(
@@ -63,4 +66,4 @@ async def get_current_user(
     if not sub:
         raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Token missing 'sub' claim")
 
-    return AuthContext(user_id=sub, claims=claims)
+    return AuthContext(user_id=sub, claims=claims, token=token)

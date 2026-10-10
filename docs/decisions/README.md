@@ -9,7 +9,7 @@ Format: `docs/decisions/ADR-000-template.md`.
 | [0001](ADR-0001-backend-python-fastapi.md) | Python + FastAPI backend, Next.js frontend | Accepted |
 | [0002](ADR-0002-agent-hand-rolled-loop.md) | Hand-rolled tool-calling loop first | Accepted |
 | [0003](ADR-0003-rag-pgvector-supabase.md) | RAG on pgvector inside Supabase | Accepted |
-| [0004](ADR-0004-vision-provider-and-llm-routing.md) | Vision = Groq qwen; chat = gpt-oss; Gemini free tier rejected | Accepted |
+| [0004](ADR-0004-vision-provider-and-llm-routing.md) | Vision = Groq qwen; chat = gpt-oss; Gemini free tier rejected | Accepted (vision model renamed in ADR-0018) |
 | [0005](ADR-0005-deterministic-agrochemical-safety.md) | Deterministic agrochemical safety layer | Accepted |
 | [0006](ADR-0006-evidence-typed-response.md) | Evidence-typed response model | Accepted (partly superseded by 0013) |
 | [0007](ADR-0007-multilingual-retrieval.md) | Multilingual retrieval without query translation; evaluation-first | Accepted |
@@ -21,4 +21,6 @@ Format: `docs/decisions/ADR-000-template.md`.
 | [0013](ADR-0013-evidence-based-abstention.md) | Abstention from validated evidence, not a similarity floor; code authors provenance | Accepted |
 | [0014](ADR-0014-crop-scoped-evidence.md) | Crop-scoped evidence: a crop question is answered only from documents curated as a source for that crop | Accepted |
 | [0015](ADR-0015-irrigation-water-balance.md) | Irrigation advice is a deterministic FAO-56 water balance; the model explains, code checks | Accepted |
+| [0016](ADR-0016-chemical-safety-layer.md) | Chemical safety layer: banned-molecule guard, hardened dose guard, doses only as code-copied label cards | Accepted |
 | [0017](ADR-0017-web-app-and-deployment.md) | Web app v0 (client-side Next.js), /ask caps, free-tier deployment topology | Accepted |
+| [0018](ADR-0018-photo-diagnosis-pipeline.md) | Photo diagnosis: a staged pipeline that is allowed to say no (quality gate, measured classifier, independent vision model, the /ask safety stack) | Accepted |

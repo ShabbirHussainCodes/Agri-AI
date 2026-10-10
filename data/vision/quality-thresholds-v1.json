@@ -1,0 +1,15 @@
+{
+ "version": "quality-v1-2026-10-10",
+ "thresholds": {
+  "min_side_px": 224,
+  "min_sharpness": 112.06958618164063,
+  "min_mean_luma": 57.97214546203613,
+  "max_mean_luma": 229.53783264160157,
+  "max_dark_fraction": 0.5135446878404136,
+  "max_bright_fraction": 0.7714749273559387,
+  "min_vegetation_fraction": 0.066609358630737
+ },
+ "derived_from": "percentiles of 2331 PlantDoc train photos (CC-BY-4.0): blur 2.0%, others 1.0% each; min side fixed at 224px",
+ "generated_by": "evals/vision/vquality.py",
+ "date": "2026-10-10"
+}
